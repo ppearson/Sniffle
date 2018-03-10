@@ -25,9 +25,11 @@
 static void printHelp()
 {
 	fprintf(stderr, "Sniffle version 0.1.\n");
-	fprintf(stderr, "Usage:\n\n");
-	fprintf(stderr, "sniffle find /path/to/search/*.log\n");
-	fprintf(stderr, "sniffle grep /path/to/search/*.log\n");
+	fprintf(stderr, "Usage:\n");
+	fprintf(stderr, "sniffle find <\"/path/to/search/*.log\">\n");
+	fprintf(stderr, "sniffle find <\"/path/to/*/search/*.log\">\n");
+	fprintf(stderr, "sniffle grep <\"/path/to/search/*.log\"> <stringToFind>\n");
+	fprintf(stderr, "sniffle grep <\"/path/to/*/search/*.log\"> <stringToFind>\n");
 }
 
 int main(int argc, char** argv)
@@ -43,12 +45,24 @@ int main(int argc, char** argv)
 	std::string mainCommand = argv[1];
 	if (mainCommand == "find")
 	{
+		if (argc < 3)
+		{
+			fprintf(stderr, "Error: Insufficient number of arguments for 'find' command.\n");
+			return 0;
+		}
+		
 		std::string path = argv[2];
 		
 		sniffle.runFind(path);
 	}
 	else if (mainCommand == "grep")
 	{
+		if (argc < 4)
+		{
+			fprintf(stderr, "Error: Insufficient number of arguments for 'grep' command.\n");
+			return 0;
+		}
+		
 		std::string filePattern = argv[2];
 		std::string contentsPattern = argv[3];
 		

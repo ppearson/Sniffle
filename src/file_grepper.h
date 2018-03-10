@@ -16,37 +16,25 @@
  ---------
 */
 
-#ifndef FILEGREPPER_H
-#define FILEGREPPER_H
+#ifndef FILE_GREPPER_H
+#define FILE_GREPPER_H
 
 #include <string>
 
+class Config;
 
 class FileGrepper
 {
 public:
-	FileGrepper();
+	FileGrepper(const Config& config);
 	
-	struct OutputSettings
-	{
-		OutputSettings() : 
-			firstOnly(true),
-			outputFilename(true),
-			outputContentLines(true),
-		    additionalAfterLines(0)
-		{
-			
-		}
-		
-		bool		  firstOnly;
-		bool		  outputFilename;
-		bool		  outputContentLines;
-		unsigned int  additionalAfterLines;
-	};
+	
 	
 	// slow, basic
-	bool findBasic(const std::string& filename, const std::string& searchString, const OutputSettings& settings);
+	bool findBasic(const std::string& filename, const std::string& searchString);
 
+private:
+	const Config&	m_config;
 };
 
-#endif // FILEGREPPER_H
+#endif // FILE_GREPPER_H

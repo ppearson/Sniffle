@@ -28,7 +28,7 @@
 
 Sniffle::Sniffle()
 {
-	
+	m_config.loadConfigFile();
 }
 
 Sniffle::~Sniffle()
@@ -65,13 +65,12 @@ void Sniffle::runGrep(const std::string& filePattern, const std::string& content
 		return;
 	}
 	
-	FileGrepper grepper;
-	FileGrepper::OutputSettings outSettings;
+	FileGrepper grepper(m_config);
 	
 	for (const std::string& fileItem : foundFiles)
 	{
 		// the grepper itself does any printing...
-		grepper.findBasic(fileItem, contentsPattern, outSettings);
+		grepper.findBasic(fileItem, contentsPattern);
 	}
 }
 
@@ -225,7 +224,6 @@ bool Sniffle::findFiles(const std::string& pattern, std::vector<std::string>& fo
 				
 				if (!dir)
 				{
-					fprintf(stderr, "Error: 65\n");
 					dirToCheck = false;
 					break;
 				}
@@ -243,9 +241,7 @@ bool Sniffle::findFiles(const std::string& pattern, std::vector<std::string>& fo
 			// TODO: could parallelise this, but we need to be a bit careful as we really care about latency at this point, so
 			//       spawing off threads to do further file globbing needs care... It *might* make some sense over NFS though...
 			
-			bool foundOK = FileHelpers::getRelativeFilesInDirectoryRecursive(remainderFullDir, remainderFullDir, extensionMatch, foundFiles);
-			
-			
+			bool foundOK = FileHelpers::getRelativeFilesInDirectoryRecursive(remainderFullDir, remainderFullDir, extensionMatch, foundFiles);			
 			return foundOK;
 		}
 	}
