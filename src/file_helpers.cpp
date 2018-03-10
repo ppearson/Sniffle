@@ -163,6 +163,73 @@ bool FileHelpers::getFilesInDirectory(const std::string& directoryPath, const st
 	return !files.empty();
 }
 
+bool FileHelpers::getDirectoriesInDirectory(const std::string& directoryPath, const std::string& dirMatch, std::vector<std::string>& directories)
+{
+	// Note: opendir() is used on purpose here, as scandir() and lsstat() don't reliably support S_ISLNK on symlinks over NFS,
+	//       whereas opendir() allows this
+	DIR* dir = opendir(directoryPath.c_str());
+	if (!dir)
+		return false;
+
+	struct dirent* dirEnt = NULL;
+	char tempBuffer[4096];
+
+	while ((dirEnt = readdir(dir)) != NULL)
+	{
+		// cope with symlinks by working out what they point at
+		if (dirEnt->d_type == DT_LNK)
+		{
+			std::string fullAbsolutePath = combinePaths(directoryPath, dirEnt->d_name);
+			if (readlink(fullAbsolutePath.c_str(), tempBuffer, 4096) == -1)
+			{
+				// something went wrong, so ignore...
+				continue;
+			}
+			else
+			{
+				// on the assumption that the target of the symlink is not another symlink (if so, this won't work over NFS)
+				// check what type it is
+				struct stat statState;
+				int ret = lstat(tempBuffer, &statState);
+
+				if (ret == -1)
+				{
+					// ignore for the moment...
+					continue;
+				}
+				else if (S_ISDIR(statState.st_mode))
+				{
+						 
+				}
+				else
+				{
+					// assume it's a file...
+				}
+			}
+		}
+		else if (dirEnt->d_type == DT_DIR)
+		{
+			// it's a directory
+			
+			// ignore built-ins
+			if (strcmp(dirEnt->d_name, ".") == 0 || strcmp(dirEnt->d_name, "..") == 0)
+				continue;
+			
+			// currently, we don't do any dirMatch checking, on the assumption it's only a full wildcard for the moment...
+			directories.push_back(dirEnt->d_name);
+		}
+		else
+		{
+			// it's probably a file, ignore it...
+			continue;
+		}
+	}
+
+	closedir(dir);
+
+	return !directories.empty();
+}
+
 bool FileHelpers::getRelativeFilesInDirectoryRecursive(const std::string& searchDirectoryPath, const std::string& relativeDirectoryPath,
 													   const std::string& extension, std::vector<std::string>& files)
 {
@@ -187,19 +254,18 @@ bool FileHelpers::getRelativeFilesInDirectoryRecursive(const std::string& search
 			std::string newRelativeDirPath = combinePaths(relativeDirectoryPath, dirEnt->d_name);
 			getRelativeFilesInDirectoryRecursive(newFullDirPath, newRelativeDirPath, extension, files);
 		}
-
-		// cope with symlinks by working out what they point at
-		if (dirEnt->d_type == DT_LNK)
+		else if (dirEnt->d_type == DT_LNK)
 		{
+			// cope with symlinks by working out what they point at
 			// TODO: implement...
 			continue;
 		}
 		else
 		{
 			// it's hopefully a file
-			std::string fullRelativePath = combinePaths(relativeDirectoryPath, dirEnt->d_name);
-			if (getFileExtension(dirEnt->d_name) == extension)
+			if (extension == "*" || getFileExtension(dirEnt->d_name) == extension)
 			{
+				std::string fullRelativePath = combinePaths(relativeDirectoryPath, dirEnt->d_name);
 				files.push_back(fullRelativePath);
 			}
 		}

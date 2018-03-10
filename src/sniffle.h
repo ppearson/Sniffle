@@ -32,6 +32,8 @@ public:
 	
 	void runFind(const std::string& pattern);
 	
+	void runGrep(const std::string& filePattern, const std::string& contentsPattern);
+	
 	
 	
 private:
@@ -71,6 +73,8 @@ private:
 	static PatternSearch classifyPattern(const std::string& pattern);
 	
 	bool findFiles(const std::string& pattern, std::vector<std::string>& foundFiles, unsigned int findFlags);
+	
+	bool findFilesInDir(const std::string& pattern, std::vector<std::string>& foundFiles, unsigned int findFlags);
 };
 
 #endif // SNIFFLE_H

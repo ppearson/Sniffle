@@ -49,7 +49,10 @@ int main(int argc, char** argv)
 	}
 	else if (mainCommand == "grep")
 	{
+		std::string filePattern = argv[2];
+		std::string contentsPattern = argv[3];
 		
+		sniffle.runGrep(filePattern, contentsPattern);
 	}
 	else if (mainCommand.find("help") != std::string::npos)
 	{

@@ -34,7 +34,12 @@ public:
 	static std::string combinePaths(const std::string& path0, const std::string& path1);
 	static std::string combinePaths(const std::vector<std::string>& pathItems);
 
+	// this returns full absolute paths
 	static bool getFilesInDirectory(const std::string& directoryPath, const std::string& extension, std::vector<std::string>& files);
+	
+	// this returns relative directory names to the first level
+	// currently dirMatch has to be '*'...
+	static bool getDirectoriesInDirectory(const std::string& directoryPath, const std::string& dirMatch, std::vector<std::string>& directories);
 
 	static bool getRelativeFilesInDirectoryRecursive(const std::string& searchDirectoryPath, const std::string& relativeDirectoryPath,
 													 const std::string& extension, std::vector<std::string>& files);
