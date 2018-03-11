@@ -28,8 +28,8 @@ static void printHelp()
 	fprintf(stderr, "Usage:\n");
 	fprintf(stderr, "sniffle find [options] <\"/path/to/search/*.log\">\n");
 	fprintf(stderr, "sniffle find [options] <\"/path/to/*/search/*.log\">\n");
-	fprintf(stderr, "sniffle grep [options] <\"/path/to/search/*.log\"> <stringToFind>\n");
-	fprintf(stderr, "sniffle grep [options] <\"/path/to/*/search/*.log\"> <stringToFind>\n");
+	fprintf(stderr, "sniffle grep [options] <stringToFind> <\"/path/to/search/*.log\">\n");
+	fprintf(stderr, "sniffle grep [options] <stringToFind> <\"/path/to/*/search/*.log\">\n");
 }
 
 int main(int argc, char** argv)
@@ -68,8 +68,8 @@ int main(int argc, char** argv)
 			return 0;
 		}
 		
-		std::string filePattern = argv[2];
-		std::string contentsPattern = argv[3];
+		std::string contentsPattern = argv[2];
+		std::string filePattern = argv[3];
 		
 		sniffle.runGrep(filePattern, contentsPattern);
 	}
@@ -80,6 +80,14 @@ int main(int argc, char** argv)
 	else if (mainCommand == "count")
 	{
 		
+	}
+	else if (mainCommand == "debug")
+	{
+		fprintf(stderr, "Args provided:\n");
+		for (int i = 1; i < argc; i++)
+		{
+			fprintf(stderr, "%s\n", argv[i]);
+		}
 	}
 	else if (mainCommand.find("help") != std::string::npos)
 	{

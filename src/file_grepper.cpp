@@ -75,6 +75,8 @@ bool FileGrepper::findBasic(const std::string& filename, const std::string& sear
 							fprintf(stderr, "\n");
 						}
 						fprintf(stderr, "%s:\n", filename.c_str());
+						
+						found = true;
 					}
 				}
 				else
@@ -87,6 +89,8 @@ bool FileGrepper::findBasic(const std::string& filename, const std::string& sear
 						// just the filename
 						fprintf(stderr, "%s\n", filename.c_str());
 						
+						found = true;
+						
 						// we don't want the content lines, so we can just break out
 						break;
 					}
@@ -98,9 +102,7 @@ bool FileGrepper::findBasic(const std::string& filename, const std::string& sear
 				fprintf(stderr, "%s\n", line.c_str());
 			}
 			
-			found = true;
-
-			if ((!m_config.getFirstResultOnly() && m_config.getAfterLines() == 0) || !m_config.getOutputContentLines())
+			if ((m_config.getFirstResultOnly() && m_config.getAfterLines() == 0) || !m_config.getOutputContentLines())
 			{
 				// we can break out.
 				break;
