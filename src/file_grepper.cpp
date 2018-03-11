@@ -27,7 +27,7 @@ FileGrepper::FileGrepper(const Config& config) : m_config(config)
 	
 }
 
-bool FileGrepper::findBasic(const std::string& filename, const std::string& searchString)
+bool FileGrepper::findBasic(const std::string& filename, const std::string& searchString, bool foundPreviousFile)
 {
 	// slow and basic search...
 	
@@ -39,10 +39,6 @@ bool FileGrepper::findBasic(const std::string& filename, const std::string& sear
 	std::ios::sync_with_stdio(false); 
 
 	std::fstream fileStream(filename.c_str(), mode);
-	
-	bool found = false;
-	
-	unsigned int printCount = 0;
 
 	if (fileStream.fail())
 	{
@@ -50,10 +46,14 @@ bool FileGrepper::findBasic(const std::string& filename, const std::string& sear
 		return false;
 	}
 	
+	bool found = false;
+	
+	unsigned int printCount = 0;
+	
 	std::string line;
 	char buf[2048];
 	
-	unsigned int lineCount = 0;
+	unsigned int lineIndex = 0;
 
 	while (fileStream.getline(buf, 2048))
 	{
@@ -70,15 +70,20 @@ bool FileGrepper::findBasic(const std::string& filename, const std::string& sear
 					// the filename if it's the first time for this file
 					if (!found)
 					{
+						if (foundPreviousFile && m_config.getBlankLinesBetweenFiles())
+						{
+							fprintf(stderr, "\n");
+						}
 						fprintf(stderr, "%s:\n", filename.c_str());
 					}
-					
-					fprintf(stderr, "%s\n", line.c_str());
 				}
 				else
 				{
 					if (!found)
 					{
+						// technically, we should do a new line if asked, but doesn't seem worth it if we're not outputting
+						// the contents...
+						
 						// just the filename
 						fprintf(stderr, "%s\n", filename.c_str());
 						
@@ -86,6 +91,11 @@ bool FileGrepper::findBasic(const std::string& filename, const std::string& sear
 						break;
 					}
 				}
+			}
+			
+			if (m_config.getOutputContentLines())
+			{
+				fprintf(stderr, "%s\n", line.c_str());
 			}
 			
 			found = true;
@@ -104,7 +114,7 @@ bool FileGrepper::findBasic(const std::string& filename, const std::string& sear
 			printCount++;
 		}
 		
-		lineCount ++;
+		lineIndex ++;
 	}
 
 	fileStream.close();

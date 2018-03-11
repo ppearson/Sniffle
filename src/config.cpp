@@ -112,8 +112,12 @@ void Config::loadConfigFile()
 // in main.cpp, but it means we can have all config related stuff in this file, which makes keeping the config
 // file and args parsing in sync much easier...
 // Although it means keeping this and the printHelp() output in sync is harder, so...
-bool Config::parseArgs(int argc, char** argv, int& nextArgIndex)
+bool Config::parseArgs(int argc, char** argv, int startOptionArg, int& nextArgIndex)
 {
+	for (int i = startOptionArg; i < argc; i++)
+	{
+		
+	}
 	return true;
 }
 

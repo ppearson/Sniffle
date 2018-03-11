@@ -28,12 +28,18 @@
 
 Sniffle::Sniffle()
 {
+	// load any local config file if one exists
 	m_config.loadConfigFile();
 }
 
 Sniffle::~Sniffle()
 {
 	
+}
+
+bool Sniffle::parseArgs(int argc, char** argv, int startOptionArg, int& nextArgIndex)
+{
+	return m_config.parseArgs(argc, argv, startOptionArg, nextArgIndex);
 }
 
 void Sniffle::runFind(const std::string& pattern)
@@ -67,10 +73,12 @@ void Sniffle::runGrep(const std::string& filePattern, const std::string& content
 	
 	FileGrepper grepper(m_config);
 	
+	bool foundPrevious = false;
+	
 	for (const std::string& fileItem : foundFiles)
 	{
 		// the grepper itself does any printing...
-		grepper.findBasic(fileItem, contentsPattern);
+		foundPrevious |= grepper.findBasic(fileItem, contentsPattern, foundPrevious);
 	}
 }
 

@@ -28,7 +28,7 @@ public:
 	
 	void loadConfigFile();
 	
-	bool parseArgs(int argc, char** argv, int& nextArgIndex);
+	bool parseArgs(int argc, char** argv, int startOptionArg, int& nextArgIndex);
 	
 	
 	// getters
@@ -97,6 +97,8 @@ private:
 	unsigned int	m_afterLines; // lines after
 	
 	bool			m_blankLinesBetweenFiles; //
+	
+	std::string		m_searchItemSeperatorChar; //
 	
 	std::string		m_outputToFile; // if non-empty, write output to this file
 };

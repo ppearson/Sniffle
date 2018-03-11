@@ -7,8 +7,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED on)
 
 set(QMAKE_CXXFLAGS "-std=c++11")
 
-SET(CMAKE_CXX_FLAGS_RELEASE "-O3 -std=c++11 -mfpmath=sse -fPIC -ffast-math")
-SET(CMAKE_CXX_FLAGS_DEBUG "-g -std=c++11 -mfpmath=sse -fPIC -ffast-math")
+SET(CMAKE_CXX_FLAGS_RELEASE "-O3 -std=c++11")
+SET(CMAKE_CXX_FLAGS_DEBUG "-g -std=c++11")
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Debug CACHE STRING

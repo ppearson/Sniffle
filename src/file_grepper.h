@@ -31,7 +31,7 @@ public:
 	
 	
 	// slow, basic
-	bool findBasic(const std::string& filename, const std::string& searchString);
+	bool findBasic(const std::string& filename, const std::string& searchString, bool foundPreviousFile);
 
 private:
 	const Config&	m_config;

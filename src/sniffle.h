@@ -29,6 +29,8 @@ class Sniffle
 public:
 	Sniffle();
 	~Sniffle();
+	
+	bool parseArgs(int argc, char** argv, int startOptionArg, int& nextArgIndex);
 		
 	void runFind(const std::string& pattern);
 	

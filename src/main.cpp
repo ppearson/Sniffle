@@ -26,10 +26,10 @@ static void printHelp()
 {
 	fprintf(stderr, "Sniffle version 0.1.\n");
 	fprintf(stderr, "Usage:\n");
-	fprintf(stderr, "sniffle find <\"/path/to/search/*.log\">\n");
-	fprintf(stderr, "sniffle find <\"/path/to/*/search/*.log\">\n");
-	fprintf(stderr, "sniffle grep <\"/path/to/search/*.log\"> <stringToFind>\n");
-	fprintf(stderr, "sniffle grep <\"/path/to/*/search/*.log\"> <stringToFind>\n");
+	fprintf(stderr, "sniffle find [options] <\"/path/to/search/*.log\">\n");
+	fprintf(stderr, "sniffle find [options] <\"/path/to/*/search/*.log\">\n");
+	fprintf(stderr, "sniffle grep [options] <\"/path/to/search/*.log\"> <stringToFind>\n");
+	fprintf(stderr, "sniffle grep [options] <\"/path/to/*/search/*.log\"> <stringToFind>\n");
 }
 
 int main(int argc, char** argv)
@@ -43,6 +43,11 @@ int main(int argc, char** argv)
 	Sniffle sniffle;
 
 	std::string mainCommand = argv[1];
+	
+	
+	int nextArg = 2;
+	sniffle.parseArgs(argc, argv, 2, nextArg);
+	
 	if (mainCommand == "find")
 	{
 		if (argc < 3)
@@ -67,6 +72,14 @@ int main(int argc, char** argv)
 		std::string contentsPattern = argv[3];
 		
 		sniffle.runGrep(filePattern, contentsPattern);
+	}
+	else if (mainCommand == "match")
+	{
+		
+	}
+	else if (mainCommand == "count")
+	{
+		
 	}
 	else if (mainCommand.find("help") != std::string::npos)
 	{
