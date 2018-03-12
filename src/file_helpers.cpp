@@ -88,12 +88,12 @@ std::string FileHelpers::combinePaths(const std::vector<std::string>& pathItems)
 {
 	// current assumption is absolute path and that items don't have path separators themselves...
 	std::string finalPath;
-	
+
 	for (const std::string& item : pathItems)
 	{
 		finalPath += kDirSep + item;
 	}
-	
+
 	return finalPath;
 }
 
@@ -118,13 +118,17 @@ bool FileHelpers::getFilesInDirectory(const std::string& directoryPath, const st
 		if (dirEnt->d_type == DT_LNK)
 		{
 			std::string fullAbsolutePath = combinePaths(directoryPath, dirEnt->d_name);
-			if (readlink(fullAbsolutePath.c_str(), tempBuffer, 4096) == -1)
+			ssize_t linkTargetStringSize = readlink(fullAbsolutePath.c_str(), tempBuffer, 4096);
+			if (linkTargetStringSize == -1)
 			{
 				// something went wrong, so ignore...
 				continue;
 			}
 			else
 			{
+				// readlink() doesn't put a null-terminator on the string, so we have to do that...
+				tempBuffer[linkTargetStringSize] = 0;
+
 				// on the assumption that the target of the symlink is not another symlink (if so, this won't work over NFS)
 				// check what type it is
 				struct stat statState;
@@ -180,13 +184,17 @@ bool FileHelpers::getDirectoriesInDirectory(const std::string& directoryPath, co
 		if (dirEnt->d_type == DT_LNK)
 		{
 			std::string fullAbsolutePath = combinePaths(directoryPath, dirEnt->d_name);
-			if (readlink(fullAbsolutePath.c_str(), tempBuffer, 4096) == -1)
+			ssize_t linkTargetStringSize = readlink(fullAbsolutePath.c_str(), tempBuffer, 4096);
+			if (linkTargetStringSize == -1)
 			{
 				// something went wrong, so ignore...
 				continue;
 			}
 			else
 			{
+				// readlink() doesn't put a null-terminator on the string, so we have to do that...
+				tempBuffer[linkTargetStringSize] = 0;
+
 				// on the assumption that the target of the symlink is not another symlink (if so, this won't work over NFS)
 				// check what type it is
 				struct stat statState;
@@ -199,7 +207,7 @@ bool FileHelpers::getDirectoriesInDirectory(const std::string& directoryPath, co
 				}
 				else if (S_ISDIR(statState.st_mode))
 				{
-						 
+
 				}
 				else
 				{
@@ -210,11 +218,11 @@ bool FileHelpers::getDirectoriesInDirectory(const std::string& directoryPath, co
 		else if (dirEnt->d_type == DT_DIR)
 		{
 			// it's a directory
-			
+
 			// ignore built-ins
 			if (strcmp(dirEnt->d_name, ".") == 0 || strcmp(dirEnt->d_name, "..") == 0)
 				continue;
-			
+
 			// currently, we don't do any dirMatch checking, on the assumption it's only a full wildcard for the moment...
 			directories.push_back(dirEnt->d_name);
 		}
@@ -240,6 +248,7 @@ bool FileHelpers::getRelativeFilesInDirectoryRecursive(const std::string& search
 		return false;
 
 	struct dirent* dirEnt = NULL;
+	char tempBuffer[4096];
 
 	while ((dirEnt = readdir(dir)) != NULL)
 	{
@@ -257,8 +266,39 @@ bool FileHelpers::getRelativeFilesInDirectoryRecursive(const std::string& search
 		else if (dirEnt->d_type == DT_LNK)
 		{
 			// cope with symlinks by working out what they point at
-			// TODO: implement...
-			continue;
+			std::string fullAbsolutePath = combinePaths(searchDirectoryPath, dirEnt->d_name);
+			ssize_t linkTargetStringSize = readlink(fullAbsolutePath.c_str(), tempBuffer, 4096);
+			if (linkTargetStringSize == -1)
+			{
+				// something went wrong, so ignore...
+				continue;
+			}
+			else
+			{
+				// readlink() doesn't put a null-terminator on the string, so we have to do that...
+				tempBuffer[linkTargetStringSize] = 0;
+				// on the assumption that the target of the symlink is not another symlink (if so, this won't work over NFS)
+				// check what type it is
+				struct stat statState;
+				int ret = lstat(tempBuffer, &statState);
+
+				if (ret == -1)
+				{
+					// ignore for the moment...
+					continue;
+				}
+				else if (S_ISDIR(statState.st_mode))
+				{
+					// build up next directory level relative path
+					std::string newFullDirPath = tempBuffer;
+					std::string newRelativeDirPath = combinePaths(relativeDirectoryPath, dirEnt->d_name);
+					getRelativeFilesInDirectoryRecursive(newFullDirPath, newRelativeDirPath, extension, files);
+				}
+				else
+				{
+					// it's a file
+				}
+			}
 		}
 		else
 		{
