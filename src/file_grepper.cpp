@@ -74,7 +74,7 @@ bool FileGrepper::findBasic(const std::string& filename, const std::string& sear
 						{
 							fprintf(stdout, "\n");
 						}
-						fprintf(stdout, "%s:\n", filename.c_str());
+						fprintf(stdout, "%s :\n", filename.c_str());
 						
 						found = true;
 					}
