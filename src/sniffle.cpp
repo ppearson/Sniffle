@@ -20,13 +20,19 @@
 
 #include <stdio.h>
 #include <dirent.h>
+#include <sys/stat.h>
+#include <string.h>
+#include <unistd.h>
 
 #include "file_helpers.h"
 #include "string_helpers.h"
 
 #include "file_grepper.h"
 
-Sniffle::Sniffle()
+#include "pattern_matchers.h"
+
+Sniffle::Sniffle() : 
+	m_pFilenameMatcher(nullptr)
 {
 	// load any local config file if one exists
 	m_config.loadConfigFile();
@@ -34,7 +40,11 @@ Sniffle::Sniffle()
 
 Sniffle::~Sniffle()
 {
-
+	if (m_pFilenameMatcher)
+	{
+		delete m_pFilenameMatcher;
+		m_pFilenameMatcher = nullptr;
+	}
 }
 
 bool Sniffle::parseArgs(int argc, char** argv, int startOptionArg, int& nextArgIndex)
@@ -154,6 +164,66 @@ Sniffle::PatternSearch Sniffle::classifyPattern(const std::string& pattern)
 	return result;
 }
 
+bool Sniffle::configureFilenameMatcher(const PatternSearch& pattern)
+{
+	if (m_pFilenameMatcher)
+	{
+		delete m_pFilenameMatcher;
+		m_pFilenameMatcher = nullptr;
+	}
+	
+	// work out the type of file matcher we want.
+	
+	if (pattern.fileMatch == "*")
+	{
+		// TODO: could do a specialised matcher for this.
+		m_pFilenameMatcher = new SimpleFilenameMatcher("*");
+		return true;
+	}
+	
+	size_t sepPos = pattern.fileMatch.find(".");
+	if (sepPos == std::string::npos)
+	{
+		m_pFilenameMatcher = new SimpleFilenameMatcher("*");
+		return true;
+	}
+	
+	std::string filenameCorePart = pattern.fileMatch.substr(0, sepPos);
+	std::string extensionPart = pattern.fileMatch.substr(sepPos + 1);
+	
+	// simple extension only filter
+	if (extensionPart.find("*", sepPos) == std::string::npos && filenameCorePart == "*")
+	{
+		// just a simple filename extension filter
+		m_pFilenameMatcher = new SimpleFilenameMatcher(extensionPart);
+		return true;
+	}
+	
+	// currently we only support partial wildcards in the filename part (not extension)
+	// TODO: implement this correctly
+	
+	// otherwise, it's the more complex type
+	if (filenameCorePart.find("*") == std::string::npos)
+	{
+		// something weird's going on, and we don't support this currently.
+		fprintf(stderr, "Error creating filename matcher with file match string: %s\n", pattern.fileMatch.c_str());
+		return false;
+	}
+	
+	// for the moment, assume there are wildcards either side by replacing wildcard chars
+	if (filenameCorePart[0] != '*' || filenameCorePart[filenameCorePart.size() - 1] != '*')
+	{
+		// something weird's going on, and we don't support this currently.
+		fprintf(stderr, "Error creating filename matcher with file match string: %s\n", pattern.fileMatch.c_str());
+		return false;
+	}
+	
+	std::string filenameMatchItem = filenameCorePart.substr(1, filenameCorePart.size() - 2);
+	
+	m_pFilenameMatcher = new AdvancedFilenameMatcher(filenameMatchItem, extensionPart);
+	return true;
+}
+
 bool Sniffle::findFiles(const std::string& pattern, std::vector<std::string>& foundFiles, unsigned int findFlags)
 {
 	// currently we assume we're given an absolute path, but...
@@ -162,6 +232,12 @@ bool Sniffle::findFiles(const std::string& pattern, std::vector<std::string>& fo
 	StringHelpers::split(pattern, patternTokens, "/");
 
 	PatternSearch patternRes = classifyPattern(pattern);
+	
+	if (!configureFilenameMatcher(patternRes))
+	{
+		fprintf(stderr, "Couldn't understand search terms.\n");
+		return false;
+	}
 
 	if (patternRes.type == ePatternSimple)
 	{
@@ -174,7 +250,7 @@ bool Sniffle::findFiles(const std::string& pattern, std::vector<std::string>& fo
 			extensionMatch = patternRes.fileMatch.substr(patternRes.fileMatch.find(".") + 1);
 		}
 
-		bool foundOK = FileHelpers::getRelativeFilesInDirectoryRecursive(patternRes.baseSearchPath, "", extensionMatch, foundFiles);
+		bool foundOK = getRelativeFilesInDirectoryRecursive(patternRes.baseSearchPath, "", foundFiles);
 
 		if (foundOK)
 		{
@@ -251,7 +327,7 @@ bool Sniffle::findFiles(const std::string& pattern, std::vector<std::string>& fo
 			// TODO: could parallelise this, but we need to be a bit careful as we really care about latency at this point, so
 			//       spawing off threads to do further file globbing needs care... It *might* make some sense over NFS though...
 
-			bool foundOK = FileHelpers::getRelativeFilesInDirectoryRecursive(remainderFullDir, remainderFullDir, extensionMatch, foundFiles);
+			bool foundOK = getRelativeFilesInDirectoryRecursive(remainderFullDir, remainderFullDir, foundFiles);
 			foundSomeFiles |= foundOK;
 		}
 
@@ -259,4 +335,83 @@ bool Sniffle::findFiles(const std::string& pattern, std::vector<std::string>& fo
 	}
 
 	return false;
+}
+
+bool Sniffle::getRelativeFilesInDirectoryRecursive(const std::string& searchDirectoryPath, const std::string& relativeDirectoryPath,
+													 std::vector<std::string>& files) const
+{
+	DIR* dir = opendir(searchDirectoryPath.c_str());
+	if (!dir)
+		return false;
+	
+	struct dirent* dirEnt = NULL;
+	char tempBuffer[4096];
+
+	while ((dirEnt = readdir(dir)) != NULL)
+	{
+		if (dirEnt->d_type == DT_DIR)
+		{
+			// ignore built-in items
+			if (strcmp(dirEnt->d_name, ".") == 0 || strcmp(dirEnt->d_name, "..") == 0)
+				continue;
+
+			// build up next directory level relative path
+			std::string newFullDirPath = FileHelpers::combinePaths(searchDirectoryPath, dirEnt->d_name);
+			std::string newRelativeDirPath = FileHelpers::combinePaths(relativeDirectoryPath, dirEnt->d_name);
+			getRelativeFilesInDirectoryRecursive(newFullDirPath, newRelativeDirPath, files);
+		}
+		else if (dirEnt->d_type == DT_LNK)
+		{
+			// cope with symlinks by working out what they point at
+			std::string fullAbsolutePath = FileHelpers::combinePaths(searchDirectoryPath, dirEnt->d_name);
+			ssize_t linkTargetStringSize = readlink(fullAbsolutePath.c_str(), tempBuffer, 4096);
+			if (linkTargetStringSize == -1)
+			{
+				// something went wrong, so ignore...
+				continue;
+			}
+			else
+			{
+				// readlink() doesn't put a null-terminator on the string, so we have to do that...
+				tempBuffer[linkTargetStringSize] = 0;
+				// on the assumption that the target of the symlink is not another symlink (if so, this won't work over NFS)
+				// check what type it is
+				struct stat statState;
+				int ret = lstat(tempBuffer, &statState);
+
+				if (ret == -1)
+				{
+					// ignore for the moment...
+					continue;
+				}
+				else if (S_ISDIR(statState.st_mode))
+				{
+					// build up next directory level relative path
+					std::string newFullDirPath = tempBuffer;
+					std::string newRelativeDirPath = FileHelpers::combinePaths(relativeDirectoryPath, dirEnt->d_name);
+					getRelativeFilesInDirectoryRecursive(newFullDirPath, newRelativeDirPath, files);
+				}
+				else
+				{
+					// it's a file
+				}
+			}
+		}
+		else
+		{
+			// it's hopefully a file
+			
+			// see if it's what we want...
+			
+			if (m_pFilenameMatcher->doesMatch(dirEnt->d_name))
+			{
+				std::string fullRelativePath = FileHelpers::combinePaths(relativeDirectoryPath, dirEnt->d_name);
+				files.push_back(fullRelativePath);
+			}
+		}
+	}
+
+	closedir(dir);
+
+	return !files.empty();
 }

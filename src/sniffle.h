@@ -24,6 +24,8 @@
 
 #include "config.h"
 
+class FilenameMatcher;
+
 class Sniffle
 {
 public:
@@ -72,15 +74,22 @@ private:
 	
 	static PatternSearch classifyPattern(const std::string& pattern);
 	
+	bool configureFilenameMatcher(const PatternSearch& pattern);
+	
 	bool findFiles(const std::string& pattern, std::vector<std::string>& foundFiles, unsigned int findFlags);
 	
 	bool findFilesInDir(const std::string& pattern, std::vector<std::string>& foundFiles, unsigned int findFlags);
 	
+	//
+	
+	bool getRelativeFilesInDirectoryRecursive(const std::string& searchDirectoryPath, const std::string& relativeDirectoryPath,
+														 std::vector<std::string>& files) const;
+	
 	
 private:
-	Config		m_config;
+	Config				m_config;
 	
-	
+	FilenameMatcher*	m_pFilenameMatcher;
 };
 
 #endif // SNIFFLE_H
