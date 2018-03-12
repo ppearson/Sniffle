@@ -64,7 +64,7 @@ void Sniffle::runFind(const std::string& pattern)
 
 	for (const std::string& fileItem : foundFiles)
 	{
-		fprintf(stderr, "%s\n", fileItem.c_str());
+		fprintf(stdout, "%s\n", fileItem.c_str());
 	}
 }
 
