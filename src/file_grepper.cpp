@@ -72,9 +72,9 @@ bool FileGrepper::findBasic(const std::string& filename, const std::string& sear
 					{
 						if (foundPreviousFile && m_config.getBlankLinesBetweenFiles())
 						{
-							fprintf(stderr, "\n");
+							fprintf(stdout, "\n");
 						}
-						fprintf(stderr, "%s:\n", filename.c_str());
+						fprintf(stdout, "%s:\n", filename.c_str());
 						
 						found = true;
 					}
@@ -87,7 +87,7 @@ bool FileGrepper::findBasic(const std::string& filename, const std::string& sear
 						// the contents...
 						
 						// just the filename
-						fprintf(stderr, "%s\n", filename.c_str());
+						fprintf(stdout, "%s\n", filename.c_str());
 						
 						found = true;
 						
@@ -99,7 +99,7 @@ bool FileGrepper::findBasic(const std::string& filename, const std::string& sear
 			
 			if (m_config.getOutputContentLines())
 			{
-				fprintf(stderr, "%s\n", line.c_str());
+				fprintf(stdout, "%s\n", line.c_str());
 			}
 			
 			if ((m_config.getFirstResultOnly() && m_config.getAfterLines() == 0) || !m_config.getOutputContentLines())
@@ -111,7 +111,7 @@ bool FileGrepper::findBasic(const std::string& filename, const std::string& sear
 		else if (found && (printCount < m_config.getAfterLines()))
 		{
 			// if we've found it before, we need to output additional lines...
-			fprintf(stderr, "%s\n", line.c_str());
+			fprintf(stdout, "%s\n", line.c_str());
 			
 			printCount++;
 		}

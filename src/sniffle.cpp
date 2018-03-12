@@ -48,7 +48,7 @@ void Sniffle::runFind(const std::string& pattern)
 
 	if (!findFiles(pattern, foundFiles, 0))
 	{
-		fprintf(stderr, "No files found.\n");
+		fprintf(stdout, "No files found.\n");
 		return;
 	}
 
