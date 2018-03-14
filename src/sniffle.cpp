@@ -27,6 +27,7 @@
 
 #include "file_helpers.h"
 #include "string_helpers.h"
+#include "system_helpers.h"
 
 #include "file_grepper.h"
 
@@ -37,6 +38,8 @@ Sniffle::Sniffle() :
 {
 	// load any local config file if one exists
 	m_config.loadConfigFile();
+	
+	configureGlobals();
 }
 
 Sniffle::~Sniffle()
@@ -48,15 +51,16 @@ Sniffle::~Sniffle()
 	}
 }
 
-bool Sniffle::parseArgs(int argc, char** argv, int startOptionArg, int& nextArgIndex)
+Config::ParseResult Sniffle::parseArgs(int argc, char** argv, int startOptionArg, int& nextArgIndex)
 {
 	return m_config.parseArgs(argc, argv, startOptionArg, nextArgIndex);
 }
 
 bool Sniffle::configureGlobals()
 {
-	char const* previousLocale = setlocale(LC_ALL, "C");
-	fprintf(stderr, "Prev locale: %s\n", previousLocale);
+	setlocale(LC_ALL, "C");
+//	char const* previousLocale = setlocale(LC_ALL, "C");
+//	fprintf(stderr, "Prev locale: %s\n", previousLocale);
 
 	return true;
 }
@@ -64,16 +68,27 @@ bool Sniffle::configureGlobals()
 void Sniffle::runFind(const std::string& pattern)
 {
 	std::vector<std::string> foundFiles;
+	
+	fprintf(stderr, "Searching for files...\n");
 
 	if (!findFiles(pattern, foundFiles, 0))
 	{
-		fprintf(stdout, "No files found.\n");
+		fprintf(stderr, "No files found matching file match criteria.\n");
 		return;
 	}
 
 	for (const std::string& fileItem : foundFiles)
 	{
 		fprintf(stdout, "%s\n", fileItem.c_str());
+	}
+	
+	if (SystemHelpers::isStdOutATTY())
+	{
+		fprintf(stderr, "\nFound %zu %s.\n", foundFiles.size(), foundFiles.size() == 1 ? "file" : "files");
+	}
+	else
+	{
+		fprintf(stderr, "Found %zu %s. Output piped to stdout.\n", foundFiles.size(), foundFiles.size() == 1 ? "file" : "files");
 	}
 }
 
@@ -83,21 +98,73 @@ void Sniffle::runGrep(const std::string& filePattern, const std::string& content
 	// TODO: contents search in multiple threads...
 
 	std::vector<std::string> foundFiles;
+	
+	fprintf(stderr, "Searching for files...\n");
 
 	if (!findFiles(filePattern, foundFiles, 0))
 	{
-		fprintf(stderr, "No files found.\n");
+		fprintf(stderr, "No files found matching file match criteria.\n");
 		return;
 	}
-
+	
+	fprintf(stderr, "Found %zu %s matching file match criteria.\n", foundFiles.size(), foundFiles.size() == 1 ? "file" : "files");
+	
+	bool printProgress = m_config.getPrintProgressWhenOutToStdOut() && !SystemHelpers::isStdOutATTY();
+	
 	FileGrepper grepper(m_config);
 
 	bool foundPrevious = false;
 
+	size_t totalFiles = foundFiles.size();
+	size_t fileCount = 0;
+	size_t lastPercentage = 101;
+	size_t foundCount = 0;
+	
+	if (printProgress)
+	{
+		fprintf(stderr, "Grepping files for content...");
+	}
+	
 	for (const std::string& fileItem : foundFiles)
 	{
+		if (printProgress)
+		{
+			fileCount++;
+			size_t thisPercentage = (fileCount * 100) / totalFiles;
+			if (thisPercentage != lastPercentage)
+			{
+				fprintf(stderr, "\rGrepping files for content - %zu%% complete...", thisPercentage);
+				lastPercentage = thisPercentage;
+			}
+		}
+		
 		// the grepper itself does any printing...
-		foundPrevious |= grepper.findBasic(fileItem, contentsPattern, foundPrevious);
+		bool foundInFile = grepper.findBasic(fileItem, contentsPattern, foundPrevious);
+		
+		if (foundInFile)
+		{
+			foundCount++;
+		}
+		
+		// TODO: this bit could be kept within FileGrepper...
+		foundPrevious |= foundInFile;
+	}
+	
+	if (printProgress)
+	{
+		// annoyingly, we need to clear the remainder of previous progress line here, hence the space padding...
+		fprintf(stderr, "\rFound content in %zu %s. Output piped to stdout.%-5s\n", foundCount, foundCount == 1 ? "file" : "files", " ");
+	}
+	else
+	{
+		if (SystemHelpers::isStdOutATTY())
+		{
+			fprintf(stderr, "Found content in %zu %s.\n", foundCount, foundCount == 1 ? "file" : "files");
+		}
+		else
+		{
+			fprintf(stderr, "Found content in %zu %s. Output piped to stdout.\n", foundCount, foundCount == 1 ? "file" : "files");
+		}
 	}
 }
 

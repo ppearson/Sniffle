@@ -26,9 +26,17 @@ class Config
 public:
 	Config();
 	
+	enum ParseResult
+	{
+		eParseError,
+		eParseNoneHandled,
+		eParseHandledOK,
+		eParseHelpWanted
+	};
+	
 	void loadConfigFile();
 	
-	bool parseArgs(int argc, char** argv, int startOptionArg, int& nextArgIndex);
+	ParseResult parseArgs(int argc, char** argv, int startOptionArg, int& nextArgIndex);
 	
 	
 	// getters
@@ -36,6 +44,11 @@ public:
 	unsigned int getGrepThreads() const
 	{
 		return m_grepThreads;
+	}
+	
+	bool getPrintProgressWhenOutToStdOut() const
+	{
+		return m_printProgressWhenOutToStdOut;
 	}
 	
 	bool getFirstResultOnly() const
@@ -75,7 +88,13 @@ public:
 	}
 	
 private:
+	// for config file
 	static bool getKeyValue(const std::string& configLine, std::string& key, std::string& value);
+	
+	// for command line args
+	static bool getKeyValueFromArg(const std::string& argString, std::string& key, std::string& value);
+	
+	bool applyKeyValueSetting(const std::string& key, const std::string& value);
 	
 	
 	
@@ -84,6 +103,10 @@ private:
 	// TODO: this isn't very scalable (but does it need to be?) - maybe key/value lookups instead?
 	
 	unsigned int	m_grepThreads;
+	
+	bool			m_printProgressWhenOutToStdOut; // if we think stdout is not a tty (so being piped), print progress via stderr
+	
+	int				m_directoryRecursionDepth;
 	
 	bool			m_firstResultOnly;
 	

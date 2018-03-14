@@ -26,7 +26,7 @@ FileGrepper::FileGrepper(const Config& config) : m_config(config)
 {
 	m_readBufferSize = 4096;
 
-	// disable C++ sync with stdio (C) - this speeds up getline() quite a bit...
+	// disable C++ sync with stdio (C) - this can speed up getline() quite a bit...
 	// we can do this as we only use C++ stuff for file reading (currently),
 	// and C stuff for output, so we don't care about synchronisation between the two
 	std::ios::sync_with_stdio(false);

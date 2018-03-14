@@ -31,9 +31,9 @@ class Sniffle
 public:
 	Sniffle();
 	~Sniffle();
-
-	bool parseArgs(int argc, char** argv, int startOptionArg, int& nextArgIndex);
-
+	
+	Config::ParseResult parseArgs(int argc, char** argv, int startOptionArg, int& nextArgIndex);
+	
 	bool configureGlobals();
 
 	void runFind(const std::string& pattern);

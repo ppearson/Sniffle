@@ -22,54 +22,67 @@
 
 #include "sniffle.h"
 
-static void printHelp()
+static void printHelp(bool fullOptions)
 {
 	fprintf(stderr, "Sniffle version 0.1.\n");
 	fprintf(stderr, "Usage:\n");
-	fprintf(stderr, "sniffle find [options] <\"/path/to/search/*.log\">\n");
-	fprintf(stderr, "sniffle find [options] <\"/path/to/*/search/*.log\">\n");
-	fprintf(stderr, "sniffle grep [options] <stringToFind> <\"/path/to/search/*.log\">\n");
-	fprintf(stderr, "sniffle grep [options] <stringToFind> <\"/path/to/*/search/*.log\">\n");
+	fprintf(stderr, "sniffle [options] find <\"/path/to/search/*.log\">\n");
+	fprintf(stderr, "sniffle [options] find <\"/path/to/*/search/*.log\">\n");
+	fprintf(stderr, "sniffle [options] grep <stringToFind> <\"/path/to/search/*.log\">\n");
+	fprintf(stderr, "sniffle [options] grep <stringToFind> <\"/path/to/*/search/*.log\">\n");
+	
+	if (fullOptions)
+	{
+		fprintf(stderr, "\nOptions:\n");
+		fprintf(stderr, " -firstOnly\t\tMatch only the first item in each file.\n");
+		fprintf(stderr, " -m 1\t\t\tAs above emulation of grep.\n");
+		fprintf(stderr, " -blbf\t\t\tOutput a blank line between files.\n");
+	}
 }
 
 int main(int argc, char** argv)
 {
 	if (argc <= 1)
 	{
-		printHelp();
+		printHelp(false);
 		return -1;
 	}
 	
 	Sniffle sniffle;
-
-	std::string mainCommand = argv[1];
 	
+	// the assumption here is that optional options (starting with '-') are always the first argument...
 	
-	int nextArg = 2;
-	sniffle.parseArgs(argc, argv, 2, nextArg);
+	int nextArg = 1;
+	
+	// process any optional options
+	Config::ParseResult res = sniffle.parseArgs(argc, argv, 1, nextArg);
+	
+	int commandArgs = argc - nextArg;
+	
+	std::string mainCommand = argv[nextArg];
 	
 	if (mainCommand == "find")
 	{
-		if (argc < 3)
+		if (commandArgs < 2)
 		{
 			fprintf(stderr, "Error: Insufficient number of arguments for 'find' command.\n");
 			return 0;
 		}
 		
-		std::string path = argv[2];
+		std::string path = argv[nextArg + 1];
 		
 		sniffle.runFind(path);
 	}
 	else if (mainCommand == "grep")
 	{
-		if (argc < 4)
+		if (commandArgs < 3)
 		{
 			fprintf(stderr, "Error: Insufficient number of arguments for 'grep' command.\n");
 			return 0;
 		}
 		
-		std::string contentsPattern = argv[2];
-		std::string filePattern = argv[3];
+		std::string contentsPattern = argv[nextArg + 1];
+		std::string filePattern = argv[nextArg + 2];
 		
 		sniffle.runGrep(filePattern, contentsPattern);
 	}
@@ -89,9 +102,9 @@ int main(int argc, char** argv)
 			fprintf(stderr, "%s\n", argv[i]);
 		}
 	}
-	else if (mainCommand.find("help") != std::string::npos)
+	else if (res == Config::eParseHelpWanted)
 	{
-		printHelp();
+		printHelp(true);
 		return -1;
 	}
 	
