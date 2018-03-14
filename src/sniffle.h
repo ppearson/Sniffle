@@ -31,64 +31,66 @@ class Sniffle
 public:
 	Sniffle();
 	~Sniffle();
-	
+
 	bool parseArgs(int argc, char** argv, int startOptionArg, int& nextArgIndex);
-		
+
+	bool configureGlobals();
+
 	void runFind(const std::string& pattern);
-	
+
 	void runGrep(const std::string& filePattern, const std::string& contentsPattern);
-	
+
 private:
-	
+
 	enum PatternType
 	{
 		ePatternUnknown,
 		ePatternSimple,
 		ePatternWildcardDir
 	};
-	
+
 	struct PatternSearch
 	{
 		PatternSearch() : type(ePatternUnknown)
 		{
 		}
-			
-		
+
+
 		PatternType			type;
 		std::string			baseSearchPath;
-		
+
 		std::string			dirWildcardMatch;
 		std::vector<std::string> dirRemainders;
-		
+
 		std::string			fileMatch;
 	};
-	
-	
-	
+
+
+
 	enum FindFlags
 	{
 		FIND_RECURSIVE				= 1 << 0,
 		FIND_FOLLOW_SYMLINKS		= 1 << 1,
 		FIND_OUTPUT_RELATIVE_PATHS	= 1 << 2
 	};
-	
+
 	static PatternSearch classifyPattern(const std::string& pattern);
-	
+
 	bool configureFilenameMatcher(const PatternSearch& pattern);
-	
+
 	bool findFiles(const std::string& pattern, std::vector<std::string>& foundFiles, unsigned int findFlags);
-	
+
 	bool findFilesInDir(const std::string& pattern, std::vector<std::string>& foundFiles, unsigned int findFlags);
-	
+
 	//
-	
+
 	bool getRelativeFilesInDirectoryRecursive(const std::string& searchDirectoryPath, const std::string& relativeDirectoryPath,
 														 std::vector<std::string>& files) const;
-	
-	
+
+
 private:
 	Config				m_config;
-	
+
 	FilenameMatcher*	m_pFilenameMatcher;
 };
 

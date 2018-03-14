@@ -23,6 +23,7 @@
 #include <sys/stat.h>
 #include <string.h>
 #include <unistd.h>
+#include <locale.h>
 
 #include "file_helpers.h"
 #include "string_helpers.h"
@@ -31,7 +32,7 @@
 
 #include "pattern_matchers.h"
 
-Sniffle::Sniffle() : 
+Sniffle::Sniffle() :
 	m_pFilenameMatcher(nullptr)
 {
 	// load any local config file if one exists
@@ -50,6 +51,14 @@ Sniffle::~Sniffle()
 bool Sniffle::parseArgs(int argc, char** argv, int startOptionArg, int& nextArgIndex)
 {
 	return m_config.parseArgs(argc, argv, startOptionArg, nextArgIndex);
+}
+
+bool Sniffle::configureGlobals()
+{
+	char const* previousLocale = setlocale(LC_ALL, "C");
+	fprintf(stderr, "Prev locale: %s\n", previousLocale);
+
+	return true;
 }
 
 void Sniffle::runFind(const std::string& pattern)
@@ -171,26 +180,26 @@ bool Sniffle::configureFilenameMatcher(const PatternSearch& pattern)
 		delete m_pFilenameMatcher;
 		m_pFilenameMatcher = nullptr;
 	}
-	
+
 	// work out the type of file matcher we want.
-	
+
 	if (pattern.fileMatch == "*")
 	{
 		// TODO: could do a specialised matcher for this.
 		m_pFilenameMatcher = new SimpleFilenameMatcher("*");
 		return true;
 	}
-	
+
 	size_t sepPos = pattern.fileMatch.find(".");
 	if (sepPos == std::string::npos)
 	{
 		m_pFilenameMatcher = new SimpleFilenameMatcher("*");
 		return true;
 	}
-	
+
 	std::string filenameCorePart = pattern.fileMatch.substr(0, sepPos);
 	std::string extensionPart = pattern.fileMatch.substr(sepPos + 1);
-	
+
 	// simple extension only filter
 	if (extensionPart.find("*", sepPos) == std::string::npos && filenameCorePart == "*")
 	{
@@ -198,10 +207,10 @@ bool Sniffle::configureFilenameMatcher(const PatternSearch& pattern)
 		m_pFilenameMatcher = new SimpleFilenameMatcher(extensionPart);
 		return true;
 	}
-	
+
 	// currently we only support partial wildcards in the filename part (not extension)
 	// TODO: implement this correctly
-	
+
 	// otherwise, it's the more complex type
 	if (filenameCorePart.find("*") == std::string::npos)
 	{
@@ -209,7 +218,7 @@ bool Sniffle::configureFilenameMatcher(const PatternSearch& pattern)
 		fprintf(stderr, "Error creating filename matcher with file match string: %s\n", pattern.fileMatch.c_str());
 		return false;
 	}
-	
+
 	// for the moment, assume there are wildcards either side by replacing wildcard chars
 	if (filenameCorePart[0] != '*' || filenameCorePart[filenameCorePart.size() - 1] != '*')
 	{
@@ -217,9 +226,9 @@ bool Sniffle::configureFilenameMatcher(const PatternSearch& pattern)
 		fprintf(stderr, "Error creating filename matcher with file match string: %s\n", pattern.fileMatch.c_str());
 		return false;
 	}
-	
+
 	std::string filenameMatchItem = filenameCorePart.substr(1, filenameCorePart.size() - 2);
-	
+
 	m_pFilenameMatcher = new AdvancedFilenameMatcher(filenameMatchItem, extensionPart);
 	return true;
 }
@@ -232,7 +241,7 @@ bool Sniffle::findFiles(const std::string& pattern, std::vector<std::string>& fo
 	StringHelpers::split(pattern, patternTokens, "/");
 
 	PatternSearch patternRes = classifyPattern(pattern);
-	
+
 	if (!configureFilenameMatcher(patternRes))
 	{
 		fprintf(stderr, "Couldn't understand search terms.\n");
@@ -343,7 +352,7 @@ bool Sniffle::getRelativeFilesInDirectoryRecursive(const std::string& searchDire
 	DIR* dir = opendir(searchDirectoryPath.c_str());
 	if (!dir)
 		return false;
-	
+
 	struct dirent* dirEnt = NULL;
 	char tempBuffer[4096];
 
@@ -400,9 +409,9 @@ bool Sniffle::getRelativeFilesInDirectoryRecursive(const std::string& searchDire
 		else
 		{
 			// it's hopefully a file
-			
+
 			// see if it's what we want...
-			
+
 			if (m_pFilenameMatcher->doesMatch(dirEnt->d_name))
 			{
 				std::string fullRelativePath = FileHelpers::combinePaths(relativeDirectoryPath, dirEnt->d_name);
