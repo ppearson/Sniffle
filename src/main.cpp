@@ -30,12 +30,13 @@ static void printHelp(bool fullOptions)
 	fprintf(stderr, "sniffle [options] find <\"/path/to/*/search/*.log\">\n");
 	fprintf(stderr, "sniffle [options] grep <stringToFind> <\"/path/to/search/*.log\">\n");
 	fprintf(stderr, "sniffle [options] grep <stringToFind> <\"/path/to/*/search/*.log\">\n");
+	fprintf(stderr, "\nNote: in some shells, a path with wildcards in might have to be quoted to prevent auto-completed results being given to sniffle.\n");
 	
 	if (fullOptions)
 	{
 		fprintf(stderr, "\nOptions:\n");
 		fprintf(stderr, " -firstOnly\t\tMatch only the first item in each file.\n");
-		fprintf(stderr, " -m 1\t\t\tAs above emulation of grep.\n");
+		fprintf(stderr, " -m <count>\t\t\tMatch count\n");
 		fprintf(stderr, " -blbf\t\t\tOutput a blank line between files.\n");
 	}
 }
@@ -88,7 +89,16 @@ int main(int argc, char** argv)
 	}
 	else if (mainCommand == "match")
 	{
+		if (commandArgs < 3)
+		{
+			fprintf(stderr, "Error: Insufficient number of arguments for 'match' command.\n");
+			return 0;
+		}
 		
+		std::string contentsPattern = argv[nextArg + 1];
+		std::string filePattern = argv[nextArg + 2];
+		
+		sniffle.runMatch(filePattern, contentsPattern);
 	}
 	else if (mainCommand == "count")
 	{

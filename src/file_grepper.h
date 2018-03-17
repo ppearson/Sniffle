@@ -21,6 +21,7 @@
 
 #include <string>
 #include <fstream>
+#include <vector>
 
 class Config;
 
@@ -32,24 +33,44 @@ public:
 	// compute cached values for matching mode
 	bool initMatch(const std::string& matchString);
 
+	
+	
+	// operations per file...
+	// TODO: abstract this to classes doing this	
+	
+	// basic ones are slow, naive versions 
+	
 	// slow, basic
-	bool findBasic(const std::string& filename, const std::string& searchString, bool foundPreviousFile);
-
-
+	bool grepBasic(const std::string& filename, const std::string& searchString, bool foundPreviousFile);
 
 	// match - initMatch() has to have been called previously for this to work...
 	bool matchBasic(const std::string& filename, bool foundPreviousFile);
+	bool matchBasicOr(const std::string& filename, bool foundPreviousFile);
+	bool matchBasicAnd(const std::string& filename, bool foundPreviousFile);
 
 
 private:
-	bool openFilestream(const std::string& filename, std::fstream& fileStream);
+	bool openFileStream(const std::string& filename, std::fstream& fileStream);
+	
+	void resetMatchCounts();
 
 private:
 	const Config&	m_config;
+	
+	enum MatchType
+	{
+		eMatchTypeOr,
+		eMatchTypeAnd
+	};
 
 
 	// cached stuff
 	unsigned int		m_readBufferSize;
+	
+	// match items
+	MatchType			m_matchType;
+	std::vector<std::string>	m_aMatchItems;
+	std::vector<unsigned int>	m_aMatchItemCounts;
 };
 
 #endif // FILE_GREPPER_H

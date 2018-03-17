@@ -39,6 +39,8 @@ public:
 	void runFind(const std::string& pattern);
 
 	void runGrep(const std::string& filePattern, const std::string& contentsPattern);
+	
+	void runMatch(const std::string& filePattern, const std::string& contentsPattern);
 
 private:
 

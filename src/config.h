@@ -51,9 +51,19 @@ public:
 		return m_printProgressWhenOutToStdOut;
 	}
 	
-	bool getFirstResultOnly() const
+	bool getIgnoreHiddenFiles() const
 	{
-		return m_firstResultOnly;
+		return m_ignoreHiddenFiles;
+	}
+	
+	bool getIgnoreHiddenDirectories() const
+	{
+		return m_ignoreHiddenDirectories;
+	}
+	
+	int getMatchCount() const
+	{
+		return m_matchCount;
 	}
 	
 	bool getOutputFilename() const
@@ -87,6 +97,16 @@ public:
 		return m_blankLinesBetweenFiles;
 	}
 	
+	char getMatchItemOrSeperatorChar() const
+	{
+		return m_matchItemOrSeperatorChar;
+	}
+	
+	char getMatchItemAndSeperatorChar() const
+	{
+		return m_matchItemAndSeperatorChar;
+	}
+	
 private:
 	// for config file
 	static bool getKeyValue(const std::string& configLine, std::string& key, std::string& value);
@@ -108,12 +128,16 @@ private:
 	
 	int				m_directoryRecursionDepth;
 	
-	bool			m_firstResultOnly;
+	bool			m_ignoreHiddenFiles;
+	bool			m_ignoreHiddenDirectories;
+	
+	int				m_matchCount;
 	
 	bool			m_outputFilename; // TODO: relative / absolute options as well?
 	bool			m_outputContentLines; // whether to output the content where the match takes place
 	
 	bool			m_outputLineNumbers;
+	bool			m_outputFileSize;
 	
 	// note: there's an implicit 'context' lines option here, which if set, will set both of the below
 	unsigned int	m_beforeLines; // lines before
@@ -121,7 +145,8 @@ private:
 	
 	bool			m_blankLinesBetweenFiles; //
 	
-	std::string		m_searchItemSeperatorChar; //
+	char			m_matchItemOrSeperatorChar; //
+	char			m_matchItemAndSeperatorChar; //
 	
 	std::string		m_outputToFile; // if non-empty, write output to this file
 };

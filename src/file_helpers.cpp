@@ -97,10 +97,11 @@ std::string FileHelpers::combinePaths(const std::vector<std::string>& pathItems)
 	return finalPath;
 }
 
-bool FileHelpers::getDirectoriesInDirectory(const std::string& directoryPath, const std::string& dirMatch, std::vector<std::string>& directories)
+bool FileHelpers::getDirectoriesInDirectory(const std::string& directoryPath, const std::string& dirMatch,
+											bool ignoreHiddenDirs, std::vector<std::string>& directories)
 {
 	// Note: opendir() is used on purpose here, as scandir() and lsstat() don't reliably support S_ISLNK on symlinks over NFS,
-	//       whereas opendir() allows this
+	//       whereas opendir() allows this robustly.
 	DIR* dir = opendir(directoryPath.c_str());
 	if (!dir)
 		return false;
@@ -148,6 +149,10 @@ bool FileHelpers::getDirectoriesInDirectory(const std::string& directoryPath, co
 		else if (dirEnt->d_type == DT_DIR)
 		{
 			// it's a directory
+			
+			// if required, ignore hidden (starting with '.') directories
+			if (ignoreHiddenDirs && strncmp(dirEnt->d_name, ".", 1) == 0)
+				continue;
 
 			// ignore built-ins
 			if (strcmp(dirEnt->d_name, ".") == 0 || strcmp(dirEnt->d_name, "..") == 0)

@@ -36,7 +36,8 @@ public:
 
 	// this returns relative directory names to the first level
 	// currently dirMatch has to be '*'...
-	static bool getDirectoriesInDirectory(const std::string& directoryPath, const std::string& dirMatch, std::vector<std::string>& directories);
+	static bool getDirectoriesInDirectory(const std::string& directoryPath, const std::string& dirMatch,
+										  bool ignoreHiddenDirs, std::vector<std::string>& directories);
 };
 
 #endif // FILE_HELPERS_H

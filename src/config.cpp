@@ -28,13 +28,18 @@ Config::Config() :
     m_grepThreads(1),
 	m_printProgressWhenOutToStdOut(true),
 	m_directoryRecursionDepth(-1),
-	m_firstResultOnly(false),
+	m_ignoreHiddenFiles(true),
+	m_ignoreHiddenDirectories(true),
+	m_matchCount(-1),
 	m_outputFilename(true),
 	m_outputContentLines(true),
 	m_outputLineNumbers(false),
+	m_outputFileSize(false),
 	m_beforeLines(0),
 	m_afterLines(0),
-    m_blankLinesBetweenFiles(false)
+    m_blankLinesBetweenFiles(true),
+	m_matchItemOrSeperatorChar('|'),
+	m_matchItemAndSeperatorChar('&')
 {
 	
 }
@@ -127,15 +132,16 @@ Config::ParseResult Config::parseArgs(int argc, char** argv, int startOptionArg,
 		// handle some common short-hand conveniences...
 		else if (argString == "-m")
 		{
-			// currently we only support 1 as an emulation of grep
+			std::string nextArg(argv[i + 1]);
+			m_matchCount = atoi(nextArg.c_str());
 			
-			m_firstResultOnly = true;
+			m_matchCount = 1;
 			
 			lastProcessedArg ++;
 		}
 		else if (argString == "-firstOnly")
 		{
-			m_firstResultOnly = true;
+			m_matchCount = 1;
 		}
 		else if (argString == "-blbf")
 		{
@@ -227,10 +233,20 @@ bool Config::applyKeyValueSetting(const std::string& key, const std::string& val
 		unsigned int intValue = atoi(value.c_str());
 		m_printProgressWhenOutToStdOut = intValue == 1;
 	}
-	else if (key == "firstResultOnly")
+	else if (key == "ignoreHiddenFiles")
 	{
 		unsigned int intValue = atoi(value.c_str());
-		m_firstResultOnly = intValue == 1;
+		m_ignoreHiddenFiles = intValue == 1;
+	}
+	else if (key == "ignoreHiddenDirectories")
+	{
+		unsigned int intValue = atoi(value.c_str());
+		m_ignoreHiddenDirectories = intValue == 1;
+	}
+	else if (key == "matchCount")
+	{
+		unsigned int intValue = atoi(value.c_str());
+		m_matchCount = intValue;
 	}
 	else if (key == "outputFilename")
 	{
