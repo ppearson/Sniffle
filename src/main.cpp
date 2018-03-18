@@ -30,14 +30,15 @@ static void printHelp(bool fullOptions)
 	fprintf(stderr, "sniffle [options] find <\"/path/to/*/search/*.log\">\n");
 	fprintf(stderr, "sniffle [options] grep <stringToFind> <\"/path/to/search/*.log\">\n");
 	fprintf(stderr, "sniffle [options] grep <stringToFind> <\"/path/to/*/search/*.log\">\n");
-	fprintf(stderr, "\nNote: in some shells, a path with wildcards in might have to be quoted to prevent auto-completed results being given to sniffle.\n");
+	fprintf(stderr, "sniffle [options] match <tokens|to|find> <\"/path/to/search/*.log\">\n");
+	fprintf(stderr, "sniffle [options] match <tokens&to&find> <\"/path/to/*/search/*.log\">\n");
+	fprintf(stderr, "\nNote: in some shells, a path with wildcards in might have to be escaped/quoted to prevent auto-completed arguments being given to Sniffle.\n");
 	
 	if (fullOptions)
 	{
 		fprintf(stderr, "\nOptions:\n");
 		fprintf(stderr, " -firstOnly\t\tMatch only the first item in each file.\n");
 		fprintf(stderr, " -m <count>\t\t\tMatch count\n");
-		fprintf(stderr, " -blbf\t\t\tOutput a blank line between files.\n");
 	}
 }
 
@@ -51,7 +52,7 @@ int main(int argc, char** argv)
 	
 	Sniffle sniffle;
 	
-	// the assumption here is that optional options (starting with '-') are always the first argument...
+	// the assumption here is that optional options (starting with '-') are always the first arguments...
 	
 	int nextArg = 1;
 	
