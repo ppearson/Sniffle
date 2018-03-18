@@ -601,10 +601,9 @@ bool Sniffle::getRelativeFilesInDirectoryRecursive(const std::string& searchDire
 				}
 			}
 		}
-		else
+		else if (dirEnt->d_type == DT_REG)
 		{
-			// it's hopefully a file
-
+			// it's a file
 			// see if it's what we want...
 			
 			// if required, ignore hidden (starting with '.') files
@@ -616,6 +615,11 @@ bool Sniffle::getRelativeFilesInDirectoryRecursive(const std::string& searchDire
 				std::string fullRelativePath = FileHelpers::combinePaths(relativeDirectoryPath, dirEnt->d_name);
 				files.push_back(fullRelativePath);
 			}
+		}
+		else
+		{
+			// we don't know what it is, so ignore it for the moment.
+			// TODO: check stat() to see what it really is...
 		}
 	}
 

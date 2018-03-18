@@ -161,8 +161,15 @@ bool FileHelpers::getDirectoriesInDirectory(const std::string& directoryPath, co
 			// currently, we don't do any dirMatch checking, on the assumption it's only a full wildcard for the moment...
 			directories.push_back(dirEnt->d_name);
 		}
+		else if (dirEnt->d_type == DT_REG)
+		{
+			// a file, ignore it...
+			continue;
+		}
 		else
 		{
+			// TODO: check stat to see what it really is...
+			
 			// it's probably a file, ignore it...
 			continue;
 		}
