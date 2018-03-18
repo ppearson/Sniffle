@@ -23,6 +23,8 @@
 #include <fstream>
 #include <vector>
 
+#include "string_buffer.h"
+
 class Config;
 
 class FileGrepper
@@ -38,7 +40,7 @@ public:
 	// operations per file...
 	// TODO: abstract this to classes doing this	
 	
-	// basic ones are slow, naive versions 
+	// basic ones are slow, naive versions that read files per-line using linear search
 	
 	// slow, basic
 	bool grepBasic(const std::string& filename, const std::string& searchString, bool foundPreviousFile);
@@ -52,8 +54,6 @@ public:
 private:
 	bool openFileStream(const std::string& filename, std::fstream& fileStream);
 	
-	void resetMatchCounts();
-
 private:
 	const Config&	m_config;
 	
@@ -67,10 +67,11 @@ private:
 	// cached stuff
 	unsigned int		m_readBufferSize;
 	
+	StringBuffer		m_stringBuffer;
+	
 	// match items
 	MatchType			m_matchType;
 	std::vector<std::string>	m_aMatchItems;
-	std::vector<unsigned int>	m_aMatchItemCounts;
 };
 
 #endif // FILE_GREPPER_H
