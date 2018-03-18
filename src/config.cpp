@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <fstream>
+#include <cctype> // for isdigit()
 
 #include "file_helpers.h"
 
@@ -135,8 +136,6 @@ Config::ParseResult Config::parseArgs(int argc, char** argv, int startOptionArg,
 			std::string nextArg(argv[i + 1]);
 			m_matchCount = atoi(nextArg.c_str());
 			
-			m_matchCount = 1;
-			
 			lastProcessedArg ++;
 		}
 		else if (argString == "-firstOnly")
@@ -230,18 +229,15 @@ bool Config::applyKeyValueSetting(const std::string& key, const std::string& val
 	}
 	else if (key == "printProgressWhenOutToStdOut")
 	{
-		unsigned int intValue = atoi(value.c_str());
-		m_printProgressWhenOutToStdOut = intValue == 1;
+		m_printProgressWhenOutToStdOut = getBooleanValueFromString(value);
 	}
 	else if (key == "ignoreHiddenFiles")
 	{
-		unsigned int intValue = atoi(value.c_str());
-		m_ignoreHiddenFiles = intValue == 1;
+		m_ignoreHiddenFiles = getBooleanValueFromString(value);
 	}
 	else if (key == "ignoreHiddenDirectories")
 	{
-		unsigned int intValue = atoi(value.c_str());
-		m_ignoreHiddenDirectories = intValue == 1;
+		m_ignoreHiddenDirectories = getBooleanValueFromString(value);
 	}
 	else if (key == "matchCount")
 	{
@@ -250,23 +246,19 @@ bool Config::applyKeyValueSetting(const std::string& key, const std::string& val
 	}
 	else if (key == "outputFilename")
 	{
-		unsigned int intValue = atoi(value.c_str());
-		m_outputFilename = intValue == 1;
+		m_outputFilename = getBooleanValueFromString(value);
 	}
 	else if (key == "outputContentLines")
 	{
-		unsigned int intValue = atoi(value.c_str());
-		m_outputContentLines = intValue == 1;
+		m_outputContentLines = getBooleanValueFromString(value);
 	}
 	else if (key == "outputLineNumbers")
 	{
-		unsigned int intValue = atoi(value.c_str());
-		m_outputLineNumbers = intValue == 1;
+		m_outputLineNumbers = getBooleanValueFromString(value);
 	}
 	else if (key == "blankLinesBetweenFiles")
 	{
-		unsigned int intValue = atoi(value.c_str());
-		m_blankLinesBetweenFiles = intValue == 1;
+		m_blankLinesBetweenFiles = getBooleanValueFromString(value);
 	}
 	else if (key == "context")
 	{
@@ -290,4 +282,22 @@ bool Config::applyKeyValueSetting(const std::string& key, const std::string& val
 	}
 	
 	return true;
+}
+
+bool Config::getBooleanValueFromString(const std::string& value)
+{
+	if (isdigit(value[0]))
+	{
+		// it's a digit, so...
+		return atoi(value.c_str()) == 1;
+	}
+	else
+	{
+		// it's probably a string of some sort
+		bool isTrue = value.find("true") != std::string::npos ||
+					  value.find("yes") != std::string::npos ||
+					  value.find("on") != std::string::npos;
+		
+		return isTrue;
+	}
 }

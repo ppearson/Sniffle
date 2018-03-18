@@ -116,6 +116,7 @@ private:
 	
 	bool applyKeyValueSetting(const std::string& key, const std::string& value);
 	
+	static bool getBooleanValueFromString(const std::string& value);	
 	
 	
 private:
