@@ -23,6 +23,7 @@
 #include <sys/stat.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdlib.h>
 #include <locale.h>
 
 #include "file_helpers.h"
@@ -191,7 +192,7 @@ void Sniffle::runMatch(const std::string& filePattern, const std::string& conten
 	
 	if (!grepper.initMatch(contentsPattern))
 	{
-		fprintf(stderr, "Invalid match pattern.\n");
+		fprintf(stderr, "Invalid match pattern. Make sure you provide multiple items to search for, separated by the respective OR and AND character separators.\n");
 		return;
 	}
 
@@ -255,11 +256,59 @@ void Sniffle::runMatch(const std::string& filePattern, const std::string& conten
 Sniffle::PatternSearch Sniffle::classifyPattern(const std::string& pattern)
 {
 	Sniffle::PatternSearch result;
-
-	result.baseSearchPath = "/";
-
+	
 	std::vector<std::string> patternTokens;
-	StringHelpers::split(pattern, patternTokens, "/");
+	
+	// first of all, work out if the path is an absolute full path, or a relative one.
+	if (pattern[0] == '/')
+	{
+		// it was an absolute path, so we can just tokenise the path
+		result.baseSearchPath = "/";
+		
+		StringHelpers::split(pattern, patternTokens, "/");
+	}
+	else
+	{
+		// it was a relative path, so attempt to work out what the full absolute path should be...
+		
+		// TODO: could try and use realpath() for this, but we'd still have to remove any wildcard items before
+		//       we can use it, so for the moment, just do the obvious stuff ourselves...
+		
+		char szCurrDir[2048];
+		if (getcwd(szCurrDir, 2048) == NULL)
+		{
+			// we couldn't get the current directory for some reason...
+			fprintf(stderr, "Error: couldn't get current working directory.\n");
+			result.type = ePatternError;
+			return result;
+		}
+		
+		std::string currentDir(szCurrDir);
+		
+		if (pattern[0] == '*' && pattern.find("/") == std::string::npos)
+		{
+			// we're likely just a file match pattern...
+			result.baseSearchPath = currentDir;
+			result.fileMatch = pattern;
+			result.type = ePatternSimple;
+			return result;
+		}
+		else if (pattern.find("/") != std::string::npos)
+		{
+			// for the moment, just slap the currentDir before what we have in the hope it will work...
+			std::string expandedPath = FileHelpers::combinePaths(currentDir, pattern);
+			
+			result.baseSearchPath = "/";
+			
+			StringHelpers::split(expandedPath, patternTokens, "/");
+		}
+		else
+		{
+			fprintf(stderr, "Other relative path...\n");
+			result.type = ePatternError;
+			return result;
+		}
+	}
 
 	// currently we only support one wildcard directory
 
@@ -384,11 +433,6 @@ bool Sniffle::configureFilenameMatcher(const PatternSearch& pattern)
 
 bool Sniffle::findFiles(const std::string& pattern, std::vector<std::string>& foundFiles, unsigned int findFlags)
 {
-	// currently we assume we're given an absolute path, but...
-
-	std::vector<std::string> patternTokens;
-	StringHelpers::split(pattern, patternTokens, "/");
-
 	PatternSearch patternRes = classifyPattern(pattern);
 
 	if (!configureFilenameMatcher(patternRes))
@@ -400,13 +444,6 @@ bool Sniffle::findFiles(const std::string& pattern, std::vector<std::string>& fo
 	if (patternRes.type == ePatternSimple)
 	{
 		// just do a simple recursive search
-
-		// currently we only support extension wildcards...
-		std::string extensionMatch = "*";
-		if (patternRes.fileMatch.find(".") != std::string::npos)
-		{
-			extensionMatch = patternRes.fileMatch.substr(patternRes.fileMatch.find(".") + 1);
-		}
 
 		bool foundOK = getRelativeFilesInDirectoryRecursive(patternRes.baseSearchPath, "", foundFiles);
 
@@ -430,13 +467,6 @@ bool Sniffle::findFiles(const std::string& pattern, std::vector<std::string>& fo
 		if (!FileHelpers::getDirectoriesInDirectory(patternRes.baseSearchPath, patternRes.dirWildcardMatch, m_config.getIgnoreHiddenDirectories(), wildCardDirs))
 		{
 			return false;
-		}
-
-		// currently we only support extension wildcards...
-		std::string extensionMatch = "*";
-		if (patternRes.fileMatch.find(".") != std::string::npos)
-		{
-			extensionMatch = patternRes.fileMatch.substr(patternRes.fileMatch.find(".") + 1);
 		}
 
 		bool foundSomeFiles = false;

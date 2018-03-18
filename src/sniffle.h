@@ -48,7 +48,8 @@ private:
 	{
 		ePatternUnknown,
 		ePatternSimple,
-		ePatternWildcardDir
+		ePatternWildcardDir,
+		ePatternError
 	};
 
 	struct PatternSearch
