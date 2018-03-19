@@ -26,7 +26,10 @@ class FilenameMatcher
 public:
 	FilenameMatcher()
 	{
-		
+	}
+
+	virtual ~FilenameMatcher()
+	{
 	}
 	
 	virtual bool doesMatch(const std::string& filename) const = 0;
