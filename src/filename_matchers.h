@@ -16,26 +16,12 @@
  ---------
 */
 
-#ifndef PATTERN_MATCHERS_H
-#define PATTERN_MATCHERS_H
+#ifndef FILENAME_MATCHERS_H
+#define FILENAME_MATCHERS_H
 
 #include <string>
 
-class PatternMatcher
-{
-public:
-	PatternMatcher()
-	{
-		
-	}	
-	
-	virtual ~PatternMatcher()
-	{
-		
-	}
-};
-
-class FilenameMatcher : public PatternMatcher
+class FilenameMatcher
 {
 public:
 	FilenameMatcher()
@@ -80,4 +66,4 @@ protected:
 	std::string		m_extension;
 };
 
-#endif // PATTERN_MATCHERS_H
+#endif // FILENAME_MATCHERS_H

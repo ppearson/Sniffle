@@ -82,13 +82,10 @@ private:
 	bool configureFilenameMatcher(const PatternSearch& pattern);
 
 	bool findFiles(const std::string& pattern, std::vector<std::string>& foundFiles, unsigned int findFlags);
-
-	bool findFilesInDir(const std::string& pattern, std::vector<std::string>& foundFiles, unsigned int findFlags);
-
 	//
 
 	bool getRelativeFilesInDirectoryRecursive(const std::string& searchDirectoryPath, const std::string& relativeDirectoryPath,
-														 std::vector<std::string>& files) const;
+											  unsigned int currentDepth, std::vector<std::string>& files) const;
 
 
 private:

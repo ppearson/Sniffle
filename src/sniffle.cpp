@@ -32,7 +32,7 @@
 
 #include "file_grepper.h"
 
-#include "pattern_matchers.h"
+#include "filename_matchers.h"
 
 Sniffle::Sniffle() :
 	m_pFilenameMatcher(nullptr)
@@ -313,6 +313,8 @@ Sniffle::PatternSearch Sniffle::classifyPattern(const std::string& pattern)
 	// currently we only support one wildcard directory
 
 	bool foundDirWildcard = false;
+	bool collapseRemainderDirs = true; // collapse remainder directories into one item if possible
+	std::string remainderDirsItem;
 
 	// see if we've got a wildcard for a directory
 	for (unsigned int i = 0; i < patternTokens.size(); i++)
@@ -335,6 +337,11 @@ Sniffle::PatternSearch Sniffle::classifyPattern(const std::string& pattern)
 			// it should be the file filter
 
 			result.fileMatch = token;
+			
+			if (collapseRemainderDirs && !remainderDirsItem.empty())
+			{
+				result.dirRemainders.push_back(remainderDirsItem);
+			}
 		}
 		else if (!lastToken)
 		{
@@ -347,8 +354,15 @@ Sniffle::PatternSearch Sniffle::classifyPattern(const std::string& pattern)
 			}
 			else
 			{
-				// otherwise, add it to the remainders path to be looked for after the directory wildcard
-				result.dirRemainders.push_back(token);
+				if (collapseRemainderDirs)
+				{
+					remainderDirsItem = FileHelpers::combinePaths(remainderDirsItem, token);
+				}
+				else
+				{
+					// otherwise, add it to the remainders path to be looked for after the directory wildcard
+					result.dirRemainders.push_back(token);
+				}
 			}
 		}
 	}
@@ -445,7 +459,7 @@ bool Sniffle::findFiles(const std::string& pattern, std::vector<std::string>& fo
 	{
 		// just do a simple recursive search
 
-		bool foundOK = getRelativeFilesInDirectoryRecursive(patternRes.baseSearchPath, "", foundFiles);
+		bool foundOK = getRelativeFilesInDirectoryRecursive(patternRes.baseSearchPath, "", 0, foundFiles);
 
 		if (foundOK)
 		{
@@ -490,14 +504,14 @@ bool Sniffle::findFiles(const std::string& pattern, std::vector<std::string>& fo
 
 			std::string remainderFullDir = testDir;
 			
-			// TODO: we could collapse some of these into a single multi-level directory deep opendir() call...
+			// Note: these might be collapse into a single item (done within classifyPattern() )
 
 			for (const std::string& remainderDir : patternRes.dirRemainders)
 			{
 				testDir = FileHelpers::combinePaths(testDir, remainderDir);
 
 				dir = opendir(testDir.c_str());
-
+				
 				if (!dir)
 				{
 					// it doesn't exist, so no point continuing with this one...
@@ -519,7 +533,7 @@ bool Sniffle::findFiles(const std::string& pattern, std::vector<std::string>& fo
 			//       spawing off threads to do further file globbing needs care... It *might* make some sense over NFS though,
 			//       especially where symlinks are involved pointing to other file nodes...
 
-			bool foundOK = getRelativeFilesInDirectoryRecursive(remainderFullDir, remainderFullDir, foundFiles);
+			bool foundOK = getRelativeFilesInDirectoryRecursive(remainderFullDir, remainderFullDir, 0, foundFiles);
 			foundSomeFiles |= foundOK;
 		}
 
@@ -530,7 +544,7 @@ bool Sniffle::findFiles(const std::string& pattern, std::vector<std::string>& fo
 }
 
 bool Sniffle::getRelativeFilesInDirectoryRecursive(const std::string& searchDirectoryPath, const std::string& relativeDirectoryPath,
-													 std::vector<std::string>& files) const
+													unsigned int currentDepth, std::vector<std::string>& files) const
 {
 	// Note: opendir() is used on purpose here, as scandir() and lsstat() don't reliably support S_ISLNK on symlinks over NFS,
 	//       whereas opendir() allows this robustly. opendir() is also more efficient when operating on items one at a time...
@@ -546,6 +560,10 @@ bool Sniffle::getRelativeFilesInDirectoryRecursive(const std::string& searchDire
 	{
 		if (dirEnt->d_type == DT_DIR)
 		{
+			// if we're at the max depth already, don't continue...
+			if (currentDepth >= m_config.getDirectoryRecursionDepth())
+				continue;
+			
 			// if required, ignore hidden (starting with '.') directories
 			if (m_config.getIgnoreHiddenDirectories() && strncmp(dirEnt->d_name, ".", 1) == 0)
 				continue;
@@ -557,7 +575,7 @@ bool Sniffle::getRelativeFilesInDirectoryRecursive(const std::string& searchDire
 			// build up next directory level relative path
 			std::string newFullDirPath = FileHelpers::combinePaths(searchDirectoryPath, dirEnt->d_name);
 			std::string newRelativeDirPath = FileHelpers::combinePaths(relativeDirectoryPath, dirEnt->d_name);
-			getRelativeFilesInDirectoryRecursive(newFullDirPath, newRelativeDirPath, files);
+			getRelativeFilesInDirectoryRecursive(newFullDirPath, newRelativeDirPath, currentDepth + 1, files);
 		}
 		else if (dirEnt->d_type == DT_LNK)
 		{
@@ -585,6 +603,10 @@ bool Sniffle::getRelativeFilesInDirectoryRecursive(const std::string& searchDire
 				}
 				else if (S_ISDIR(statState.st_mode))
 				{
+					// if we're at the max depth already, don't continue...
+					if (currentDepth >= m_config.getDirectoryRecursionDepth())
+						continue;
+					
 					// if required, ignore hidden (starting with '.') directories
 					if (m_config.getIgnoreHiddenDirectories() && strncmp(tempBuffer, ".", 1) == 0)
 						continue;
@@ -592,7 +614,7 @@ bool Sniffle::getRelativeFilesInDirectoryRecursive(const std::string& searchDire
 					// build up next directory level relative path
 					std::string newFullDirPath = tempBuffer;
 					std::string newRelativeDirPath = FileHelpers::combinePaths(relativeDirectoryPath, dirEnt->d_name);
-					getRelativeFilesInDirectoryRecursive(newFullDirPath, newRelativeDirPath, files);
+					getRelativeFilesInDirectoryRecursive(newFullDirPath, newRelativeDirPath, currentDepth + 1, files);
 				}
 				else
 				{
@@ -647,12 +669,16 @@ bool Sniffle::getRelativeFilesInDirectoryRecursive(const std::string& searchDire
 			}
 			else if (S_ISDIR(statState.st_mode))
 			{
+				// if we're at the max depth already, don't continue...
+				if (currentDepth >= m_config.getDirectoryRecursionDepth())
+					continue;
+				
 				// if required, ignore hidden (starting with '.') directories
 				if (m_config.getIgnoreHiddenDirectories() && strncmp(dirEnt->d_name, ".", 1) == 0)
 					continue;
 				
 				// TODO: not sure this is right...
-				getRelativeFilesInDirectoryRecursive(newRelativePath, newRelativePath, files);
+				getRelativeFilesInDirectoryRecursive(newRelativePath, newRelativePath, currentDepth + 1, files);
 			}
 			else
 			{

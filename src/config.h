@@ -51,6 +51,11 @@ public:
 		return m_printProgressWhenOutToStdOut;
 	}
 	
+	unsigned int getDirectoryRecursionDepth() const
+	{
+		return m_directoryRecursionDepth;
+	}
+	
 	bool getIgnoreHiddenFiles() const
 	{
 		return m_ignoreHiddenFiles;

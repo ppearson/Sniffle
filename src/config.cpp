@@ -28,7 +28,7 @@
 Config::Config() : 
     m_grepThreads(1),
 	m_printProgressWhenOutToStdOut(true),
-	m_directoryRecursionDepth(-1),
+	m_directoryRecursionDepth(10),
 	m_ignoreHiddenFiles(true),
 	m_ignoreHiddenDirectories(true),
 	m_matchCount(-1),
@@ -226,6 +226,10 @@ bool Config::applyKeyValueSetting(const std::string& key, const std::string& val
 	else if (key == "printProgressWhenOutToStdOut")
 	{
 		m_printProgressWhenOutToStdOut = getBooleanValueFromString(value);
+	}
+	else if (key == "directoryRecursionDepth")
+	{
+		m_directoryRecursionDepth = atoi(value.c_str());
 	}
 	else if (key == "ignoreHiddenFiles")
 	{

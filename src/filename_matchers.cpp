@@ -16,7 +16,7 @@
  ---------
 */
 
-#include "pattern_matchers.h"
+#include "filename_matchers.h"
 
 #include "utils/file_helpers.h"
 
