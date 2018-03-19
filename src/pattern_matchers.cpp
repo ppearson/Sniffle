@@ -18,7 +18,7 @@
 
 #include "pattern_matchers.h"
 
-#include "file_helpers.h"
+#include "utils/file_helpers.h"
 
 // TODO: if CPU performance ever becomes an issue, remove some of these string copies...
 

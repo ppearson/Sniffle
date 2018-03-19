@@ -19,6 +19,7 @@
 #include "string_helpers.h"
 
 #include <stdlib.h>
+#include <algorithm>
 
 StringHelpers::StringHelpers()
 {

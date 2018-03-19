@@ -26,9 +26,9 @@
 #include <stdlib.h>
 #include <locale.h>
 
-#include "file_helpers.h"
-#include "string_helpers.h"
-#include "system_helpers.h"
+#include "utils/file_helpers.h"
+#include "utils/string_helpers.h"
+#include "utils/system_helpers.h"
 
 #include "file_grepper.h"
 
@@ -618,8 +618,48 @@ bool Sniffle::getRelativeFilesInDirectoryRecursive(const std::string& searchDire
 		}
 		else
 		{
-			// we don't know what it is, so ignore it for the moment.
-			// TODO: check stat() to see what it really is...
+			// check stat() to see what it really is...
+			
+			// TODO: these seem to almost always be files in practice...
+			//       attempt to detect this from the filename in order to reduce the need to do a stat()?
+			
+			struct stat statState;
+			std::string newRelativePath = FileHelpers::combinePaths(relativeDirectoryPath, dirEnt->d_name);
+			int ret = lstat(newRelativePath.c_str(), &statState);
+
+			if (ret == -1)
+			{
+				// ignore for the moment...
+				continue;
+			}
+			else if (S_ISREG(statState.st_mode))
+			{
+				// it's a file 
+				// if required, ignore hidden (starting with '.') files
+				if (m_config.getIgnoreHiddenFiles() && strncmp(dirEnt->d_name, ".", 1) == 0)
+					continue;
+	
+				if (m_pFilenameMatcher->doesMatch(dirEnt->d_name))
+				{
+					std::string fullRelativePath = FileHelpers::combinePaths(relativeDirectoryPath, dirEnt->d_name);
+					files.push_back(fullRelativePath);
+				}
+			}
+			else if (S_ISDIR(statState.st_mode))
+			{
+				// if required, ignore hidden (starting with '.') directories
+				if (m_config.getIgnoreHiddenDirectories() && strncmp(dirEnt->d_name, ".", 1) == 0)
+					continue;
+				
+				// TODO: not sure this is right...
+				getRelativeFilesInDirectoryRecursive(newRelativePath, newRelativePath, files);
+			}
+			else
+			{
+				// not sure what's happened here...
+				// another symlink?
+				continue;
+			}
 		}
 	}
 

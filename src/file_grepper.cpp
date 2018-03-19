@@ -13,14 +13,14 @@
  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  See the License for the specific language governing permissions and
  limitations under the License.
- ---------
+ ---------utils/string_helpers.cpp
 */
 
 #include "file_grepper.h"
 
 #include <string.h>
 
-#include "string_helpers.h"
+#include "utils/string_helpers.h"
 
 #include "config.h"
 

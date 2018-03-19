@@ -23,7 +23,7 @@
 #include <fstream>
 #include <cctype> // for isdigit()
 
-#include "file_helpers.h"
+#include "utils/file_helpers.h"
 
 Config::Config() : 
     m_grepThreads(1),
