@@ -44,3 +44,67 @@ void StringHelpers::toLower(std::string& str)
 	for (unsigned int i = 0; i < size; i++)
 		str[i] = tolower(str[i]);
 }
+
+std::string StringHelpers::formatSize(size_t amount)
+{
+	char szMemAvailable[16];
+	std::string units;
+	unsigned int size = 0;
+	char szDecimalSize[12];
+	if (amount >= 1024 * 1024 * 1024) // GB
+	{
+		size = amount / (1024 * 1024);
+		float fSize = (float)size / 1024.0f;
+		sprintf(szDecimalSize, "%.2f", fSize);
+		units = "GB";
+	}
+	else if (amount >= 1024 * 1024) // MB
+	{
+		size = amount / 1024;
+		float fSize = (float)size / 1024.0f;
+		sprintf(szDecimalSize, "%.2f", fSize);
+		units = "MB";
+	}
+	else if (amount >= 1024) // KB
+	{
+		size = amount;
+		float fSize = (float)size / 1024.0f;
+		sprintf(szDecimalSize, "%.1f", fSize);
+		units = "KB";
+	}
+	else
+	{
+		sprintf(szDecimalSize, "0");
+		units = "B"; // just so it makes sense
+	}
+
+	sprintf(szMemAvailable, "%s %s", szDecimalSize, units.c_str());
+	std::string final(szMemAvailable);
+	return final;
+}
+
+std::string StringHelpers::formatNumberThousandsSeparator(size_t value)
+{
+	char szRawNumber[32];
+	sprintf(szRawNumber, "%zu", value);
+
+	std::string temp(szRawNumber);
+
+	std::string final;
+	int i = temp.size() - 1;
+	unsigned int count = 0;
+	for (; i >= 0; i--)
+	{
+		final += temp[i];
+
+		if (count++ == 2 && i != 0)
+		{
+			final += ",";
+			count = 0;
+		}
+	}
+
+	std::reverse(final.begin(), final.end());
+
+	return final;
+}

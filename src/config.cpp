@@ -32,6 +32,7 @@ Config::Config() :
 	m_ignoreHiddenFiles(true),
 	m_ignoreHiddenDirectories(true),
 	m_matchCount(-1),
+	m_flushOutput(true),
 	m_outputFilename(true),
 	m_outputContentLines(true),
 	m_outputLineNumbers(false),
@@ -67,10 +68,10 @@ void Config::loadConfigFile()
 
 	while (fileStream.getline(buf, 1024))
 	{
-		line.assign(buf);
-
 		if (buf[0] == 0 || buf[0] == '#')
 			continue;
+
+		line.assign(buf);
 
 		if (getKeyValue(line, key, value))
 		{
@@ -141,11 +142,6 @@ Config::ParseResult Config::parseArgs(int argc, char** argv, int startOptionArg,
 		else if (argString == "-firstOnly")
 		{
 			m_matchCount = 1;
-		}
-		else if (argString == "-blbf")
-		{
-			// does this one even make sense as the default is on?
-			m_blankLinesBetweenFiles = true;
 		}
 		else if (argString == "-C")
 		{
@@ -243,6 +239,10 @@ bool Config::applyKeyValueSetting(const std::string& key, const std::string& val
 	{
 		unsigned int intValue = atoi(value.c_str());
 		m_matchCount = intValue;
+	}
+	else if (key == "flushOutput")
+	{
+		m_flushOutput = getBooleanValueFromString(value);
 	}
 	else if (key == "outputFilename")
 	{

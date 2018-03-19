@@ -138,6 +138,10 @@ bool FileGrepper::grepBasic(const std::string& filename, const std::string& sear
 					}
 				}
 			}
+			else
+			{
+				foundCount ++;
+			}
 
 			if (m_config.getOutputContentLines())
 			{
@@ -165,7 +169,17 @@ bool FileGrepper::grepBasic(const std::string& filename, const std::string& sear
 
 	fileStream.close();
 
-	return foundCount > 0;
+	if (foundCount > 0)
+	{
+		if (m_config.getFlushOutput())
+		{
+			fflush(stdout);
+		}
+
+		return true;
+	}
+
+	return false;
 }
 
 bool FileGrepper::matchBasic(const std::string& filename, bool foundPreviousFile)
@@ -228,8 +242,6 @@ bool FileGrepper::matchBasicOr(const std::string& filename, bool foundPreviousFi
 						}
 						fprintf(stdout, "%s :\n", filename.c_str());
 					}
-	
-					foundSomething = true;
 					
 					// as we found the item, reset the after line content count item
 					afterLinesToPrint = m_config.getAfterLines();
@@ -249,12 +261,10 @@ bool FileGrepper::matchBasicOr(const std::string& filename, bool foundPreviousFi
 						// we don't want the content lines, so we can just break out as we don't need to do anything else...
 						break;
 					}
-					else
-					{
-						foundSomething = true;
-					}
 				}
 			}
+
+			foundSomething = true;
 
 			if (m_config.getOutputContentLines())
 			{
@@ -282,6 +292,14 @@ bool FileGrepper::matchBasicOr(const std::string& filename, bool foundPreviousFi
 	}
 
 	fileStream.close();
+
+	if (foundSomething)
+	{
+		if (m_config.getFlushOutput())
+		{
+			fflush(stdout);
+		}
+	}
 
 	return foundSomething;
 }
@@ -405,6 +423,10 @@ bool FileGrepper::matchBasicAnd(const std::string& filename, bool foundPreviousF
 	if (foundAll)
 	{
 		fprintf(stdout, "%s", finalOutput.c_str());
+		if (m_config.getFlushOutput())
+		{
+			fflush(stdout);
+		}
 	}
 	
 	return foundAll;

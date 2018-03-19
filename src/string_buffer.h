@@ -22,6 +22,8 @@
 #include <vector>
 #include <string>
 
+// helper class for Basic grep methods to store line buffers
+
 class StringBuffer
 {
 public:

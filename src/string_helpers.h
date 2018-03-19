@@ -29,6 +29,9 @@ public:
 	
 	static void split(const std::string& str, std::vector<std::string>& tokens, const std::string& sep = "\n");
 	static void toLower(std::string& str);
+
+	static std::string formatSize(size_t amount);
+	static std::string formatNumberThousandsSeparator(size_t value);
 };
 
 #endif // STRING_HELPERS_H

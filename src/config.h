@@ -65,6 +65,11 @@ public:
 	{
 		return m_matchCount;
 	}
+
+	bool getFlushOutput() const
+	{
+		return m_flushOutput;
+	}
 	
 	bool getOutputFilename() const
 	{
@@ -133,6 +138,8 @@ private:
 	bool			m_ignoreHiddenDirectories;
 	
 	int				m_matchCount;
+
+	bool			m_flushOutput; // flush output after each atomic print item (i.e. file)
 	
 	bool			m_outputFilename; // TODO: relative / absolute options as well?
 	bool			m_outputContentLines; // whether to output the content where the match takes place
