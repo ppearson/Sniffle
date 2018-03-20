@@ -25,12 +25,13 @@
 
 #include "utils/file_helpers.h"
 
-Config::Config() : 
-    m_grepThreads(1),
+Config::Config() :
+	m_grepThreads(1),
 	m_printProgressWhenOutToStdOut(true),
 	m_directoryRecursionDepth(10),
 	m_ignoreHiddenFiles(true),
 	m_ignoreHiddenDirectories(true),
+	m_preEmptiveSymlinkSkipping(true),
 	m_matchCount(-1),
 	m_flushOutput(true),
 	m_outputFilename(true),
@@ -39,11 +40,11 @@ Config::Config() :
 	m_outputFileSize(false),
 	m_beforeLines(0),
 	m_afterLines(0),
-    m_blankLinesBetweenFiles(true),
+	m_blankLinesBetweenFiles(true),
 	m_matchItemOrSeperatorChar('|'),
 	m_matchItemAndSeperatorChar('&')
 {
-	
+
 }
 
 void Config::loadConfigFile()
@@ -51,9 +52,9 @@ void Config::loadConfigFile()
 	const char* homeDir = getenv("HOME");
 	if (!homeDir)
 		return;
-	
+
 	std::string configFilePath = FileHelpers::combinePaths(std::string(homeDir), ".config/sniffle.conf");
-	
+
 	std::fstream fileStream(configFilePath.c_str(), std::ios::in);
 	if (!fileStream.is_open() || fileStream.fail())
 	{
@@ -89,24 +90,24 @@ void Config::loadConfigFile()
 Config::ParseResult Config::parseArgs(int argc, char** argv, int startOptionArg, int& nextArgIndex)
 {
 	int lastProcessedArg = startOptionArg;
-	
+
 	// TODO: use getopt()?
 	bool handled = false;
-	
+
 	for (int i = startOptionArg; i < argc; i++)
 	{
 		if (argv[i][0] != '-')
 		{
 			continue;
 		}
-		
+
 		handled = true;
-		
+
 		lastProcessedArg ++;
-		
+
 		// otherwise, we want to process it...
 		std::string argString(argv[i]);
-		
+
 		if (argString.find("help") != std::string::npos)
 		{
 			return eParseHelpWanted;
@@ -115,28 +116,28 @@ Config::ParseResult Config::parseArgs(int argc, char** argv, int startOptionArg,
 		{
 			// handle full options
 			std::string settingString = argString.substr(2);
-			
+
 			std::string key;
 			std::string value;
-			
+
 			if (!getKeyValueFromArg(settingString, key, value))
 			{
 				fprintf(stderr, "Error: Malformed command line arg: %s\n", argString.c_str());
 				return eParseError;
 			}
-			
+
 			if (!applyKeyValueSetting(key, value))
 			{
 				fprintf(stderr, "Error: Unrecognised command line setting: %s\n", key.c_str());
 				return eParseError;
-			}			
+			}
 		}
 		// handle some common short-hand conveniences...
 		else if (argString == "-m")
 		{
 			std::string nextArg(argv[i + 1]);
 			m_matchCount = atoi(nextArg.c_str());
-			
+
 			lastProcessedArg ++;
 		}
 		else if (argString == "-firstOnly")
@@ -147,35 +148,35 @@ Config::ParseResult Config::parseArgs(int argc, char** argv, int startOptionArg,
 		{
 			std::string nextArg(argv[i + 1]);
 			int contextLines = atoi(nextArg.c_str());
-			
+
 			m_afterLines = contextLines;
 			m_beforeLines = contextLines;
-			
+
 			lastProcessedArg ++;
 		}
 		else if (argString == "-B")
 		{
 			std::string nextArg(argv[i + 1]);
 			int contextLines = atoi(nextArg.c_str());
-			
+
 			m_beforeLines = contextLines;
-			
+
 			lastProcessedArg ++;
 		}
 		else if (argString == "-A")
 		{
 			std::string nextArg(argv[i + 1]);
 			int contextLines = atoi(nextArg.c_str());
-			
+
 			m_afterLines = contextLines;
-			
+
 			lastProcessedArg ++;
 		}
-			
+
 	}
-	
+
 	nextArgIndex = lastProcessedArg;
-	
+
 	if (handled)
 	{
 		return eParseHandledOK;
@@ -209,10 +210,10 @@ bool Config::getKeyValueFromArg(const std::string& argString, std::string& key, 
 	size_t sepPos = argString.find("=");
 	if (sepPos == std::string::npos)
 		return false;
-	
+
 	key = argString.substr(0, sepPos);
 	value = argString.substr(sepPos + 1);
-	
+
 	return true;
 }
 
@@ -238,6 +239,10 @@ bool Config::applyKeyValueSetting(const std::string& key, const std::string& val
 	else if (key == "ignoreHiddenDirectories")
 	{
 		m_ignoreHiddenDirectories = getBooleanValueFromString(value);
+	}
+	else if (key == "preEmptiveSymlinkSkipping")
+	{
+		m_preEmptiveSymlinkSkipping = getBooleanValueFromString(value);
 	}
 	else if (key == "matchCount")
 	{
@@ -284,7 +289,7 @@ bool Config::applyKeyValueSetting(const std::string& key, const std::string& val
 	{
 		return false;
 	}
-	
+
 	return true;
 }
 
@@ -301,7 +306,7 @@ bool Config::getBooleanValueFromString(const std::string& value)
 		bool isTrue = value.find("true") != std::string::npos ||
 					  value.find("yes") != std::string::npos ||
 					  value.find("on") != std::string::npos;
-		
+
 		return isTrue;
 	}
 }

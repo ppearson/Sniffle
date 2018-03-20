@@ -18,6 +18,8 @@
 
 #include "filename_matchers.h"
 
+#include <string.h>
+
 #include "utils/file_helpers.h"
 
 // TODO: if CPU performance ever becomes an issue, remove some of these string copies...
@@ -28,18 +30,53 @@ bool SimpleFilenameMatcher::doesMatch(const std::string& filename) const
 	{
 		return true;
 	}
-	
+
 	return false;
 }
 
+bool SimpleFilenameMatcher::canSkipPotentialSymlinkFile(const char* filename) const
+{
+	const char* dotPos = strrchr(filename, '.');
+
+	if (!dotPos)
+	{
+		// it's very unlikely to be a filename, so we can't skip it...
+		return false;
+	}
+
+	// otherwise, see if the extension matches. The current assumption is that at least
+	// the file extension will match between the symlink filename and the target of the symlink.
+
+	int compValue = strcmp(dotPos + 1, m_extension.c_str());
+	return (compValue != 0);
+}
+
+//
 
 bool AdvancedFilenameMatcher::doesMatch(const std::string& filename) const
 {
-	if ((m_extension == "*" || FileHelpers::getFileExtension(filename) == m_extension) && 
+	if ((m_extension == "*" || FileHelpers::getFileExtension(filename) == m_extension) &&
 			filename.find(m_filenameItem) != std::string::npos)
 	{
 		return true;
 	}
-	
+
 	return false;
+}
+
+bool AdvancedFilenameMatcher::canSkipPotentialSymlinkFile(const char* filename) const
+{
+	const char* dotPos = strrchr(filename, '.');
+
+	if (!dotPos)
+	{
+		// it's very unlikely to be a filename, so we can't skip it...
+		return false;
+	}
+
+	// otherwise, see if the extension matches. The current assumption is that at least
+	// the file extension will match between the symlink filename and the target of the symlink.
+
+	int compValue = strcmp(dotPos + 1, m_extension.c_str());
+	return (compValue != 0);
 }

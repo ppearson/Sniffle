@@ -133,12 +133,14 @@ bool FileHelpers::getDirectoriesInDirectory(const std::string& directoryPath, co
 
 				if (ret == -1)
 				{
+					// it's very likely a dead/broken/stale symlink pointing to a non-existent file...
 					// ignore for the moment...
 					continue;
 				}
 				else if (S_ISDIR(statState.st_mode))
 				{
-
+					// currently, we don't do any dirMatch checking, on the assumption it's only a full wildcard for the moment...
+					directories.push_back(dirEnt->d_name);
 				}
 				else
 				{
@@ -149,7 +151,7 @@ bool FileHelpers::getDirectoriesInDirectory(const std::string& directoryPath, co
 		else if (dirEnt->d_type == DT_DIR)
 		{
 			// it's a directory
-			
+
 			// if required, ignore hidden (starting with '.') directories
 			if (ignoreHiddenDirs && strncmp(dirEnt->d_name, ".", 1) == 0)
 				continue;
@@ -169,8 +171,7 @@ bool FileHelpers::getDirectoriesInDirectory(const std::string& directoryPath, co
 		else
 		{
 			// TODO: check stat to see what it really is...
-			
-			// it's probably a file, ignore it...
+
 			continue;
 		}
 	}

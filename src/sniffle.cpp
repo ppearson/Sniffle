@@ -39,7 +39,7 @@ Sniffle::Sniffle() :
 {
 	// load any local config file if one exists
 	m_config.loadConfigFile();
-	
+
 	configureGlobals();
 }
 
@@ -69,7 +69,7 @@ bool Sniffle::configureGlobals()
 void Sniffle::runFind(const std::string& pattern)
 {
 	std::vector<std::string> foundFiles;
-	
+
 	fprintf(stderr, "Searching for files...\n");
 
 	if (!findFiles(pattern, foundFiles, 0))
@@ -82,7 +82,7 @@ void Sniffle::runFind(const std::string& pattern)
 	{
 		fprintf(stdout, "%s\n", fileItem.c_str());
 	}
-	
+
 	if (SystemHelpers::isStdOutATTY())
 	{
 		fprintf(stderr, "\nFound %zu %s.\n", foundFiles.size(), foundFiles.size() == 1 ? "file" : "files");
@@ -99,7 +99,7 @@ void Sniffle::runGrep(const std::string& filePattern, const std::string& content
 	// TODO: contents search in multiple threads...
 
 	std::vector<std::string> foundFiles;
-	
+
 	fprintf(stderr, "Searching for files...\n");
 
 	if (!findFiles(filePattern, foundFiles, 0))
@@ -107,11 +107,11 @@ void Sniffle::runGrep(const std::string& filePattern, const std::string& content
 		fprintf(stderr, "No files found matching file match criteria.\n");
 		return;
 	}
-	
+
 	fprintf(stderr, "Found %zu %s matching file match criteria.\n", foundFiles.size(), foundFiles.size() == 1 ? "file" : "files");
-	
+
 	bool printProgress = m_config.getPrintProgressWhenOutToStdOut() && !SystemHelpers::isStdOutATTY();
-	
+
 	FileGrepper grepper(m_config);
 
 	bool foundPrevious = false;
@@ -120,12 +120,12 @@ void Sniffle::runGrep(const std::string& filePattern, const std::string& content
 	size_t fileCount = 0;
 	size_t lastPercentage = 101;
 	size_t foundCount = 0;
-	
+
 	if (printProgress)
 	{
 		fprintf(stderr, "Grepping files for content...");
 	}
-	
+
 	for (const std::string& fileItem : foundFiles)
 	{
 		if (printProgress)
@@ -138,19 +138,19 @@ void Sniffle::runGrep(const std::string& filePattern, const std::string& content
 				lastPercentage = thisPercentage;
 			}
 		}
-		
+
 		// the grepper itself does any printing...
 		bool foundInFile = grepper.grepBasic(fileItem, contentsPattern, foundPrevious);
-		
+
 		if (foundInFile)
 		{
 			foundCount++;
 		}
-		
+
 		// TODO: this bit could be kept within FileGrepper...
 		foundPrevious |= foundInFile;
 	}
-	
+
 	if (printProgress)
 	{
 		// annoyingly, we need to clear the remainder of previous progress line here, hence the space padding...
@@ -175,7 +175,7 @@ void Sniffle::runMatch(const std::string& filePattern, const std::string& conten
 	// TODO: contents search in multiple threads...
 
 	std::vector<std::string> foundFiles;
-	
+
 	fprintf(stderr, "Searching for files...\n");
 
 	if (!findFiles(filePattern, foundFiles, 0))
@@ -183,13 +183,13 @@ void Sniffle::runMatch(const std::string& filePattern, const std::string& conten
 		fprintf(stderr, "No files found matching file match criteria.\n");
 		return;
 	}
-	
+
 	fprintf(stderr, "Found %zu %s matching file match criteria.\n", foundFiles.size(), foundFiles.size() == 1 ? "file" : "files");
-	
+
 	bool printProgress = m_config.getPrintProgressWhenOutToStdOut() && !SystemHelpers::isStdOutATTY();
-	
+
 	FileGrepper grepper(m_config);
-	
+
 	if (!grepper.initMatch(contentsPattern))
 	{
 		fprintf(stderr, "Invalid match pattern. Make sure you provide multiple items to search for, separated by the respective OR and AND character separators.\n");
@@ -202,12 +202,12 @@ void Sniffle::runMatch(const std::string& filePattern, const std::string& conten
 	size_t fileCount = 0;
 	size_t lastPercentage = 101;
 	size_t foundCount = 0;
-	
+
 	if (printProgress)
 	{
 		fprintf(stderr, "Searching files for match content...");
 	}
-	
+
 	for (const std::string& fileItem : foundFiles)
 	{
 		if (printProgress)
@@ -220,19 +220,19 @@ void Sniffle::runMatch(const std::string& filePattern, const std::string& conten
 				lastPercentage = thisPercentage;
 			}
 		}
-		
+
 		// the grepper itself does any printing...
 		bool foundInFile = grepper.matchBasic(fileItem, foundPrevious);
-		
+
 		if (foundInFile)
 		{
 			foundCount++;
 		}
-		
+
 		// TODO: this bit could be kept within FileGrepper...
 		foundPrevious |= foundInFile;
 	}
-	
+
 	if (printProgress)
 	{
 		// annoyingly, we need to clear the remainder of previous progress line here, hence the space padding...
@@ -256,24 +256,24 @@ void Sniffle::runMatch(const std::string& filePattern, const std::string& conten
 Sniffle::PatternSearch Sniffle::classifyPattern(const std::string& pattern)
 {
 	Sniffle::PatternSearch result;
-	
+
 	std::vector<std::string> patternTokens;
-	
+
 	// first of all, work out if the path is an absolute full path, or a relative one.
 	if (pattern[0] == '/')
 	{
 		// it was an absolute path, so we can just tokenise the path
 		result.baseSearchPath = "/";
-		
+
 		StringHelpers::split(pattern, patternTokens, "/");
 	}
 	else
 	{
 		// it was a relative path, so attempt to work out what the full absolute path should be...
-		
+
 		// TODO: could try and use realpath() for this, but we'd still have to remove any wildcard items before
 		//       we can use it, so for the moment, just do the obvious stuff ourselves...
-		
+
 		char szCurrDir[2048];
 		if (getcwd(szCurrDir, 2048) == NULL)
 		{
@@ -282,9 +282,9 @@ Sniffle::PatternSearch Sniffle::classifyPattern(const std::string& pattern)
 			result.type = ePatternError;
 			return result;
 		}
-		
+
 		std::string currentDir(szCurrDir);
-		
+
 		if (pattern[0] == '*' && pattern.find("/") == std::string::npos)
 		{
 			// we're likely just a file match pattern...
@@ -297,9 +297,9 @@ Sniffle::PatternSearch Sniffle::classifyPattern(const std::string& pattern)
 		{
 			// for the moment, just slap the currentDir before what we have in the hope it will work...
 			std::string expandedPath = FileHelpers::combinePaths(currentDir, pattern);
-			
+
 			result.baseSearchPath = "/";
-			
+
 			StringHelpers::split(expandedPath, patternTokens, "/");
 		}
 		else
@@ -337,7 +337,7 @@ Sniffle::PatternSearch Sniffle::classifyPattern(const std::string& pattern)
 			// it should be the file filter
 
 			result.fileMatch = token;
-			
+
 			if (collapseRemainderDirs && !remainderDirsItem.empty())
 			{
 				result.dirRemainders.push_back(remainderDirsItem);
@@ -503,15 +503,15 @@ bool Sniffle::findFiles(const std::string& pattern, std::vector<std::string>& fo
 			bool dirToCheck = true;
 
 			std::string remainderFullDir = testDir;
-			
-			// Note: these might be collapse into a single item (done within classifyPattern() )
+
+			// Note: these might be collapsed into a single item (done within classifyPattern() )
 
 			for (const std::string& remainderDir : patternRes.dirRemainders)
 			{
 				testDir = FileHelpers::combinePaths(testDir, remainderDir);
 
 				dir = opendir(testDir.c_str());
-				
+
 				if (!dir)
 				{
 					// it doesn't exist, so no point continuing with this one...
@@ -548,7 +548,7 @@ bool Sniffle::getRelativeFilesInDirectoryRecursive(const std::string& searchDire
 {
 	// Note: opendir() is used on purpose here, as scandir() and lsstat() don't reliably support S_ISLNK on symlinks over NFS,
 	//       whereas opendir() allows this robustly. opendir() is also more efficient when operating on items one at a time...
-	
+
 	DIR* dir = opendir(searchDirectoryPath.c_str());
 	if (!dir)
 		return false;
@@ -563,11 +563,11 @@ bool Sniffle::getRelativeFilesInDirectoryRecursive(const std::string& searchDire
 			// if we're at the max depth already, don't continue...
 			if (currentDepth >= m_config.getDirectoryRecursionDepth())
 				continue;
-			
+
 			// if required, ignore hidden (starting with '.') directories
 			if (m_config.getIgnoreHiddenDirectories() && strncmp(dirEnt->d_name, ".", 1) == 0)
 				continue;
-			
+
 			// ignore built-in items
 			if (strcmp(dirEnt->d_name, ".") == 0 || strcmp(dirEnt->d_name, "..") == 0)
 				continue;
@@ -579,6 +579,14 @@ bool Sniffle::getRelativeFilesInDirectoryRecursive(const std::string& searchDire
 		}
 		else if (dirEnt->d_type == DT_LNK)
 		{
+			// if preemptive symlink skipping is enabled, see if we can skip the path without having to read the link
+			// or do an expensive stat() call...
+			if (m_config.getPreEmptiveSymlinkSkipping() && m_pFilenameMatcher->canSkipPotentialSymlinkFile(dirEnt->d_name))
+			{
+				// we can skip it
+				continue;
+			}
+
 			// cope with symlinks by working out what they point at
 			std::string fullAbsolutePath = FileHelpers::combinePaths(searchDirectoryPath, dirEnt->d_name);
 			ssize_t linkTargetStringSize = readlink(fullAbsolutePath.c_str(), tempBuffer, 4096);
@@ -596,9 +604,15 @@ bool Sniffle::getRelativeFilesInDirectoryRecursive(const std::string& searchDire
 				struct stat statState;
 				int ret = lstat(tempBuffer, &statState);
 
+				// TODO: there's an assumption in the code in this block that the target of the link will
+				//       have a similar filename (especially file extension) that the original symlink file does.
+				//       If that's not the case, it will not do the correct thing.
+
 				if (ret == -1)
 				{
+					// it's very likely a dead/broken/stale symlink pointing to a non-existent file...
 					// ignore for the moment...
+					// TODO: verbose log output option?
 					continue;
 				}
 				else if (S_ISDIR(statState.st_mode))
@@ -606,20 +620,28 @@ bool Sniffle::getRelativeFilesInDirectoryRecursive(const std::string& searchDire
 					// if we're at the max depth already, don't continue...
 					if (currentDepth >= m_config.getDirectoryRecursionDepth())
 						continue;
-					
+
 					// if required, ignore hidden (starting with '.') directories
 					if (m_config.getIgnoreHiddenDirectories() && strncmp(tempBuffer, ".", 1) == 0)
 						continue;
-					
+
 					// build up next directory level relative path
 					std::string newFullDirPath = tempBuffer;
 					std::string newRelativeDirPath = FileHelpers::combinePaths(relativeDirectoryPath, dirEnt->d_name);
 					getRelativeFilesInDirectoryRecursive(newFullDirPath, newRelativeDirPath, currentDepth + 1, files);
 				}
+				else if (S_ISREG(statState.st_mode))
+				{
+					if (m_pFilenameMatcher->doesMatch(dirEnt->d_name))
+					{
+						std::string fullRelativePath = FileHelpers::combinePaths(relativeDirectoryPath, dirEnt->d_name);
+						files.push_back(fullRelativePath);
+					}
+				}
 				else
 				{
-					// it's a file or another symlink...
-					// TODO...
+					// it's some other type...
+					continue;
 				}
 			}
 		}
@@ -627,7 +649,7 @@ bool Sniffle::getRelativeFilesInDirectoryRecursive(const std::string& searchDire
 		{
 			// it's a file
 			// see if it's what we want...
-			
+
 			// if required, ignore hidden (starting with '.') files
 			if (m_config.getIgnoreHiddenFiles() && strncmp(dirEnt->d_name, ".", 1) == 0)
 				continue;
@@ -640,11 +662,18 @@ bool Sniffle::getRelativeFilesInDirectoryRecursive(const std::string& searchDire
 		}
 		else
 		{
+			// we don't know what type it is, so
 			// check stat() to see what it really is...
-			
-			// TODO: these seem to almost always be files in practice...
-			//       attempt to detect this from the filename in order to reduce the need to do a stat()?
-			
+			// This generally seems to happen when the symlink points to a file on a different server...
+
+			// if preemptive symlink skipping is enabled, see if we can skip the path without having to read the link
+			// or do an expensive stat() call...
+			if (m_config.getPreEmptiveSymlinkSkipping() && m_pFilenameMatcher->canSkipPotentialSymlinkFile(dirEnt->d_name))
+			{
+				// we can skip it
+				continue;
+			}
+
 			struct stat statState;
 			std::string newRelativePath = FileHelpers::combinePaths(relativeDirectoryPath, dirEnt->d_name);
 			int ret = lstat(newRelativePath.c_str(), &statState);
@@ -652,15 +681,17 @@ bool Sniffle::getRelativeFilesInDirectoryRecursive(const std::string& searchDire
 			if (ret == -1)
 			{
 				// ignore for the moment...
+				// it's very likely a dead/broken/stale symlink pointing to a non-existent file..
+				// TODO: verbose log output option?
 				continue;
 			}
 			else if (S_ISREG(statState.st_mode))
 			{
-				// it's a file 
+				// it's a file
 				// if required, ignore hidden (starting with '.') files
 				if (m_config.getIgnoreHiddenFiles() && strncmp(dirEnt->d_name, ".", 1) == 0)
 					continue;
-	
+
 				if (m_pFilenameMatcher->doesMatch(dirEnt->d_name))
 				{
 					std::string fullRelativePath = FileHelpers::combinePaths(relativeDirectoryPath, dirEnt->d_name);
@@ -672,11 +703,11 @@ bool Sniffle::getRelativeFilesInDirectoryRecursive(const std::string& searchDire
 				// if we're at the max depth already, don't continue...
 				if (currentDepth >= m_config.getDirectoryRecursionDepth())
 					continue;
-				
+
 				// if required, ignore hidden (starting with '.') directories
 				if (m_config.getIgnoreHiddenDirectories() && strncmp(dirEnt->d_name, ".", 1) == 0)
 					continue;
-				
+
 				// TODO: not sure this is right...
 				getRelativeFilesInDirectoryRecursive(newRelativePath, newRelativePath, currentDepth + 1, files);
 			}

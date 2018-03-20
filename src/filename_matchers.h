@@ -31,8 +31,14 @@ public:
 	virtual ~FilenameMatcher()
 	{
 	}
-	
+
+	// potential full match of filename and extension (it's up to what derived classes do though,
+	// they might only look at the extension)
 	virtual bool doesMatch(const std::string& filename) const = 0;
+
+	// for use on symlinks to intelligently reject any obviously unwanted files before bothering
+	// to stat() them. Must return false if no extension (so possibly not a file)
+	virtual bool canSkipPotentialSymlinkFile(const char* filename) const = 0;
 };
 
 // extension only matcher
@@ -40,14 +46,16 @@ class SimpleFilenameMatcher : public FilenameMatcher
 {
 public:
 	SimpleFilenameMatcher(const std::string& extension) :
-	    m_extension(extension)
+		m_extension(extension)
 	{
-		
+
 	}
-	
+
 	virtual bool doesMatch(const std::string& filename) const;
-	
-protected:	
+
+	virtual bool canSkipPotentialSymlinkFile(const char* filename) const;
+
+protected:
 	std::string		m_extension;
 };
 
@@ -57,13 +65,15 @@ class AdvancedFilenameMatcher : public FilenameMatcher
 public:
 	AdvancedFilenameMatcher(const std::string& filenameItem, const std::string& extension) :
 		m_filenameItem(filenameItem),
-	    m_extension(extension)
+		m_extension(extension)
 	{
-		
+
 	}
-	
+
 	virtual bool doesMatch(const std::string& filename) const;
-	
+
+	virtual bool canSkipPotentialSymlinkFile(const char* filename) const;
+
 protected:
 	std::string		m_filenameItem;
 	std::string		m_extension;
