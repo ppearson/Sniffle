@@ -37,7 +37,7 @@ public:
 	virtual bool doesMatch(const std::string& filename) const = 0;
 
 	// for use on symlinks to intelligently reject any obviously unwanted files before bothering
-	// to stat() them. Must return false if no extension (so possibly not a file)
+	// to stat() them. Must return false if there is no extension (so possibly not a file)
 	virtual bool canSkipPotentialSymlinkFile(const char* filename) const = 0;
 };
 

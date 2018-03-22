@@ -577,7 +577,7 @@ bool Sniffle::getRelativeFilesInDirectoryRecursive(const std::string& searchDire
 			std::string newRelativeDirPath = FileHelpers::combinePaths(relativeDirectoryPath, dirEnt->d_name);
 			getRelativeFilesInDirectoryRecursive(newFullDirPath, newRelativeDirPath, currentDepth + 1, files);
 		}
-		else if (dirEnt->d_type == DT_LNK)
+		else if (dirEnt->d_type == DT_LNK && m_config.getFollowSymlinks())
 		{
 			// if preemptive symlink skipping is enabled, see if we can skip the path without having to read the link
 			// or do an expensive stat() call...

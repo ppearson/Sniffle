@@ -31,6 +31,7 @@ Config::Config() :
 	m_directoryRecursionDepth(10),
 	m_ignoreHiddenFiles(true),
 	m_ignoreHiddenDirectories(true),
+	m_followSymlinks(true),
 	m_preEmptiveSymlinkSkipping(true),
 	m_matchCount(-1),
 	m_flushOutput(true),
@@ -172,7 +173,15 @@ Config::ParseResult Config::parseArgs(int argc, char** argv, int startOptionArg,
 
 			lastProcessedArg ++;
 		}
+		else if (argString == "-rd")
+		{
+			std::string nextArg(argv[i + 1]);
+			int recursionDepthLimit = atoi(nextArg.c_str());
 
+			m_directoryRecursionDepth = recursionDepthLimit;
+
+			lastProcessedArg ++;
+		}
 	}
 
 	nextArgIndex = lastProcessedArg;
@@ -185,6 +194,30 @@ Config::ParseResult Config::parseArgs(int argc, char** argv, int startOptionArg,
 	{
 		return eParseNoneHandled;
 	}
+}
+
+void Config::printFullOptions() const
+{
+	fprintf(stderr, "\nFull options: (specify with --<option>=<value> or in sniffle.conf file):\n");
+	fprintf(stderr, "(showing defaults):\n");
+//	fprintf(stderr, "grepThreads: %i: \n", m_grepThreads);
+	fprintf(stderr, "printProgressWhenOutToStdOut: %i:\n", m_printProgressWhenOutToStdOut);
+	fprintf(stderr, "directoryRecursionDepth: %i:\n", m_directoryRecursionDepth);
+	fprintf(stderr, "ignoreHiddenFiles: %i:\n", m_ignoreHiddenFiles);
+	fprintf(stderr, "ignoreHiddenDirectories: %i:\n", m_ignoreHiddenDirectories);
+	fprintf(stderr, "followSymlinks: %i:\n", m_followSymlinks);
+	fprintf(stderr, "preEmptiveSymlinkSkipping: %i:\n", m_preEmptiveSymlinkSkipping);
+	fprintf(stderr, "matchCount: %i:\n", m_matchCount);
+	fprintf(stderr, "flushOutput: %i:\n", m_flushOutput);
+	fprintf(stderr, "outputFilename: %i:\t\tOutput the filename before matched results within file.\n", m_outputFilename);
+	fprintf(stderr, "outputContentLines: %i:\n", m_outputContentLines);
+//	fprintf(stderr, "outputLineNumbers: %i:\n", m_outputLineNumbers);
+	fprintf(stderr, "blankLinesBetweenFiles: %i:\n", m_blankLinesBetweenFiles);
+	fprintf(stderr, "matchItemOrSeperatorChar: %c:\n", m_matchItemOrSeperatorChar);
+	fprintf(stderr, "matchItemAndSeperatorChar: %c:\n", m_matchItemAndSeperatorChar);
+	fprintf(stderr, "context:\t\tContent lines to print either side of match.\n");
+	fprintf(stderr, "after-context:\t\t\tContent lines to print after match.\n");
+//	fprintf(stderr, "before-context:\t\t\tContent lines to print before match.\n");
 }
 
 // for config file
@@ -240,6 +273,10 @@ bool Config::applyKeyValueSetting(const std::string& key, const std::string& val
 	{
 		m_ignoreHiddenDirectories = getBooleanValueFromString(value);
 	}
+	else if (key == "followSymlinks")
+	{
+		m_followSymlinks = getBooleanValueFromString(value);
+	}
 	else if (key == "preEmptiveSymlinkSkipping")
 	{
 		m_preEmptiveSymlinkSkipping = getBooleanValueFromString(value);
@@ -268,6 +305,20 @@ bool Config::applyKeyValueSetting(const std::string& key, const std::string& val
 	else if (key == "blankLinesBetweenFiles")
 	{
 		m_blankLinesBetweenFiles = getBooleanValueFromString(value);
+	}
+	else if (key == "matchItemOrSeperatorChar")
+	{
+		if (!value.empty())
+		{
+			m_matchItemOrSeperatorChar = value[0];
+		}
+	}
+	else if (key == "matchItemAndSeperatorChar")
+	{
+		if (!value.empty())
+		{
+			m_matchItemAndSeperatorChar = value[0];
+		}
 	}
 	else if (key == "context")
 	{

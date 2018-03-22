@@ -51,7 +51,7 @@ bool SimpleFilenameMatcher::canSkipPotentialSymlinkFile(const char* filename) co
 	return (compValue != 0);
 }
 
-//
+/////
 
 bool AdvancedFilenameMatcher::doesMatch(const std::string& filename) const
 {

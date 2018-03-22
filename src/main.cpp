@@ -32,13 +32,21 @@ static void printHelp(bool fullOptions)
 	fprintf(stderr, "sniffle [options] grep <stringToFind> <\"/path/to/*/search/*.log\">\n");
 	fprintf(stderr, "sniffle [options] match <tokens|to|find> <\"/path/to/search/*.log\">\n");
 	fprintf(stderr, "sniffle [options] match <tokens&to&find> <\"/path/to/*/search/*.log\">\n");
+	fprintf(stderr, "sniffle [options] debug <args>...    print args received.\n");
 	fprintf(stderr, "\nNote: in some shells, a path with wildcards in might have to be escaped/quoted to prevent auto-completed arguments being given to Sniffle.\n");
 	
 	if (fullOptions)
 	{
-		fprintf(stderr, "\nOptions:\n");
-		fprintf(stderr, " -firstOnly\t\tMatch only the first item in each file.\n");
-		fprintf(stderr, " -m <count>\t\t\tMatch count\n");
+		fprintf(stderr, "\nSimple Options:\n");
+		fprintf(stderr, " -firstOnly\t\t\tMatch only the first item in each file.\n");
+		fprintf(stderr, " -m <count>\t\t\tMatch count.\n");
+		fprintf(stderr, " -rd <limit>\t\t\tDirectory recursion depth limit.\n");
+		fprintf(stderr, " -C <line_count>\t\tContext lines to print either side of match.\n");
+//		fprintf(stderr, " -B <line_count>\t\tContext lines to print before match.\n");
+		fprintf(stderr, " -A <line_count>\t\tContext lines to print after match.\n");
+
+		Config tempConfig;
+		tempConfig.printFullOptions();
 	}
 }
 

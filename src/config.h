@@ -66,6 +66,11 @@ public:
 		return m_ignoreHiddenDirectories;
 	}
 
+	bool getFollowSymlinks() const
+	{
+		return m_followSymlinks;
+	}
+
 	bool getPreEmptiveSymlinkSkipping() const
 	{
 		return m_preEmptiveSymlinkSkipping;
@@ -122,6 +127,8 @@ public:
 		return m_matchItemAndSeperatorChar;
 	}
 
+	void printFullOptions() const;
+
 private:
 	// for config file
 	static bool getKeyValue(const std::string& configLine, std::string& key, std::string& value);
@@ -146,6 +153,8 @@ private:
 
 	bool			m_ignoreHiddenFiles;
 	bool			m_ignoreHiddenDirectories;
+
+	bool			m_followSymlinks;
 
 	bool			m_preEmptiveSymlinkSkipping; // whether to attempt to skip statting / following a symlink based on its likely filenames
 
