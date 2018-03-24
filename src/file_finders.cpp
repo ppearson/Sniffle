@@ -236,7 +236,7 @@ FileFinderBasicRecursive::FileFinderBasicRecursive(const Config& config,
 	
 }
 
-bool FileFinderBasicRecursive::findFiles(std::vector<std::string>& foundFiles) const
+bool FileFinderBasicRecursive::findFiles(std::vector<std::string>& foundFiles)
 {
 	bool foundOK = getRelativeFilesInDirectoryRecursive(m_patternSearch.baseSearchPath, "", 0, foundFiles);
 
@@ -263,7 +263,7 @@ FileFinderBasicRecursiveDirectoryWildcard::FileFinderBasicRecursiveDirectoryWild
 	
 }
 
-bool FileFinderBasicRecursiveDirectoryWildcard::findFiles(std::vector<std::string>& foundFiles) const
+bool FileFinderBasicRecursiveDirectoryWildcard::findFiles(std::vector<std::string>& foundFiles)
 {
 	// for this type of search, we look for directories matching the wildcard (currently just *) as a first step
 
@@ -328,4 +328,101 @@ bool FileFinderBasicRecursiveDirectoryWildcard::findFiles(std::vector<std::strin
 	}
 
 	return foundSomeFiles;
+}
+
+//
+
+FileFinderBasicRecursiveDirectoryWildcardParallel::FileFinderBasicRecursiveDirectoryWildcardParallel(const Config& config,
+								const FilenameMatcher* pFilenameMatcher,
+								const PatternSearch& patternSearch) :
+										FileFinder(config, pFilenameMatcher, patternSearch)
+{
+	
+}
+
+bool FileFinderBasicRecursiveDirectoryWildcardParallel::findFiles(std::vector<std::string>& foundFiles)
+{
+	// for this type of search, we look for directories matching the wildcard (currently just *) as a first step
+
+	std::vector<std::string> wildCardDirs;
+	if (!FileHelpers::getDirectoriesInDirectory(m_patternSearch.baseSearchPath, m_patternSearch.dirWildcardMatch, m_config.getIgnoreHiddenDirectories(), wildCardDirs))
+	{
+		return false;
+	}
+	
+	unsigned int threads = std::min(m_config.getFindThreads(), (unsigned int)wildCardDirs.size());
+	
+	std::vector<std::vector<std::string> > aThreadFoundFiles;
+	aThreadFoundFiles.resize(threads);
+
+	// we have some first level directories where the wildcard is, so for each of those try and find remainder directories within each
+	unsigned int count = 0;
+	for (const std::string& wildcardDir : wildCardDirs)
+	{
+		WildcardDirTask* pNewTask = new WildcardDirTask(wildcardDir, aThreadFoundFiles[count++]);
+		
+		addTask(pNewTask);
+	}
+	
+	start(threads);
+		
+	// now add
+	for (const std::vector<std::string>& threadResults : aThreadFoundFiles)
+	{
+		foundFiles.insert(foundFiles.end(), threadResults.begin(), threadResults.end());
+	}
+
+	return !foundFiles.empty();
+}
+
+void FileFinderBasicRecursiveDirectoryWildcardParallel::processTask(Task* pTask)
+{
+	WildcardDirTask* pWildcardTask = static_cast<WildcardDirTask*>(pTask);
+	
+	std::string testDir = FileHelpers::combinePaths(m_patternSearch.baseSearchPath, pWildcardTask->m_dirItem);
+
+	// TODO: this check technically isn't needed, but for the moment it's helpful to guarentee things are doing what they should be,
+	//       and there might be issues with symlinks...
+	DIR* dir = opendir(testDir.c_str());
+	if (!dir)
+	{
+		fprintf(stderr, "Error: 55\n");
+		return;
+	}
+	closedir(dir);
+
+	bool dirToCheck = true;
+
+	std::string remainderFullDir = testDir;
+
+	// Note: these might be collapsed into a single item (done within classifyPattern() )
+
+	for (const std::string& remainderDir : m_patternSearch.dirRemainders)
+	{
+		testDir = FileHelpers::combinePaths(testDir, remainderDir);
+
+		dir = opendir(testDir.c_str());
+
+		if (!dir)
+		{
+			// it doesn't exist, so no point continuing with this one...
+			dirToCheck = false;
+			break;
+		}
+		closedir(dir);
+
+		remainderFullDir = FileHelpers::combinePaths(remainderFullDir, remainderDir);
+	}
+	
+	std::vector<std::string>& foundFiles = pWildcardTask->m_foundFiles;
+
+	if (dirToCheck)
+	{
+		// otherwise, we should have a final directory matching the pattern, including the directory wildcard.
+		// so now do a file search at that level
+		
+		getRelativeFilesInDirectoryRecursive(remainderFullDir, remainderFullDir, 0, foundFiles);
+	}
+
+	delete pWildcardTask;
 }

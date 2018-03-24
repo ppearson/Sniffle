@@ -5,6 +5,8 @@ enable_language(CXX)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED on)
 
+FIND_PACKAGE(Threads)
+
 set(QMAKE_CXXFLAGS "-std=c++11")
 
 SET(CMAKE_CXX_FLAGS_RELEASE "-O3 -std=c++11")
@@ -23,3 +25,5 @@ include_directories(src)
 FILE(GLOB_RECURSE sniffle_SOURCES "${CMAKE_SOURCE_DIR}/src/*.cpp")
 
 ADD_EXECUTABLE(sniffle ${sniffle_SOURCES})
+
+TARGET_LINK_LIBRARIES(sniffle ${CMAKE_THREAD_LIBS_INIT})

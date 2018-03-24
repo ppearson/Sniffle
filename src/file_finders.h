@@ -22,6 +22,8 @@
 #include <vector>
 #include <string>
 
+#include "utils/threaded_task_pool.h"
+
 class Config;
 class FilenameMatcher;
 struct PatternSearch;
@@ -38,7 +40,7 @@ public:
 	bool getRelativeFilesInDirectoryRecursive(const std::string& searchDirectoryPath, const std::string& relativeDirectoryPath,
 											  unsigned int currentDepth, std::vector<std::string>& files) const;
 	
-	virtual bool findFiles(std::vector<std::string>& foundFiles) const = 0;	
+	virtual bool findFiles(std::vector<std::string>& foundFiles) = 0;	
 	
 protected:
 	const Config&			m_config;
@@ -55,7 +57,7 @@ public:
 							 const FilenameMatcher* pFilenameMatcher,
 							 const PatternSearch& patternSearch);
 	
-	virtual bool findFiles(std::vector<std::string>& foundFiles) const;
+	virtual bool findFiles(std::vector<std::string>& foundFiles);
 };
 
 //
@@ -67,7 +69,36 @@ public:
 											  const FilenameMatcher* pFilenameMatcher,
 											  const PatternSearch& patternSearch);
 	
-	virtual bool findFiles(std::vector<std::string>& foundFiles) const;
+	virtual bool findFiles(std::vector<std::string>& foundFiles);
+};
+
+//
+
+class FileFinderBasicRecursiveDirectoryWildcardParallel : public FileFinder, public ThreadedTaskPool
+{
+public:
+	FileFinderBasicRecursiveDirectoryWildcardParallel(const Config& config,
+													  const FilenameMatcher* pFilenameMatcher,
+													  const PatternSearch& patternSearch);
+	
+	virtual bool findFiles(std::vector<std::string>& foundFiles);
+	
+	virtual void processTask(Task* pTask);
+	
+	class WildcardDirTask : public Task
+	{
+	public:
+		WildcardDirTask(const std::string& dir, std::vector<std::string>& foundFiles) : m_dirItem(dir),
+			m_foundFiles(foundFiles)
+		{
+			
+		}
+		
+		std::string		m_dirItem;
+		std::vector<std::string>& m_foundFiles;
+	};
+	
+protected:
 };
 
 #endif // FILE_FINDERS_H

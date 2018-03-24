@@ -465,7 +465,14 @@ bool Sniffle::configureFileFinder(const PatternSearch& pattern)
 	}
 	else if (pattern.type == PatternSearch::ePatternWildcardDir)
 	{
-		m_pFileFinder = new FileFinderBasicRecursiveDirectoryWildcard(m_config, m_pFilenameMatcher, pattern);
+		if (m_config.getFindThreads() == 1)
+		{
+			m_pFileFinder = new FileFinderBasicRecursiveDirectoryWildcard(m_config, m_pFilenameMatcher, pattern);
+		}
+		else
+		{
+			m_pFileFinder = new FileFinderBasicRecursiveDirectoryWildcardParallel(m_config, m_pFilenameMatcher, pattern);
+		}
 	}
 	
 	return true;

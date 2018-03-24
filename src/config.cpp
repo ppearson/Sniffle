@@ -26,6 +26,7 @@
 #include "utils/file_helpers.h"
 
 Config::Config() :
+	m_findThreads(1),
 	m_grepThreads(1),
 	m_printProgressWhenOutToStdOut(true),
 	m_directoryRecursionDepth(10),
@@ -134,6 +135,24 @@ Config::ParseResult Config::parseArgs(int argc, char** argv, int startOptionArg,
 			}
 		}
 		// handle some common short-hand conveniences...
+		else if (argString == "-ft")
+		{
+			// find threads
+			
+			std::string nextArg(argv[i + 1]);
+			m_findThreads = atoi(nextArg.c_str());
+
+			lastProcessedArg ++;
+		}
+		else if (argString == "-gt")
+		{
+			// grep threads
+			
+			std::string nextArg(argv[i + 1]);
+			m_grepThreads = atoi(nextArg.c_str());
+
+			lastProcessedArg ++;
+		}
 		else if (argString == "-m")
 		{
 			std::string nextArg(argv[i + 1]);
@@ -252,7 +271,12 @@ bool Config::getKeyValueFromArg(const std::string& argString, std::string& key, 
 
 bool Config::applyKeyValueSetting(const std::string& key, const std::string& value)
 {
-	if (key == "grepThreads")
+	if (key == "findThreads")
+	{
+		unsigned int intValue = atoi(value.c_str());
+		m_findThreads = intValue;
+	}
+	else if (key == "grepThreads")
 	{
 		unsigned int intValue = atoi(value.c_str());
 		m_grepThreads = intValue;

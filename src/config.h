@@ -40,6 +40,11 @@ public:
 
 
 	// getters
+	
+	unsigned int getFindThreads() const
+	{
+		return m_findThreads;
+	}
 
 	unsigned int getGrepThreads() const
 	{
@@ -145,6 +150,7 @@ private:
 
 	// TODO: this isn't very scalable (but does it need to be?) - maybe key/value lookups instead?
 
+	unsigned int	m_findThreads;
 	unsigned int	m_grepThreads;
 
 	bool			m_printProgressWhenOutToStdOut; // if we think stdout is not a tty (so being piped), print progress via stderr
