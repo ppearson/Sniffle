@@ -23,8 +23,10 @@
 #include <vector>
 
 #include "config.h"
+#include "pattern.h"
 
 class FilenameMatcher;
+class FileFinder;
 
 class Sniffle
 {
@@ -44,32 +46,6 @@ public:
 
 private:
 
-	enum PatternType
-	{
-		ePatternUnknown,
-		ePatternSimple,
-		ePatternWildcardDir,
-		ePatternError
-	};
-
-	struct PatternSearch
-	{
-		PatternSearch() : type(ePatternUnknown)
-		{
-		}
-
-
-		PatternType			type;
-		std::string			baseSearchPath;
-
-		std::string			dirWildcardMatch;
-		std::vector<std::string> dirRemainders;
-
-		std::string			fileMatch;
-	};
-
-
-
 	enum FindFlags
 	{
 		FIND_RECURSIVE				= 1 << 0,
@@ -80,18 +56,17 @@ private:
 	static PatternSearch classifyPattern(const std::string& pattern);
 
 	bool configureFilenameMatcher(const PatternSearch& pattern);
+	bool configureFileFinder(const PatternSearch& pattern);
 
 	bool findFiles(const std::string& pattern, std::vector<std::string>& foundFiles, unsigned int findFlags);
 	//
-
-	bool getRelativeFilesInDirectoryRecursive(const std::string& searchDirectoryPath, const std::string& relativeDirectoryPath,
-											  unsigned int currentDepth, std::vector<std::string>& files) const;
 
 
 private:
 	Config				m_config;
 
 	FilenameMatcher*	m_pFilenameMatcher;
+	FileFinder*			m_pFileFinder;
 };
 
 #endif // SNIFFLE_H
