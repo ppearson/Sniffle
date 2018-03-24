@@ -353,7 +353,10 @@ bool FileFinderBasicRecursiveDirectoryWildcardParallel::findFiles(std::vector<st
 	unsigned int threads = std::min(m_config.getFindThreads(), (unsigned int)wildCardDirs.size());
 	
 	std::vector<std::vector<std::string> > aThreadFoundFiles;
-	aThreadFoundFiles.resize(threads);
+	// one std::vector<std::string> per subdir/task
+	// TODO: might be worth thinking about making these per-thread instead, but doing it this way will likely
+	//       be useful in the future for custom file output to files named based on first-level subdirectories.
+	aThreadFoundFiles.resize(wildCardDirs.size());
 
 	// we have some first level directories where the wildcard is, so for each of those try and find remainder directories within each
 	unsigned int count = 0;
