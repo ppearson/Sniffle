@@ -12,10 +12,11 @@ and has defaults (which can be configured with a config file) which make sense f
 workflow compared to other grep/search tools (i.e. following symlinks is enabled by default).
 
 It is *not* designed as a complete grep / ack / ag replacement for general file searches
-(although it can do that with certain by-design limitations).
+(although it can do that to a degree with certain by-design limitations).
 
-Currently it does not use the most optimum algorithm for searching content (linear by-line
-search instead of something like Boyer-Moore) - in the future this will be improved.
+Currently it does not use the most optimum algorithm for searching content (currently uses
+linear line-by-line search instead of something like Boyer-Moore) - in the future this will
+be improved.
 
 It can perform file searches, grepping of content of files, matching multiple search strings
 within files, and more functionality will be added in the future.

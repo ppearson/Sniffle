@@ -95,6 +95,11 @@ public:
 	{
 		return m_outputFilename;
 	}
+	
+	bool getOutputRelativeFilename() const
+	{
+		return m_outputRelativeFilename;
+	}
 
 	bool getOutputContentLines() const
 	{
@@ -169,6 +174,7 @@ private:
 	bool			m_flushOutput; // flush output after each atomic print item (i.e. file)
 
 	bool			m_outputFilename; // TODO: relative / absolute options as well?
+	bool			m_outputRelativeFilename; // TODO: for the moment, do relative this way, but...
 	bool			m_outputContentLines; // whether to output the content where the match takes place
 
 	bool			m_outputLineNumbers;

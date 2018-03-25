@@ -1,10 +1,9 @@
 Sniffle TODO:
 -------------
 
-* Multithread file finding
+* Multithread file finding (partial support)
 * Multithread content searching
 * Progressive content searching as files are found
-* Outputting line numbers
 * Outputting before content context lines
 * Outputting file size / file date along with filename
 * More flexible and advanced file/directory pattern matching

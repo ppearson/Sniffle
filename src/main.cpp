@@ -40,6 +40,9 @@ static void printHelp(bool fullOptions)
 		fprintf(stderr, "\nSimple Options:\n");
 		fprintf(stderr, " -firstOnly\t\t\tMatch only the first item in each file.\n");
 		fprintf(stderr, " -m <count>\t\t\tMatch count.\n");
+		fprintf(stderr, " -ft <thread_count>\t\tNumber of threads to use to find files.\n");
+//		fprintf(stderr, " -gt <thread_count>\t\t\tNumber of threads to use to grep/process files.\n");
+		fprintf(stderr, " -n\t\t\t\tOutput line numbers alongside content.\n");
 		fprintf(stderr, " -rd <limit>\t\t\tDirectory recursion depth limit.\n");
 		fprintf(stderr, " -C <line_count>\t\tContext lines to print either side of match.\n");
 //		fprintf(stderr, " -B <line_count>\t\tContext lines to print before match.\n");

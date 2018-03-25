@@ -37,6 +37,7 @@ Config::Config() :
 	m_matchCount(-1),
 	m_flushOutput(true),
 	m_outputFilename(true),
+	m_outputRelativeFilename(false),
 	m_outputContentLines(true),
 	m_outputLineNumbers(false),
 	m_outputFileSize(false),
@@ -164,6 +165,10 @@ Config::ParseResult Config::parseArgs(int argc, char** argv, int startOptionArg,
 		{
 			m_matchCount = 1;
 		}
+		else if (argString == "-n")
+		{
+			m_outputLineNumbers = true;
+		}
 		else if (argString == "-C")
 		{
 			std::string nextArg(argv[i + 1]);
@@ -219,6 +224,7 @@ void Config::printFullOptions() const
 {
 	fprintf(stderr, "\nFull options: (specify with --<option>=<value> or in sniffle.conf file):\n");
 	fprintf(stderr, "(showing defaults):\n");
+	fprintf(stderr, "findThreads: %i: \n", m_findThreads);
 //	fprintf(stderr, "grepThreads: %i: \n", m_grepThreads);
 	fprintf(stderr, "printProgressWhenOutToStdOut: %i:\n", m_printProgressWhenOutToStdOut);
 	fprintf(stderr, "directoryRecursionDepth: %i:\n", m_directoryRecursionDepth);
@@ -229,12 +235,13 @@ void Config::printFullOptions() const
 	fprintf(stderr, "matchCount: %i:\n", m_matchCount);
 	fprintf(stderr, "flushOutput: %i:\n", m_flushOutput);
 	fprintf(stderr, "outputFilename: %i:\t\tOutput the filename before matched results within file.\n", m_outputFilename);
+	fprintf(stderr, "outputRelativeFilename: %i:\t\n", m_outputRelativeFilename);
 	fprintf(stderr, "outputContentLines: %i:\n", m_outputContentLines);
-//	fprintf(stderr, "outputLineNumbers: %i:\n", m_outputLineNumbers);
+	fprintf(stderr, "outputLineNumbers: %i:\n", m_outputLineNumbers);
 	fprintf(stderr, "blankLinesBetweenFiles: %i:\n", m_blankLinesBetweenFiles);
 	fprintf(stderr, "matchItemOrSeperatorChar: %c:\n", m_matchItemOrSeperatorChar);
 	fprintf(stderr, "matchItemAndSeperatorChar: %c:\n", m_matchItemAndSeperatorChar);
-	fprintf(stderr, "context:\t\tContent lines to print either side of match.\n");
+	fprintf(stderr, "context:\t\t\tContent lines to print either side of match.\n");
 	fprintf(stderr, "after-context:\t\t\tContent lines to print after match.\n");
 //	fprintf(stderr, "before-context:\t\t\tContent lines to print before match.\n");
 }
@@ -317,6 +324,10 @@ bool Config::applyKeyValueSetting(const std::string& key, const std::string& val
 	else if (key == "outputFilename")
 	{
 		m_outputFilename = getBooleanValueFromString(value);
+	}
+	else if (key == "outputRelativeFilename")
+	{
+		m_outputRelativeFilename = getBooleanValueFromString(value);
 	}
 	else if (key == "outputContentLines")
 	{

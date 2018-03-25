@@ -86,9 +86,6 @@ void ThreadedTaskPool::workerThreadFunctionEvent()
 		{
 			std::unique_lock<std::mutex> lock(m_lock);
 			m_newTaskEvent.wait(lock);
-	
-			if (m_aTasks.empty())
-				return;
 			
 			pThisTask = std::move(m_aTasks.front());
 			m_aTasks.pop();

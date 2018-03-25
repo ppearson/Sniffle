@@ -84,7 +84,7 @@ bool FileGrepper::grepBasic(const std::string& filename, const std::string& sear
 
 	char buf[kStringLength];
 
-	unsigned int lineIndex = 0;
+	unsigned int lineIndex = 1; // start at one as this value is only used for printing line number purposes
 
 	while (fileStream.getline(buf, kStringLength))
 	{
@@ -145,7 +145,14 @@ bool FileGrepper::grepBasic(const std::string& filename, const std::string& sear
 
 			if (m_config.getOutputContentLines())
 			{
-				fprintf(stdout, "%s\n", buf);
+				if (m_config.getOutputLineNumbers())
+				{
+					fprintf(stdout, "%u: %s\n", lineIndex, buf);
+				}
+				else
+				{
+					fprintf(stdout, "%s\n", buf);
+				}
 			}
 			
 			bool haveFoundEnoughItems = m_config.getMatchCount() != -1 && foundCount >= m_config.getMatchCount();
@@ -159,7 +166,14 @@ bool FileGrepper::grepBasic(const std::string& filename, const std::string& sear
 		else if (afterLinesToPrint > 0)
 		{
 			// if we've found it before, we need to output additional lines...
-			fprintf(stdout, "%s\n", buf);
+			if (m_config.getOutputLineNumbers())
+			{
+				fprintf(stdout, "%u: %s\n", lineIndex, buf);
+			}
+			else
+			{
+				fprintf(stdout, "%s\n", buf);
+			}
 
 			afterLinesToPrint--;
 		}
@@ -210,7 +224,7 @@ bool FileGrepper::matchBasicOr(const std::string& filename, bool foundPreviousFi
 
 	char buf[kStringLength];
 
-	unsigned int lineIndex = 0;
+	unsigned int lineIndex = 1; // start at one as this value is only used for printing line number purposes
 
 	while (fileStream.getline(buf, kStringLength))
 	{	
@@ -268,7 +282,14 @@ bool FileGrepper::matchBasicOr(const std::string& filename, bool foundPreviousFi
 
 			if (m_config.getOutputContentLines())
 			{
-				fprintf(stdout, "%s\n", buf);
+				if (m_config.getOutputLineNumbers())
+				{
+					fprintf(stdout, "%u: %s\n", lineIndex, buf);
+				}
+				else
+				{
+					fprintf(stdout, "%s\n", buf);
+				}
 			}
 			
 			// TODO: work out if we want to do anything about match counts? Not really sure how it would work... Match all equal number
@@ -283,7 +304,14 @@ bool FileGrepper::matchBasicOr(const std::string& filename, bool foundPreviousFi
 		else if (afterLinesToPrint > 0)
 		{
 			// if we've found it before, we need to output additional lines...
-			fprintf(stdout, "%s\n", buf);
+			if (m_config.getOutputLineNumbers())
+			{
+				fprintf(stdout, "%u: %s\n", lineIndex, buf);
+			}
+			else
+			{
+				fprintf(stdout, "%s\n", buf);
+			}
 
 			afterLinesToPrint--;
 		}
@@ -330,7 +358,7 @@ bool FileGrepper::matchBasicAnd(const std::string& filename, bool foundPreviousF
 	// temp buffer for formatting output
 	char szTemp[kStringLength];
 	
-	unsigned int lineIndex = 0;
+	unsigned int lineIndex = 1; // start at one as this value is only used for printing line number purposes
 	
 	// we start off looking for the first item...
 	unsigned int lastItemToMatchIndex = m_aMatchItems.size() - 1;
@@ -349,7 +377,14 @@ bool FileGrepper::matchBasicAnd(const std::string& filename, bool foundPreviousF
 			}
 			else if (foundAll && afterLinesToPrint > 0)
 			{
-				sprintf(szTemp, "%s\n", buf);
+				if (m_config.getOutputLineNumbers())
+				{
+					sprintf(szTemp, "%u: %s\n", lineIndex, buf);
+				}
+				else
+				{
+					sprintf(szTemp, "%s\n", buf);
+				}
 				finalOutput.append(szTemp);
 				
 				afterLinesToPrint --;
@@ -390,7 +425,14 @@ bool FileGrepper::matchBasicAnd(const std::string& filename, bool foundPreviousF
 		// now output the item itself if required. We output the line of all items matched.
 		if (m_config.getOutputContentLines())
 		{
-			sprintf(szTemp, "%s\n", buf);
+			if (m_config.getOutputLineNumbers())
+			{
+				sprintf(szTemp, "%u: %s\n", lineIndex, buf);
+			}
+			else
+			{
+				sprintf(szTemp, "%s\n", buf);
+			}
 			finalOutput.append(szTemp);
 		}
 		
