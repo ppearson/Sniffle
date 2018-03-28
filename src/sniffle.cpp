@@ -93,11 +93,13 @@ void Sniffle::runFind(const std::string& pattern)
 
 	if (SystemHelpers::isStdOutATTY())
 	{
-		fprintf(stderr, "\nFound %zu %s.\n", foundFiles.size(), foundFiles.size() == 1 ? "file" : "files");
+		fprintf(stderr, "\nFound %s %s.\n", StringHelpers::formatNumberThousandsSeparator(foundFiles.size()).c_str(),
+				foundFiles.size() == 1 ? "file" : "files");
 	}
 	else
 	{
-		fprintf(stderr, "Found %zu %s. Output piped to stdout.\n", foundFiles.size(), foundFiles.size() == 1 ? "file" : "files");
+		fprintf(stderr, "Found %s %s. Output piped to stdout.\n", StringHelpers::formatNumberThousandsSeparator(foundFiles.size()).c_str(),
+				foundFiles.size() == 1 ? "file" : "files");
 	}
 }
 
@@ -116,7 +118,8 @@ void Sniffle::runGrep(const std::string& filePattern, const std::string& content
 		return;
 	}
 
-	fprintf(stderr, "Found %zu %s matching file match criteria.\n", foundFiles.size(), foundFiles.size() == 1 ? "file" : "files");
+	fprintf(stderr, "Found %s %s matching file match criteria.\n", StringHelpers::formatNumberThousandsSeparator(foundFiles.size()).c_str(),
+			foundFiles.size() == 1 ? "file" : "files");
 
 	bool printProgress = m_config.getPrintProgressWhenOutToStdOut() && !SystemHelpers::isStdOutATTY();
 
@@ -168,11 +171,13 @@ void Sniffle::runGrep(const std::string& filePattern, const std::string& content
 	{
 		if (SystemHelpers::isStdOutATTY())
 		{
-			fprintf(stderr, "Found content in %zu %s.\n", foundCount, foundCount == 1 ? "file" : "files");
+			fprintf(stderr, "Found content in %s %s.\n", StringHelpers::formatNumberThousandsSeparator(foundCount).c_str(),
+					foundCount == 1 ? "file" : "files");
 		}
 		else
 		{
-			fprintf(stderr, "Found content in %zu %s. Output piped to stdout.\n", foundCount, foundCount == 1 ? "file" : "files");
+			fprintf(stderr, "Found content in %s %s. Output piped to stdout.\n", StringHelpers::formatNumberThousandsSeparator(foundCount).c_str(),
+					foundCount == 1 ? "file" : "files");
 		}
 	}
 }
@@ -192,7 +197,8 @@ void Sniffle::runMatch(const std::string& filePattern, const std::string& conten
 		return;
 	}
 
-	fprintf(stderr, "Found %zu %s matching file match criteria.\n", foundFiles.size(), foundFiles.size() == 1 ? "file" : "files");
+	fprintf(stderr, "Found %s %s matching file match criteria.\n", StringHelpers::formatNumberThousandsSeparator(foundFiles.size()).c_str(),
+			foundFiles.size() == 1 ? "file" : "files");
 
 	bool printProgress = m_config.getPrintProgressWhenOutToStdOut() && !SystemHelpers::isStdOutATTY();
 
@@ -250,11 +256,13 @@ void Sniffle::runMatch(const std::string& filePattern, const std::string& conten
 	{
 		if (SystemHelpers::isStdOutATTY())
 		{
-			fprintf(stderr, "Found content in %zu %s.\n", foundCount, foundCount == 1 ? "file" : "files");
+			fprintf(stderr, "Found content in %s %s.\n", StringHelpers::formatNumberThousandsSeparator(foundCount).c_str(),
+					foundCount == 1 ? "file" : "files");
 		}
 		else
 		{
-			fprintf(stderr, "Found content in %zu %s. Output piped to stdout.\n", foundCount, foundCount == 1 ? "file" : "files");
+			fprintf(stderr, "Found content in %s %s. Output piped to stdout.\n", StringHelpers::formatNumberThousandsSeparator(foundCount).c_str(),
+					foundCount == 1 ? "file" : "files");
 		}
 	}
 }
@@ -406,14 +414,14 @@ bool Sniffle::configureFilenameMatcher(const PatternSearch& pattern)
 	if (pattern.fileMatch == "*")
 	{
 		// TODO: could do a specialised matcher for this.
-		m_pFilenameMatcher = new SimpleFilenameMatcher("*");
+		m_pFilenameMatcher = new FilenameMatcherExtension("*");
 		return true;
 	}
 
 	size_t sepPos = pattern.fileMatch.find(".");
 	if (sepPos == std::string::npos)
 	{
-		m_pFilenameMatcher = new SimpleFilenameMatcher("*");
+		m_pFilenameMatcher = new FilenameMatcherExtension("*");
 		return true;
 	}
 
@@ -424,7 +432,7 @@ bool Sniffle::configureFilenameMatcher(const PatternSearch& pattern)
 	if (extensionPart.find("*", sepPos) == std::string::npos && filenameCorePart == "*")
 	{
 		// just a simple filename extension filter
-		m_pFilenameMatcher = new SimpleFilenameMatcher(extensionPart);
+		m_pFilenameMatcher = new FilenameMatcherExtension(extensionPart);
 		return true;
 	}
 

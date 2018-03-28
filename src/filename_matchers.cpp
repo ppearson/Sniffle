@@ -24,7 +24,7 @@
 
 // TODO: if CPU performance ever becomes an issue, remove some of these string copies...
 
-bool SimpleFilenameMatcher::doesMatch(const std::string& filename) const
+bool FilenameMatcherExtension::doesMatch(const std::string& filename) const
 {
 	if (m_extension == "*" || FileHelpers::getFileExtension(filename) == m_extension)
 	{
@@ -34,7 +34,7 @@ bool SimpleFilenameMatcher::doesMatch(const std::string& filename) const
 	return false;
 }
 
-bool SimpleFilenameMatcher::canSkipPotentialSymlinkFile(const char* filename) const
+bool FilenameMatcherExtension::canSkipPotentialSymlinkFile(const char* filename) const
 {
 	const char* dotPos = strrchr(filename, '.');
 
@@ -46,6 +46,9 @@ bool SimpleFilenameMatcher::canSkipPotentialSymlinkFile(const char* filename) co
 
 	// otherwise, see if the extension matches. The current assumption is that at least
 	// the file extension will match between the symlink filename and the target of the symlink.
+
+	if (m_extension == "*")
+		return false;
 
 	int compValue = strcmp(dotPos + 1, m_extension.c_str());
 	return (compValue != 0);
@@ -76,6 +79,9 @@ bool AdvancedFilenameMatcher::canSkipPotentialSymlinkFile(const char* filename) 
 
 	// otherwise, see if the extension matches. The current assumption is that at least
 	// the file extension will match between the symlink filename and the target of the symlink.
+
+	if (m_extension == "*")
+		return false;
 
 	int compValue = strcmp(dotPos + 1, m_extension.c_str());
 	return (compValue != 0);

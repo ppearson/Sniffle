@@ -42,18 +42,18 @@ public:
 };
 
 // extension only matcher
-class SimpleFilenameMatcher : public FilenameMatcher
+class FilenameMatcherExtension : public FilenameMatcher
 {
 public:
-	SimpleFilenameMatcher(const std::string& extension) :
+	FilenameMatcherExtension(const std::string& extension) :
 		m_extension(extension)
 	{
 
 	}
 
-	virtual bool doesMatch(const std::string& filename) const;
+	virtual bool doesMatch(const std::string& filename) const override;
 
-	virtual bool canSkipPotentialSymlinkFile(const char* filename) const;
+	virtual bool canSkipPotentialSymlinkFile(const char* filename) const override;
 
 protected:
 	std::string		m_extension;
@@ -70,9 +70,9 @@ public:
 
 	}
 
-	virtual bool doesMatch(const std::string& filename) const;
+	virtual bool doesMatch(const std::string& filename) const override;
 
-	virtual bool canSkipPotentialSymlinkFile(const char* filename) const;
+	virtual bool canSkipPotentialSymlinkFile(const char* filename) const override;
 
 protected:
 	std::string		m_filenameItem;
