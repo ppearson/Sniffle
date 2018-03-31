@@ -24,9 +24,9 @@
 
 #include "config.h"
 #include "pattern.h"
+#include "file_finders.h"
 
 class FilenameMatcher;
-class FileFinder;
 
 class Sniffle
 {
@@ -34,9 +34,10 @@ public:
 	Sniffle();
 	~Sniffle();
 	
-	Config::ParseResult parseArgs(int argc, char** argv, int startOptionArg, int& nextArgIndex);
-	
 	bool configureGlobals();
+
+	Config::ParseResult parseArgs(int argc, char** argv, int startOptionArg, int& nextArgIndex);
+	bool parseFilter(int argc, char** argv, int startOptionArg, int& nextArgIndex);
 
 	void runFind(const std::string& pattern);
 
@@ -64,6 +65,8 @@ private:
 
 private:
 	Config				m_config;
+
+	FileFinder::FilterParameters	m_filter;
 
 	FilenameMatcher*	m_pFilenameMatcher;
 	FileFinder*			m_pFileFinder;

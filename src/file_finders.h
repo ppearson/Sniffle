@@ -21,6 +21,7 @@
 
 #include <vector>
 #include <string>
+#include <time.h>
 
 #include "utils/threaded_task_pool.h"
 
@@ -31,11 +32,62 @@ struct PatternSearch;
 class FileFinder
 {
 public:
+
+	class FilterParameters
+	{
+	public:
+
+		// currently we only support one active filter type
+		enum FilterType
+		{
+			eFilterNone,
+			eFilterFileModifiedDate_Younger,
+			eFilterFileModifiedDate_Older,
+			eFilterFileSize_Greater,
+			eFilterFileSize_Smaller
+		};
+
+		FilterParameters() : m_filterType(eFilterNone)
+		{
+		}
+
+		FilterType getFilterType() const
+		{
+			return m_filterType;
+		}
+
+		time_t getModifiedTimestampThreshold() const
+		{
+			return m_modifiedTimestampThreshold;
+		}
+
+		// this isn't very principled, but...
+		void setFileModifiedDateFilter(bool younger, unsigned int thresholdInHours)
+		{
+			m_filterType = (younger) ? eFilterFileModifiedDate_Younger : eFilterFileModifiedDate_Older;
+			time_t finalThresholdDelta = thresholdInHours * 3600;
+
+			// now subtract this value from the current time value
+			time(&m_modifiedTimestampThreshold);
+
+			m_modifiedTimestampThreshold -= finalThresholdDelta;
+		}
+
+
+
+	protected:
+		FilterType			m_filterType;
+
+		time_t				m_modifiedTimestampThreshold;
+	};
+
 	FileFinder(const Config& config,
 	           const FilenameMatcher* pFilenameMatcher,
 	           const PatternSearch& patternSearch);
 	
 	virtual ~FileFinder();
+
+	void setFilterParameters(const FilterParameters& filterParams);
 	
 	bool getRelativeFilesInDirectoryRecursive(const std::string& searchDirectoryPath, const std::string& relativeDirectoryPath,
 											  unsigned int currentDepth, std::vector<std::string>& files) const;
@@ -46,6 +98,8 @@ protected:
 	const Config&			m_config;
 	const FilenameMatcher*	m_pFilenameMatcher;
 	const PatternSearch&	m_patternSearch;
+
+	FilterParameters		m_filter;
 };
 
 //

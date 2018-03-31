@@ -69,8 +69,41 @@ int main(int argc, char** argv)
 	
 	// process any optional options
 	Config::ParseResult res = sniffle.parseArgs(argc, argv, 1, nextArg);
+
+	if (res == Config::eParseHelpWanted)
+	{
+		printHelp(true);
+		return -1;
+	}
+	else if (res == Config::eParseError)
+	{
+		fprintf(stderr, "Error parsing option command line arguments.\n");
+		return -1;
+	}
+
+	// Note: returns true even if it didn't need to do anything. Returns
+	//       false on parse error.
+	int nextArgFilter = 1;
+	// don't bother making use of nextArgTemp here, as there's a bit of a
+	// conflict of parseArgs() and parsefilter() doing the same thing, which
+	// needs to be sorted out properly at some point...
+	// Note: start from arg 1 again...
+	bool parsedFilter = sniffle.parseFilter(argc, argv, 1, nextArgFilter);
+	if (!parsedFilter)
+	{
+		fprintf(stderr, "Error parsing filter command line arguments.\n");
+		return -1;
+	}
+
+	nextArg = std::max(nextArgFilter, nextArg);
 	
 	int commandArgs = argc - nextArg;
+	if (commandArgs <= 0)
+	{
+		// something's gone very wrong.
+		fprintf(stderr, "Error handling command line parsing.\n");
+		return -1;
+	}
 	
 	std::string mainCommand = argv[nextArg];
 	
@@ -79,7 +112,7 @@ int main(int argc, char** argv)
 		if (commandArgs < 2)
 		{
 			fprintf(stderr, "Error: Insufficient number of arguments for 'find' command.\n");
-			return 0;
+			return -1;
 		}
 		
 		std::string path = argv[nextArg + 1];
@@ -91,7 +124,7 @@ int main(int argc, char** argv)
 		if (commandArgs < 3)
 		{
 			fprintf(stderr, "Error: Insufficient number of arguments for 'grep' command.\n");
-			return 0;
+			return -1;
 		}
 		
 		std::string contentsPattern = argv[nextArg + 1];
@@ -104,7 +137,7 @@ int main(int argc, char** argv)
 		if (commandArgs < 3)
 		{
 			fprintf(stderr, "Error: Insufficient number of arguments for 'match' command.\n");
-			return 0;
+			return -1;
 		}
 		
 		std::string contentsPattern = argv[nextArg + 1];
@@ -123,11 +156,6 @@ int main(int argc, char** argv)
 		{
 			fprintf(stderr, "%s\n", argv[i]);
 		}
-	}
-	else if (res == Config::eParseHelpWanted)
-	{
-		printHelp(true);
-		return -1;
 	}
 	
 	return 0;

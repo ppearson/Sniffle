@@ -27,14 +27,14 @@ Find:
 Return a list of all files matching a filename pattern in specified directory location(s).
 This find functionality is part of all other modes of operation below.
 
-sniffle find "/path/to/logs/*/program/*.log"
+    sniffle find "/path/to/logs/*/program/*.log"
 
 Grep:
 -----
 
 Output matches of content in found files that contain content.
 
-sniffle grep "Error 101" "/path/to/logs/*/program/*.log"
+    sniffle grep "Error 101" "/path/to/logs/*/program/*.log"
 
 Match:
 ------
@@ -43,10 +43,10 @@ Output matches of content in found files that contain multiple content matches (
 
 Match any:
 
-sniffle match "Program 1.1.|[Error] " "/path/to/logs/*/program/*prog*.log"
+    sniffle match "Program 1.1.|[Error] " "/path/to/logs/*/program/*prog*.log"
 
 Match all (in order):
 
-sniffle match "Program 1.1.&[Error] 101" "/path/to/logs/*/program/*prog*.log"
+    sniffle match "Program 1.1.&[Error] 101" "/path/to/logs/*/program/*prog*.log"
 
 

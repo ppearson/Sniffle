@@ -60,11 +60,6 @@ Sniffle::~Sniffle()
 	}
 }
 
-Config::ParseResult Sniffle::parseArgs(int argc, char** argv, int startOptionArg, int& nextArgIndex)
-{
-	return m_config.parseArgs(argc, argv, startOptionArg, nextArgIndex);
-}
-
 bool Sniffle::configureGlobals()
 {
 	setlocale(LC_ALL, "C");
@@ -72,6 +67,86 @@ bool Sniffle::configureGlobals()
 //	fprintf(stderr, "Prev locale: %s\n", previousLocale);
 
 	return true;
+}
+
+Config::ParseResult Sniffle::parseArgs(int argc, char** argv, int startOptionArg, int& nextArgIndex)
+{
+	return m_config.parseArgs(argc, argv, startOptionArg, nextArgIndex);
+}
+
+bool Sniffle::parseFilter(int argc, char** argv, int startOptionArg, int& nextArgIndex)
+{
+	int lastProcessedArg = startOptionArg;
+
+	bool error = false;
+
+	for (int i = startOptionArg; i < argc; i++)
+	{
+		if (argv[i][0] != '-')
+		{
+			continue;
+		}
+
+		lastProcessedArg ++;
+
+		// otherwise, we want to process it...
+		std::string argString(argv[i]);
+
+		if (argString == "-filefilter-moddate" ||
+			argString == "-ff-m")
+		{
+			const char firstOp = argv[i + 1][0];
+
+			// we can't easily use '<' and '>' chars here due to their piping semantics in the shell which is a bit annoying...
+			if (firstOp != 'o' && firstOp != 'y')
+			{
+				error = true;
+
+				lastProcessedArg ++;
+
+				continue;
+			}
+
+			std::string nextArg(argv[i + 1]);
+
+			bool younger = firstOp == 'y';
+
+			// check that the next char is not null
+			if (argv[i + 1][1] == 0)
+			{
+				// don't have enough items in the argument
+				error = true;
+
+				lastProcessedArg ++;
+
+				continue;
+			}
+
+			std::string remainder = nextArg.substr(1);
+
+			// currently we just support single char unit at the end of string, so...
+			std::string amountStr = remainder.substr(0, remainder.size() - 1);
+			unsigned int amountValueInHours = atoi(amountStr.c_str());
+			std::string unit = remainder.substr(remainder.size() - 1, 1);
+
+			// <4d
+			// >12h
+			if (unit == "d")
+			{
+				amountValueInHours *= 24;
+			}
+
+			m_filter.setFileModifiedDateFilter(younger, amountValueInHours);
+
+			i++;
+
+			lastProcessedArg ++;
+		}
+	}
+
+	nextArgIndex = lastProcessedArg;
+
+	return !error;
 }
 
 void Sniffle::runFind(const std::string& pattern)
@@ -481,6 +556,11 @@ bool Sniffle::configureFileFinder(const PatternSearch& pattern)
 		{
 			m_pFileFinder = new FileFinderBasicRecursiveDirectoryWildcardParallel(m_config, m_pFilenameMatcher, pattern);
 		}
+	}
+
+	if (m_filter.getFilterType() != FileFinder::FilterParameters::eFilterNone)
+	{
+		m_pFileFinder->setFilterParameters(m_filter);
 	}
 	
 	return true;
