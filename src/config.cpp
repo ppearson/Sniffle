@@ -206,6 +206,12 @@ Config::ParseResult Config::parseArgs(int argc, char** argv, int startOptionArg,
 
 			lastProcessedArg ++;
 		}
+		else
+		{
+			// otherwise, don't do anything, as it might be a filter param
+			// and we want other code to handle that (isn't great that this
+			// type of thing is in two places, but...)
+		}
 	}
 
 	nextArgIndex = lastProcessedArg;
@@ -224,8 +230,8 @@ void Config::printFullOptions() const
 {
 	fprintf(stderr, "\nFull options: (specify with --<option>=<value> or in sniffle.conf file):\n");
 	fprintf(stderr, "(showing defaults):\n");
-	fprintf(stderr, "findThreads: %i: \n", m_findThreads);
-//	fprintf(stderr, "grepThreads: %i: \n", m_grepThreads);
+	fprintf(stderr, "findThreads: %u: \n", m_findThreads);
+//	fprintf(stderr, "grepThreads: %u: \n", m_grepThreads);
 	fprintf(stderr, "printProgressWhenOutToStdOut: %i:\n", m_printProgressWhenOutToStdOut);
 	fprintf(stderr, "directoryRecursionDepth: %i:\n", m_directoryRecursionDepth);
 	fprintf(stderr, "ignoreHiddenFiles: %i:\n", m_ignoreHiddenFiles);

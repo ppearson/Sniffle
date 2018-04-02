@@ -106,6 +106,8 @@ bool Sniffle::parseFilter(int argc, char** argv, int startOptionArg, int& nextAr
 
 				continue;
 			}
+			
+			// TODO: add support for specifying absolute timestamp as date/time...
 
 			std::string nextArg(argv[i + 1]);
 
@@ -129,11 +131,15 @@ bool Sniffle::parseFilter(int argc, char** argv, int startOptionArg, int& nextAr
 			unsigned int amountValueInHours = atoi(amountStr.c_str());
 			std::string unit = remainder.substr(remainder.size() - 1, 1);
 
-			// <4d
-			// >12h
+			// o4d == older than 4 days
+			// y12h == younger than 12 hours
 			if (unit == "d")
 			{
 				amountValueInHours *= 24;
+			}
+			else if (unit == "w")
+			{
+				amountValueInHours *= 24 * 7;
 			}
 
 			m_filter.setFileModifiedDateFilter(younger, amountValueInHours);
@@ -558,7 +564,7 @@ bool Sniffle::configureFileFinder(const PatternSearch& pattern)
 		}
 	}
 
-	if (m_filter.getFilterType() != FileFinder::FilterParameters::eFilterNone)
+	if (m_filter.getFilterType() != FilterParameters::eFilterNone)
 	{
 		m_pFileFinder->setFilterParameters(m_filter);
 	}

@@ -24,10 +24,11 @@
 
 static void printHelp(bool fullOptions)
 {
-	fprintf(stderr, "Sniffle version 0.1.\n");
+	fprintf(stderr, "Sniffle version 0.2.\n");
 	fprintf(stderr, "Usage:\n");
 	fprintf(stderr, "sniffle [options] find <\"/path/to/search/*.log\">\n");
 	fprintf(stderr, "sniffle [options] find <\"/path/to/*/search/*.log\">\n");
+	fprintf(stderr, "sniffle [options] [filter] <\"/path/to/search/*.log\">\n");
 	fprintf(stderr, "sniffle [options] grep <stringToFind> <\"/path/to/search/*.log\">\n");
 	fprintf(stderr, "sniffle [options] grep <stringToFind> <\"/path/to/*/search/*.log\">\n");
 	fprintf(stderr, "sniffle [options] match <tokens|to|find> <\"/path/to/search/*.log\">\n");
@@ -47,6 +48,9 @@ static void printHelp(bool fullOptions)
 		fprintf(stderr, " -C <line_count>\t\tContext lines to print either side of match.\n");
 //		fprintf(stderr, " -B <line_count>\t\tContext lines to print before match.\n");
 		fprintf(stderr, " -A <line_count>\t\tContext lines to print after match.\n");
+		
+		fprintf(stderr, "\nFilters:\n");
+		fprintf(stderr, " -filefilter-moddate (-ff-m) <[y/o][6][h/d/w]>\n");
 
 		Config tempConfig;
 		tempConfig.printFullOptions();

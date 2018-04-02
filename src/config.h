@@ -189,7 +189,7 @@ private:
 	char			m_matchItemOrSeperatorChar; //
 	char			m_matchItemAndSeperatorChar; //
 
-	std::string		m_outputToFile; // if non-empty, write output to this file
+//	std::string		m_outputToFile; // if non-empty, write output to this file
 };
 
 #endif // CONFIG_H

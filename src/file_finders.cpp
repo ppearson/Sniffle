@@ -53,7 +53,7 @@ bool FileFinder::getRelativeFilesInDirectoryRecursive(const std::string& searchD
 													unsigned int currentDepth, std::vector<std::string>& files) const
 {
 	// Note: opendir() is used on purpose here, as scandir() and lsstat() don't reliably support S_ISLNK on symlinks over NFS,
-	//       whereas opendir() allows this robustly. opendir() is also more efficient when operating on items one at a time...
+	//       whereas opendir() allows this robustly with d_type (in most cases). opendir() is also more efficient when operating on items one at a time...
 
 	DIR* dir = opendir(searchDirectoryPath.c_str());
 	if (!dir)
@@ -108,6 +108,7 @@ bool FileFinder::getRelativeFilesInDirectoryRecursive(const std::string& searchD
 				// on the assumption that the target of the symlink is not another symlink (if so, this won't work reliably over NFS)
 				// check what type it is
 				struct stat statState;
+				// TODO: do we want lstat() here?
 				int ret = lstat(tempBuffer, &statState);
 
 				// TODO: there's an assumption in the code in this block that the target of the link will
@@ -138,7 +139,9 @@ bool FileFinder::getRelativeFilesInDirectoryRecursive(const std::string& searchD
 				}
 				else if (S_ISREG(statState.st_mode))
 				{
-					// TODO: ignore hidden files!
+					// if required, ignore hidden (starting with '.') files
+					if (m_config.getIgnoreHiddenFiles() && strncmp(dirEnt->d_name, ".", 1) == 0)
+						continue;
 
 					if (m_filter.getFilterType() != FilterParameters::eFilterNone)
 					{

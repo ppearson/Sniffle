@@ -25,6 +25,7 @@
 #include "config.h"
 #include "pattern.h"
 #include "file_finders.h"
+#include "file_filters.h"
 
 class FilenameMatcher;
 
@@ -66,7 +67,7 @@ private:
 private:
 	Config				m_config;
 
-	FileFinder::FilterParameters	m_filter;
+	FilterParameters	m_filter;
 
 	FilenameMatcher*	m_pFilenameMatcher;
 	FileFinder*			m_pFileFinder;

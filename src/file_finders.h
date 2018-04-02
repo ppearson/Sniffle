@@ -21,7 +21,8 @@
 
 #include <vector>
 #include <string>
-#include <time.h>
+
+#include "file_filters.h"
 
 #include "utils/threaded_task_pool.h"
 
@@ -32,54 +33,6 @@ struct PatternSearch;
 class FileFinder
 {
 public:
-
-	class FilterParameters
-	{
-	public:
-
-		// currently we only support one active filter type
-		enum FilterType
-		{
-			eFilterNone,
-			eFilterFileModifiedDate_Younger,
-			eFilterFileModifiedDate_Older,
-			eFilterFileSize_Greater,
-			eFilterFileSize_Smaller
-		};
-
-		FilterParameters() : m_filterType(eFilterNone)
-		{
-		}
-
-		FilterType getFilterType() const
-		{
-			return m_filterType;
-		}
-
-		time_t getModifiedTimestampThreshold() const
-		{
-			return m_modifiedTimestampThreshold;
-		}
-
-		// this isn't very principled, but...
-		void setFileModifiedDateFilter(bool younger, unsigned int thresholdInHours)
-		{
-			m_filterType = (younger) ? eFilterFileModifiedDate_Younger : eFilterFileModifiedDate_Older;
-			time_t finalThresholdDelta = thresholdInHours * 3600;
-
-			// now subtract this value from the current time value
-			time(&m_modifiedTimestampThreshold);
-
-			m_modifiedTimestampThreshold -= finalThresholdDelta;
-		}
-
-
-
-	protected:
-		FilterType			m_filterType;
-
-		time_t				m_modifiedTimestampThreshold;
-	};
 
 	FileFinder(const Config& config,
 	           const FilenameMatcher* pFilenameMatcher,

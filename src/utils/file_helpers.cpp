@@ -101,7 +101,7 @@ bool FileHelpers::getDirectoriesInDirectory(const std::string& directoryPath, co
 											bool ignoreHiddenDirs, std::vector<std::string>& directories)
 {
 	// Note: opendir() is used on purpose here, as scandir() and lsstat() don't reliably support S_ISLNK on symlinks over NFS,
-	//       whereas opendir() allows this robustly.
+	//       whereas opendir() allows this robustly with d_type (in most cases). opendir() is also more efficient when operating on items one at a time...
 	DIR* dir = opendir(directoryPath.c_str());
 	if (!dir)
 		return false;
