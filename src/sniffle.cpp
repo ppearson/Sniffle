@@ -146,7 +146,10 @@ bool Sniffle::parseFilter(int argc, char** argv, int startOptionArg, int& nextAr
 
 			i++;
 
-			lastProcessedArg ++;
+			// TODO: this works for the moment, but once we add a second argument in this loop
+			//       it'll get a bit more tricky, and we ought to do this arg parsing properly and only
+			//       in one place (not here AND Config class)...
+			lastProcessedArg = i + 1;
 		}
 	}
 
