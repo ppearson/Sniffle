@@ -20,6 +20,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <fstream>
 #include <cctype> // for isdigit()
 
@@ -101,15 +102,23 @@ Config::ParseResult Config::parseArgs(int argc, char** argv, int startOptionArg,
 	{
 		if (argv[i][0] != '-')
 		{
+			// TODO: this is really bad, but currently the only way to make this processing robust.
+			//       This whole command line processing mess needs to be completely re-done at some point...
+			if (strcmp(argv[i], "find") == 0 || strcmp(argv[i], "grep") == 0 || strcmp(argv[i], "match") == 0)
+			{
+				// we've reached the command to run, so we can break out.
+				break;
+			}
 			continue;
 		}
-
+		
+		std::string argString(argv[i]);
+		
+		// otherwise, we want to process it...
+		
 		handled = true;
 
 		lastProcessedArg ++;
-
-		// otherwise, we want to process it...
-		std::string argString(argv[i]);
 
 		if (argString.find("help") != std::string::npos)
 		{

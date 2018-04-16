@@ -84,13 +84,19 @@ bool Sniffle::parseFilter(int argc, char** argv, int startOptionArg, int& nextAr
 	{
 		if (argv[i][0] != '-')
 		{
+			// TODO: this is really bad, but currently the only way to make this processing robust.
+			//       This whole command line processing mess needs to be completely re-done at some point...
+			if (strcmp(argv[i], "find") == 0 || strcmp(argv[i], "grep") == 0 || strcmp(argv[i], "match") == 0)
+			{
+				// we've reached the command to run, so we can break out.
+				break;
+			}
 			continue;
 		}
+		
+		std::string argString(argv[i]);
 
 		lastProcessedArg ++;
-
-		// otherwise, we want to process it...
-		std::string argString(argv[i]);
 
 		if (argString == "-filefilter-moddate" ||
 			argString == "-ff-m")
