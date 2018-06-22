@@ -18,8 +18,8 @@ Currently it does not use the most optimum algorithm for searching content (curr
 linear line-by-line search instead of something like Boyer-Moore) - in the future this will
 be improved.
 
-It can perform file searches, grepping of content of files, matching multiple search strings
-within files, and more functionality will be added in the future.
+It can perform file searches, grepping of content of files, counting occurances of strings, 
+matching multiple search strings within files, and more functionality will be added in the future.
 
 Find:
 -----
@@ -35,6 +35,14 @@ Grep:
 Output matches of content in found files that contain content.
 
     sniffle grep "Error 101" "/path/to/logs/*/program/*.log"
+
+Count:
+------
+
+Output counts of the occurances of the searched-for string within each file, where count > 0.
+
+    sniffle count "[Warning 552]" "/path/to/logs/*/program/*.log"
+
 
 Match:
 ------

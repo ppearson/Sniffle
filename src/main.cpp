@@ -31,6 +31,7 @@ static void printHelp(bool fullOptions)
 	fprintf(stderr, "sniffle [options] [filter] <\"/path/to/search/*.log\">\n");
 	fprintf(stderr, "sniffle [options] grep <stringToFind> <\"/path/to/search/*.log\">\n");
 	fprintf(stderr, "sniffle [options] grep <stringToFind> <\"/path/to/*/search/*.log\">\n");
+	fprintf(stderr, "sniffle [options] count <stringToFind>  <\"/path/to/*/search/*.log\">\n");
 	fprintf(stderr, "sniffle [options] match <tokens|to|find> <\"/path/to/search/*.log\">\n");
 	fprintf(stderr, "sniffle [options] match <tokens&to&find> <\"/path/to/*/search/*.log\">\n");
 	fprintf(stderr, "sniffle [options] debug <args>...    print args received.\n");
@@ -136,6 +137,19 @@ int main(int argc, char** argv)
 		std::string filePattern = argv[nextArg + 2];
 		
 		sniffle.runGrep(filePattern, contentsPattern);
+	}
+	else if (mainCommand == "count")
+	{
+		if (commandArgs < 3)
+		{
+			fprintf(stderr, "Error: Insufficient number of arguments for 'count' command.\n");
+			return -1;
+		}
+		
+		std::string contentsPattern = argv[nextArg + 1];
+		std::string filePattern = argv[nextArg + 2];
+		
+		sniffle.runCount(filePattern, contentsPattern);
 	}
 	else if (mainCommand == "match")
 	{

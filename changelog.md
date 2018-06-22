@@ -1,6 +1,11 @@
 Sniffle changelog
 =================
 
+Version 0.3
+-----------
+
+* Added count mode support, in order to count appearances of strings in files
+
 Version 0.2
 -----------
 

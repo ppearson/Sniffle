@@ -255,7 +255,88 @@ void Sniffle::runGrep(const std::string& filePattern, const std::string& content
 	if (printProgress)
 	{
 		// annoyingly, we need to clear the remainder of previous progress line here, hence the space padding...
-		fprintf(stderr, "\rFound content in %zu %s. Output piped to stdout.%-5s\n", foundCount, foundCount == 1 ? "file" : "files", " ");
+		fprintf(stderr, "\rFound content in %s %s. Output piped to stdout.%-5s\n", StringHelpers::formatNumberThousandsSeparator(foundCount).c_str(),
+							foundCount == 1 ? "file" : "files", " ");
+	}
+	else
+	{
+		if (SystemHelpers::isStdOutATTY())
+		{
+			fprintf(stderr, "Found content in %s %s.\n", StringHelpers::formatNumberThousandsSeparator(foundCount).c_str(),
+					foundCount == 1 ? "file" : "files");
+		}
+		else
+		{
+			fprintf(stderr, "Found content in %s %s. Output piped to stdout.\n", StringHelpers::formatNumberThousandsSeparator(foundCount).c_str(),
+					foundCount == 1 ? "file" : "files");
+		}
+	}
+}
+
+void Sniffle::runCount(const std::string& filePattern, const std::string& contentsPattern)
+{
+	// this can be done as a file find, plus additional contents search on the results.
+	// TODO: contents search in multiple threads...
+
+	std::vector<std::string> foundFiles;
+
+	fprintf(stderr, "Searching for files...\n");
+
+	if (!findFiles(filePattern, foundFiles, 0))
+	{
+		fprintf(stderr, "No files found matching file match criteria.\n");
+		return;
+	}
+
+	fprintf(stderr, "Found %s %s matching file match criteria.\n", StringHelpers::formatNumberThousandsSeparator(foundFiles.size()).c_str(),
+			foundFiles.size() == 1 ? "file" : "files");
+
+	bool printProgress = m_config.getPrintProgressWhenOutToStdOut() && !SystemHelpers::isStdOutATTY();
+
+	FileGrepper grepper(m_config);
+
+	bool foundPrevious = false;
+
+	size_t totalFiles = foundFiles.size();
+	size_t fileCount = 0;
+	size_t lastPercentage = 101;
+	size_t foundCount = 0;
+
+	if (printProgress)
+	{
+		fprintf(stderr, "Searching files for content counts...");
+	}
+
+	for (const std::string& fileItem : foundFiles)
+	{
+		if (printProgress)
+		{
+			fileCount++;
+			size_t thisPercentage = (fileCount * 100) / totalFiles;
+			if (thisPercentage != lastPercentage)
+			{
+				fprintf(stderr, "\rSearching files for content counts - %zu%% complete...", thisPercentage);
+				lastPercentage = thisPercentage;
+			}
+		}
+
+		// the grepper itself does any printing...
+		bool foundInFile = grepper.countBasic(fileItem, contentsPattern);
+
+		if (foundInFile)
+		{
+			foundCount++;
+		}
+
+		// TODO: this bit could be kept within FileGrepper...
+		foundPrevious |= foundInFile;
+	}
+
+	if (printProgress)
+	{
+		// annoyingly, we need to clear the remainder of previous progress line here, hence the space padding...
+		fprintf(stderr, "\rFound content in %s %s. Output piped to stdout.%-5s\n", StringHelpers::formatNumberThousandsSeparator(foundCount).c_str(),
+							foundCount == 1 ? "file" : "files", " ");
 	}
 	else
 	{

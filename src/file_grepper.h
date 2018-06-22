@@ -44,6 +44,8 @@ public:
 	
 	// slow, basic
 	bool grepBasic(const std::string& filename, const std::string& searchString, bool foundPreviousFile);
+	
+	bool countBasic(const std::string& filename, const std::string& searchString);
 
 	// match - initMatch() has to have been called previously for this to work...
 	bool matchBasic(const std::string& filename, bool foundPreviousFile);

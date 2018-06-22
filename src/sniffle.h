@@ -44,6 +44,8 @@ public:
 
 	void runGrep(const std::string& filePattern, const std::string& contentsPattern);
 	
+	void runCount(const std::string& filePattern, const std::string& contentsPattern);
+	
 	void runMatch(const std::string& filePattern, const std::string& contentsPattern);
 
 private:

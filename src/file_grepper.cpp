@@ -24,6 +24,7 @@
 
 #include "config.h"
 
+// somewhat arbitrary, and obviously not perfect, but good enough for now...
 static const unsigned int kStringLength = 2048;
 
 FileGrepper::FileGrepper(const Config& config) : m_config(config)
@@ -193,6 +194,53 @@ bool FileGrepper::grepBasic(const std::string& filename, const std::string& sear
 		return true;
 	}
 
+	return false;
+}
+
+bool FileGrepper::countBasic(const std::string& filename, const std::string& searchString)
+{
+	// slow and basic search...
+	std::fstream fileStream;
+	if (!openFileStream(filename, fileStream))
+		return false;
+	
+	unsigned int foundCount = 0;
+	
+	char buf[kStringLength];
+
+	while (fileStream.getline(buf, kStringLength))
+	{
+		const char* findI = strstr(buf, searchString.c_str());
+		
+		if (findI == NULL)
+			continue;
+		
+		// otherwise, we found the string
+		foundCount ++;
+	}
+
+	fileStream.close();
+
+	if (foundCount > 0)
+	{
+		// can't really think of a useful use-case where you wouldn't want the filename, but...
+		if (m_config.getOutputFilename())
+		{
+			fprintf(stdout, "%u: %s\n", foundCount, filename.c_str());
+		}
+		else
+		{
+			fprintf(stdout, "%u\n", foundCount);
+		}
+		
+		if (m_config.getFlushOutput())
+		{
+			fflush(stdout);
+		}
+
+		return true;
+	}
+	
 	return false;
 }
 
