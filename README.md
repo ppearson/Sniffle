@@ -39,7 +39,7 @@ Output matches of content in found files that contain content.
 Count:
 ------
 
-Output counts of the occurances of the searched-for string within each file, where count > 0.
+Output counts of the occurences of the searched-for string within each file, where count > 0.
 
     sniffle count "[Warning 552]" "/path/to/logs/*/program/*.log"
 
