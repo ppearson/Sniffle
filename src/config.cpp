@@ -104,7 +104,7 @@ Config::ParseResult Config::parseArgs(int argc, char** argv, int startOptionArg,
 		{
 			// TODO: this is really bad, but currently the only way to make this processing robust.
 			//       This whole command line processing mess needs to be completely re-done at some point...
-			if (strcmp(argv[i], "find") == 0 || strcmp(argv[i], "grep") == 0 || strcmp(argv[i], "match") == 0)
+			if (strcmp(argv[i], "find") == 0 || strcmp(argv[i], "grep") == 0 || strcmp(argv[i], "match") == 0 || strcmp(argv[i], "count") == 0)
 			{
 				// we've reached the command to run, so we can break out.
 				break;
