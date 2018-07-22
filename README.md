@@ -58,3 +58,24 @@ Match all (in order):
     sniffle match "Program 1.1.&[Error] 101" "/path/to/logs/*/program/*prog*.log"
 
 
+File filtering:
+---------------
+
+Filtering can be done as an additional condition on the initial files found, filtering for file modified date and the file size.
+
+Filter to search for files younger than two weeks old:
+
+    sniffle -ff-md y14d grep "Error 101" "/path/to/logs/*/program/*prog*.log"
+
+Filter to search for files older than 5 hours old:
+
+    sniffle -ff-md o5h grep "Error 101" "/path/to/logs/*/program/*prog*.log"
+
+Filter to search for files smaller than 12 MB in size:
+
+    sniffle -ff-s s12m grep "Error 101" "/path/to/logs/*/program/*prog*.log"
+
+Filter to search for files bigger than 1 GB in size:
+
+    sniffle -ff-s b1g grep "Error 101" "/path/to/logs/*/program/*prog*.log"
+

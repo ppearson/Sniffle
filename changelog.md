@@ -5,6 +5,7 @@ Version 0.3
 -----------
 
 * Added count mode support, in order to count appearances of strings in files
+* Added file size filtering support
 
 Version 0.2
 -----------
