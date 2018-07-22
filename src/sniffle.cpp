@@ -86,7 +86,10 @@ bool Sniffle::parseFilter(int argc, char** argv, int startOptionArg, int& nextAr
 		{
 			// TODO: this is really bad, but currently the only way to make this processing robust.
 			//       This whole command line processing mess needs to be completely re-done at some point...
-			if (strcmp(argv[i], "find") == 0 || strcmp(argv[i], "grep") == 0 || strcmp(argv[i], "match") == 0)
+			if (strcmp(argv[i], "find") == 0
+					|| strcmp(argv[i], "grep") == 0
+					|| strcmp(argv[i], "match") == 0
+					|| strcmp(argv[i], "count") == 0)
 			{
 				// we've reached the command to run, so we can break out.
 				break;
@@ -191,7 +194,7 @@ bool Sniffle::parseFilter(int argc, char** argv, int startOptionArg, int& nextAr
 
 			 // currently we just support single char unit at the end of string, so...
 			 std::string sizeStr = remainder.substr(0, remainder.size() - 1);
-			 size_t sizeValueInKb = atoi(sizeStr.c_str());
+			 size_t sizeValueInKb = atoi(sizeStr.c_str()) * 1024;
 			 std::string unit = remainder.substr(remainder.size() - 1, 1);
 
 			 // b4m == bigger than 4 MB

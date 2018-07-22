@@ -189,13 +189,11 @@ bool FileFinder::getRelativeFilesInDirectoryRecursive(const std::string& searchD
 			if (m_config.getIgnoreHiddenFiles() && strncmp(dirEnt->d_name, ".", 1) == 0)
 				continue;
 
-			std::string fullRelativePath;
-
 			if (m_filter.getFilterTypeFlags() != 0)
 			{
 				// if we need to do filtering, we need to stat the file to get the full details...
 
-				fullRelativePath = FileHelpers::combinePaths(searchDirectoryPath, dirEnt->d_name);
+				std::string fullRelativePath = FileHelpers::combinePaths(searchDirectoryPath, dirEnt->d_name);
 
 				struct stat statState;
 				int ret = stat(fullRelativePath.c_str(), &statState);
@@ -230,11 +228,7 @@ bool FileFinder::getRelativeFilesInDirectoryRecursive(const std::string& searchD
 
 			if (m_pFilenameMatcher->doesMatch(dirEnt->d_name))
 			{
-				if (fullRelativePath.empty())
-				{
-					fullRelativePath = FileHelpers::combinePaths(relativeDirectoryPath, dirEnt->d_name);
-				}
-
+				std::string fullRelativePath = FileHelpers::combinePaths(relativeDirectoryPath, dirEnt->d_name);
 				files.push_back(fullRelativePath);
 			}
 		}
