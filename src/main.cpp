@@ -51,7 +51,8 @@ static void printHelp(bool fullOptions)
 		fprintf(stderr, " -A <line_count>\t\tContext lines to print after match.\n");
 		
 		fprintf(stderr, "\nFilters:\n");
-		fprintf(stderr, " -filefilter-moddate (-ff-m) <[y/o][6][h/d/w]>\n");
+		fprintf(stderr, " -filefilter-moddate (-ff-md) <[y/o][6][h/d/w]>\n");
+		fprintf(stderr, " -filefilter-size (-ff-s) <[b/s][6][k/m/g]>\n");
 
 		Config tempConfig;
 		tempConfig.printFullOptions();

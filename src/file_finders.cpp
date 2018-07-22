@@ -143,15 +143,25 @@ bool FileFinder::getRelativeFilesInDirectoryRecursive(const std::string& searchD
 					if (m_config.getIgnoreHiddenFiles() && strncmp(dirEnt->d_name, ".", 1) == 0)
 						continue;
 
-					if (m_filter.getFilterType() != FilterParameters::eFilterNone)
+					if (m_filter.getFilterTypeFlags() != 0)
 					{
-						if (m_filter.getFilterType() == FilterParameters::eFilterFileModifiedDate_Older &&
+						if ((m_filter.getFilterTypeFlags() & FilterParameters::FILTER_FILEMODIFIEDDATE_OLDER) &&
 							 statState.st_mtime > m_filter.getModifiedTimestampThreshold())
 						{
 							continue;
 						}
-						else if (m_filter.getFilterType() == FilterParameters::eFilterFileModifiedDate_Younger &&
+						else if ((m_filter.getFilterTypeFlags() & FilterParameters::FILTER_FILEMODIFIEDDATE_YOUNGER) &&
 							 statState.st_mtime < m_filter.getModifiedTimestampThreshold())
+						{
+							continue;
+						}
+						else if ((m_filter.getFilterTypeFlags() & FilterParameters::FILTER_FILESIZE_LARGER) &&
+							 statState.st_size < m_filter.getFileSizeThreshold())
+						{
+							continue;
+						}
+						else if ((m_filter.getFilterTypeFlags() & FilterParameters::FILTER_FILESIZE_SMALLER) &&
+							 statState.st_size > m_filter.getFileSizeThreshold())
 						{
 							continue;
 						}
@@ -181,7 +191,7 @@ bool FileFinder::getRelativeFilesInDirectoryRecursive(const std::string& searchD
 
 			std::string fullRelativePath;
 
-			if (m_filter.getFilterType() != FilterParameters::eFilterNone)
+			if (m_filter.getFilterTypeFlags() != 0)
 			{
 				// if we need to do filtering, we need to stat the file to get the full details...
 
@@ -196,13 +206,23 @@ bool FileFinder::getRelativeFilesInDirectoryRecursive(const std::string& searchD
 					continue;
 				}
 
-				if (m_filter.getFilterType() == FilterParameters::eFilterFileModifiedDate_Older &&
+				if ((m_filter.getFilterTypeFlags() & FilterParameters::FILTER_FILEMODIFIEDDATE_OLDER) &&
 					 statState.st_mtime > m_filter.getModifiedTimestampThreshold())
 				{
 					continue;
 				}
-				else if (m_filter.getFilterType() == FilterParameters::eFilterFileModifiedDate_Younger &&
+				else if ((m_filter.getFilterTypeFlags() & FilterParameters::FILTER_FILEMODIFIEDDATE_YOUNGER) &&
 					 statState.st_mtime < m_filter.getModifiedTimestampThreshold())
+				{
+					continue;
+				}
+				else if ((m_filter.getFilterTypeFlags() & FilterParameters::FILTER_FILESIZE_LARGER) &&
+					 statState.st_size < m_filter.getFileSizeThreshold())
+				{
+					continue;
+				}
+				else if ((m_filter.getFilterTypeFlags() & FilterParameters::FILTER_FILESIZE_SMALLER) &&
+					 statState.st_size > m_filter.getFileSizeThreshold())
 				{
 					continue;
 				}
@@ -250,13 +270,23 @@ bool FileFinder::getRelativeFilesInDirectoryRecursive(const std::string& searchD
 				if (m_config.getIgnoreHiddenFiles() && strncmp(dirEnt->d_name, ".", 1) == 0)
 					continue;
 
-				if (m_filter.getFilterType() == FilterParameters::eFilterFileModifiedDate_Older &&
+				if ((m_filter.getFilterTypeFlags() & FilterParameters::FILTER_FILEMODIFIEDDATE_OLDER) &&
 					 statState.st_mtime > m_filter.getModifiedTimestampThreshold())
 				{
 					continue;
 				}
-				else if (m_filter.getFilterType() == FilterParameters::eFilterFileModifiedDate_Younger &&
+				else if ((m_filter.getFilterTypeFlags() & FilterParameters::FILTER_FILEMODIFIEDDATE_YOUNGER) &&
 					 statState.st_mtime < m_filter.getModifiedTimestampThreshold())
+				{
+					continue;
+				}
+				else if ((m_filter.getFilterTypeFlags() & FilterParameters::FILTER_FILESIZE_LARGER) &&
+					 statState.st_size < m_filter.getFileSizeThreshold())
+				{
+					continue;
+				}
+				else if ((m_filter.getFilterTypeFlags() & FilterParameters::FILTER_FILESIZE_SMALLER) &&
+					 statState.st_size > m_filter.getFileSizeThreshold())
 				{
 					continue;
 				}

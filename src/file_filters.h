@@ -25,38 +25,46 @@ class FilterParameters
 {
 public:
 	
-	// currently we only support one active filter type
-	enum FilterType
+	// TODO: this now currently supports one of each type, but not two of each type, so still not great...
+	// TODO: maybe chaining together of filter ops?
+	enum FilterFlags
 	{
-		eFilterNone,
-		eFilterFileModifiedDate_Younger,
-		eFilterFileModifiedDate_Older,
-		eFilterFileSize_Greater,
-		eFilterFileSize_Smaller
+		FILTER_NONE							= 0,
+		FILTER_FILEMODIFIEDDATE_YOUNGER		= 1 << 0,
+		FILTER_FILEMODIFIEDDATE_OLDER		= 1 << 1,
+		FILTER_FILESIZE_LARGER				= 1 << 2,
+		FILTER_FILESIZE_SMALLER				= 1 << 3
 	};
 	
-	FilterParameters() : m_filterType(eFilterNone)
+	FilterParameters() : m_filterTypeFlags(0)
 	{
 	}
 
-	FilterType getFilterType() const
+	unsigned int getFilterTypeFlags() const
 	{
-		return m_filterType;
+		return m_filterTypeFlags;
 	}
 
 	time_t getModifiedTimestampThreshold() const
 	{
 		return m_modifiedTimestampThreshold;
 	}
+
+	size_t getFileSizeThreshold() const
+	{
+		return m_fileSizeThreshold;
+	}
 	
 	// this isn't very principled, but...
 	void setFileModifiedDateFilter(bool younger, unsigned int deltaThresholdInHours);
+
+	void setFileSizeFilter(bool larger, size_t fileSizeThresholdInBytes);
 	
 protected:
-	FilterType			m_filterType;
+	unsigned int		m_filterTypeFlags;
 
 	time_t				m_modifiedTimestampThreshold;
-	
+	size_t				m_fileSizeThreshold;
 };
 
 #endif // FILE_FILTERS_H

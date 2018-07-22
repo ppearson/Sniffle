@@ -23,7 +23,14 @@ const unsigned int kSecondsInDay = 3600;
 // for setting as a delta from current time
 void FilterParameters::setFileModifiedDateFilter(bool younger, unsigned int deltaThresholdInHours)
 {
-	m_filterType = (younger) ? eFilterFileModifiedDate_Younger : eFilterFileModifiedDate_Older;
+	if (younger)
+	{
+		m_filterTypeFlags |= FILTER_FILEMODIFIEDDATE_YOUNGER;
+	}
+	else
+	{
+		m_filterTypeFlags |= FILTER_FILEMODIFIEDDATE_OLDER;
+	}
 	
 	// get current time.
 	// TODO: think about time-zones?
@@ -35,3 +42,16 @@ void FilterParameters::setFileModifiedDateFilter(bool younger, unsigned int delt
 	m_modifiedTimestampThreshold -= finalThresholdDelta;
 }
 
+void FilterParameters::setFileSizeFilter(bool larger, size_t fileSizeThresholdInBytes)
+{
+	if (larger)
+	{
+		m_filterTypeFlags |= FILTER_FILESIZE_LARGER;
+	}
+	else
+	{
+		m_filterTypeFlags |= FILTER_FILESIZE_SMALLER;
+	}
+
+	m_fileSizeThreshold = fileSizeThresholdInBytes;
+}

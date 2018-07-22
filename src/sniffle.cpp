@@ -99,7 +99,7 @@ bool Sniffle::parseFilter(int argc, char** argv, int startOptionArg, int& nextAr
 		lastProcessedArg ++;
 
 		if (argString == "-filefilter-moddate" ||
-			argString == "-ff-m")
+			argString == "-ff-md")
 		{
 			const char firstOp = argv[i + 1][0];
 
@@ -157,6 +157,63 @@ bool Sniffle::parseFilter(int argc, char** argv, int startOptionArg, int& nextAr
 			//       in one place (not here AND Config class)...
 			lastProcessedArg = i + 1;
 		}
+		else if (argString == "-filefilter-size" ||
+				 argString == "-ff-s")
+		 {
+			 const char firstOp = argv[i + 1][0];
+
+			 // we can't easily use '<' and '>' chars here due to their piping semantics in the shell which is a bit annoying...
+			 if (firstOp != 'b' && firstOp != 's')
+			 {
+				 error = true;
+
+				 lastProcessedArg ++;
+
+				 continue;
+			 }
+
+			 std::string nextArg(argv[i + 1]);
+
+			 bool bigger = firstOp == 'b';
+
+			 // check that the next char is not null
+			 if (argv[i + 1][1] == 0)
+			 {
+				 // don't have enough items in the argument
+				 error = true;
+
+				 lastProcessedArg ++;
+
+				 continue;
+			 }
+
+			 std::string remainder = nextArg.substr(1);
+
+			 // currently we just support single char unit at the end of string, so...
+			 std::string sizeStr = remainder.substr(0, remainder.size() - 1);
+			 size_t sizeValueInKb = atoi(sizeStr.c_str());
+			 std::string unit = remainder.substr(remainder.size() - 1, 1);
+
+			 // b4m == bigger than 4 MB
+			 // s1g == smaller than 1 GB
+			 if (unit == "m")
+			 {
+				 sizeValueInKb *= 1024;
+			 }
+			 else if (unit == "g")
+			 {
+				 sizeValueInKb *= 1024 * 1024;
+			 }
+
+			 m_filter.setFileSizeFilter(bigger, sizeValueInKb);
+
+			 i++;
+
+			 // TODO: this works for the moment, but once we add a second argument in this loop
+			 //       it'll get a bit more tricky, and we ought to do this arg parsing properly and only
+			 //       in one place (not here AND Config class)...
+			 lastProcessedArg = i + 1;
+		 }
 	}
 
 	nextArgIndex = lastProcessedArg;
@@ -654,7 +711,7 @@ bool Sniffle::configureFileFinder(const PatternSearch& pattern)
 		}
 	}
 
-	if (m_filter.getFilterType() != FilterParameters::eFilterNone)
+	if (m_filter.getFilterTypeFlags() != 0)
 	{
 		m_pFileFinder->setFilterParameters(m_filter);
 	}
