@@ -1,6 +1,6 @@
 /*
  Sniffle
- Copyright 2018 Peter Pearson.
+ Copyright 2018-2019 Peter Pearson.
 
  Licensed under the Apache License, Version 2.0 (the "License");
  You may not use this file except in compliance with the License.
@@ -24,11 +24,11 @@
 
 static void printHelp(bool fullOptions)
 {
-	fprintf(stderr, "Sniffle version 0.2.\n");
+	fprintf(stderr, "Sniffle version 0.4.\n");
 	fprintf(stderr, "Usage:\n");
 	fprintf(stderr, "sniffle [options] find <\"/path/to/search/*.log\">\n");
 	fprintf(stderr, "sniffle [options] find <\"/path/to/*/search/*.log\">\n");
-	fprintf(stderr, "sniffle [options] [filter] <\"/path/to/search/*.log\">\n");
+	fprintf(stderr, "sniffle [options] find [filter] <\"/path/to/search/*.log\">\n");
 	fprintf(stderr, "sniffle [options] grep <stringToFind> <\"/path/to/search/*.log\">\n");
 	fprintf(stderr, "sniffle [options] grep <stringToFind> <\"/path/to/*/search/*.log\">\n");
 	fprintf(stderr, "sniffle [options] count <stringToFind>  <\"/path/to/*/search/*.log\">\n");
@@ -46,6 +46,7 @@ static void printHelp(bool fullOptions)
 //		fprintf(stderr, " -gt <thread_count>\t\t\tNumber of threads to use to grep/process files.\n");
 		fprintf(stderr, " -n\t\t\t\tOutput line numbers alongside content.\n");
 		fprintf(stderr, " -rd <limit>\t\t\tDirectory recursion depth limit.\n");
+		fprintf(stderr, " -sc <string>\t\tShort Circuit string.\n");
 		fprintf(stderr, " -C <line_count>\t\tContext lines to print either side of match.\n");
 //		fprintf(stderr, " -B <line_count>\t\tContext lines to print before match.\n");
 		fprintf(stderr, " -A <line_count>\t\tContext lines to print after match.\n");

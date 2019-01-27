@@ -1,6 +1,6 @@
 /*
  Sniffle
- Copyright 2018 Peter Pearson.
+ Copyright 2018-2019 Peter Pearson.
 
  Licensed under the Apache License, Version 2.0 (the "License");
  You may not use this file except in compliance with the License.
@@ -27,7 +27,8 @@
 // somewhat arbitrary, and obviously not perfect, but good enough for now...
 static const unsigned int kStringLength = 2048;
 
-FileGrepper::FileGrepper(const Config& config) : m_config(config)
+FileGrepper::FileGrepper(const Config& config) : m_config(config),
+	m_shortCircuit(false)
 {
 	m_readBufferSize = 4096;
 
@@ -39,6 +40,12 @@ FileGrepper::FileGrepper(const Config& config) : m_config(config)
 	if (m_config.getBeforeLines() > 0)
 	{
 		m_stringBuffer.init(m_config.getBeforeLines(), kStringLength);
+	}
+	
+	if (!m_config.getShortCircuitString().empty())
+	{
+		m_shortCircuit = true;
+		m_shortCircuitString = m_config.getShortCircuitString();
 	}
 }
 
@@ -91,7 +98,7 @@ bool FileGrepper::grepBasic(const std::string& filename, const std::string& sear
 	{
 		const char* findI = strstr(buf, searchString.c_str());
 		
-		if (findI != NULL)
+		if (findI != nullptr)
 		{
 			// we found the string
 			
@@ -178,6 +185,14 @@ bool FileGrepper::grepBasic(const std::string& filename, const std::string& sear
 
 			afterLinesToPrint--;
 		}
+		else if (m_shortCircuit)
+		{
+			const char* findI = strstr(buf, m_shortCircuitString.c_str());
+			if (findI != nullptr)
+			{
+				break;
+			}
+		}
 
 		lineIndex ++;
 	}
@@ -212,8 +227,18 @@ bool FileGrepper::countBasic(const std::string& filename, const std::string& sea
 	{
 		const char* findI = strstr(buf, searchString.c_str());
 		
-		if (findI == NULL)
+		if (findI == nullptr)
+		{
+			if (m_shortCircuit)
+			{
+				findI = strstr(buf, m_shortCircuitString.c_str());
+				if (findI != nullptr)
+				{
+					break;
+				}
+			}
 			continue;
+		}
 		
 		// otherwise, we found the string
 		foundCount ++;
@@ -280,7 +305,7 @@ bool FileGrepper::matchBasicOr(const std::string& filename, bool foundPreviousFi
 		
 		for (const std::string& matchString : m_aMatchItems)
 		{
-			if (strstr(buf, matchString.c_str()) != NULL)
+			if (strstr(buf, matchString.c_str()) != nullptr)
 			{
 				foundAString = true;
 				break;
@@ -363,6 +388,14 @@ bool FileGrepper::matchBasicOr(const std::string& filename, bool foundPreviousFi
 
 			afterLinesToPrint--;
 		}
+		else if (m_shortCircuit)
+		{
+			const char* findI = strstr(buf, m_shortCircuitString.c_str());
+			if (findI != nullptr)
+			{
+				break;
+			}
+		}
 
 		lineIndex ++;
 	}
@@ -415,10 +448,19 @@ bool FileGrepper::matchBasicAnd(const std::string& filename, bool foundPreviousF
 
 	while (fileStream.getline(buf, kStringLength))
 	{
-		if (strstr(buf, itemToMatch.c_str()) == NULL)
+		if (strstr(buf, itemToMatch.c_str()) == nullptr)
 		{
 			if (!foundAll)
 			{
+				if (m_shortCircuit)
+				{
+					const char* findI = strstr(buf, m_shortCircuitString.c_str());
+					if (findI != nullptr)
+					{
+						break;
+					}
+				}
+				
 				// didn't find it, and haven't found the last item yet, so continue on to the next line
 				lineIndex ++;
 				continue;

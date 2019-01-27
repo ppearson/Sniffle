@@ -1,6 +1,6 @@
 /*
  Sniffle
- Copyright 2018 Peter Pearson.
+ Copyright 2018-2019 Peter Pearson.
 
  Licensed under the Apache License, Version 2.0 (the "License");
  You may not use this file except in compliance with the License.
@@ -215,6 +215,13 @@ Config::ParseResult Config::parseArgs(int argc, char** argv, int startOptionArg,
 
 			lastProcessedArg ++;
 		}
+		else if (argString == "-sc")
+		{
+			std::string nextArg(argv[i + 1]);
+			
+			m_shortCircuitString = nextArg;
+			lastProcessedArg ++;
+		}
 		else
 		{
 			// otherwise, don't do anything, as it might be a filter param
@@ -256,6 +263,7 @@ void Config::printFullOptions() const
 	fprintf(stderr, "blankLinesBetweenFiles: %i:\n", m_blankLinesBetweenFiles);
 	fprintf(stderr, "matchItemOrSeperatorChar: %c:\n", m_matchItemOrSeperatorChar);
 	fprintf(stderr, "matchItemAndSeperatorChar: %c:\n", m_matchItemAndSeperatorChar);
+	fprintf(stderr, "shortCircuitString: %s:\n", m_shortCircuitString.c_str());
 	fprintf(stderr, "context:\t\t\tContent lines to print either side of match.\n");
 	fprintf(stderr, "after-context:\t\t\tContent lines to print after match.\n");
 //	fprintf(stderr, "before-context:\t\t\tContent lines to print before match.\n");
@@ -368,6 +376,13 @@ bool Config::applyKeyValueSetting(const std::string& key, const std::string& val
 		if (!value.empty())
 		{
 			m_matchItemAndSeperatorChar = value[0];
+		}
+	}
+	else if (key == "shortCircuitString")
+	{
+		if (!value.empty())
+		{
+			m_shortCircuitString = value;
 		}
 	}
 	else if (key == "context")

@@ -1,6 +1,6 @@
 /*
  Sniffle
- Copyright 2018 Peter Pearson.
+ Copyright 2018-2019 Peter Pearson.
 
  Licensed under the Apache License, Version 2.0 (the "License");
  You may not use this file except in compliance with the License.
@@ -121,7 +121,6 @@ public:
 		return m_afterLines;
 	}
 
-
 	bool getBlankLinesBetweenFiles() const
 	{
 		return m_blankLinesBetweenFiles;
@@ -135,6 +134,11 @@ public:
 	char getMatchItemAndSeperatorChar() const
 	{
 		return m_matchItemAndSeperatorChar;
+	}
+	
+	const std::string& getShortCircuitString() const
+	{
+		return m_shortCircuitString;
 	}
 
 	void printFullOptions() const;
@@ -188,6 +192,8 @@ private:
 
 	char			m_matchItemOrSeperatorChar; //
 	char			m_matchItemAndSeperatorChar; //
+	
+	std::string		m_shortCircuitString;
 
 //	std::string		m_outputToFile; // if non-empty, write output to this file
 };

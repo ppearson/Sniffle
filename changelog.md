@@ -1,6 +1,9 @@
 Sniffle changelog
 =================
 
+* Added short circuit option, which when enabled will make Sniffle abort processing the current file
+  when it finds the specified string
+
 Version 0.3
 -----------
 
