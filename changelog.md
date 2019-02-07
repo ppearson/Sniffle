@@ -3,6 +3,8 @@ Sniffle changelog
 
 * Added short circuit option, which when enabled will make Sniffle abort processing the current file
   when it finds the specified string
+* Optimised file finding algorithm to check filename before doing a stat() for any find filters, so as
+  to avoid needlessly doing stat() calls on files which were never going to match anyway.
 
 Version 0.3
 -----------

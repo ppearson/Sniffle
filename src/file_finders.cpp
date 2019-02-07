@@ -189,6 +189,11 @@ bool FileFinder::getRelativeFilesInDirectoryRecursive(const std::string& searchD
 			if (m_config.getIgnoreHiddenFiles() && strncmp(dirEnt->d_name, ".", 1) == 0)
 				continue;
 
+			// do the filename comparison first before any stat() for the filters, on the assumption it will be cheaper
+			// and might allow us to skip the need to stat() files.
+			if (!m_pFilenameMatcher->doesMatch(dirEnt->d_name))
+				continue;
+
 			if (m_filter.getFilterTypeFlags() != 0)
 			{
 				// if we need to do filtering, we need to stat the file to get the full details...
@@ -226,11 +231,8 @@ bool FileFinder::getRelativeFilesInDirectoryRecursive(const std::string& searchD
 				}
 			}
 
-			if (m_pFilenameMatcher->doesMatch(dirEnt->d_name))
-			{
-				std::string fullRelativePath = FileHelpers::combinePaths(relativeDirectoryPath, dirEnt->d_name);
-				files.push_back(fullRelativePath);
-			}
+			std::string fullRelativePath = FileHelpers::combinePaths(relativeDirectoryPath, dirEnt->d_name);
+			files.push_back(fullRelativePath);
 		}
 		else
 		{
