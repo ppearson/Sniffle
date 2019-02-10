@@ -98,6 +98,8 @@ bool FileGrepper::grepBasic(const std::string& filename, const std::string& sear
 
 	unsigned int lineIndex = 1; // start at one as this value is only used for printing line number purposes
 
+	bool shouldShortCircuit = false;
+
 	// make a note of the list line we printed output lines for so we can prevent outputting lines multiple times
 	// when context (before and after) content line output is enabled.
 	unsigned int lastOutputContentLine = 0;
@@ -112,6 +114,15 @@ bool FileGrepper::grepBasic(const std::string& filename, const std::string& sear
 		}
 
 		const char* findI = strstr(buf, searchString.c_str());
+
+		if (m_shortCircuit && !shouldShortCircuit)
+		{
+			const char* findI = strstr(buf, m_shortCircuitString.c_str());
+			if (findI != nullptr)
+			{
+				shouldShortCircuit = true;
+			}
+		}
 		
 		if (findI != nullptr)
 		{
@@ -228,13 +239,10 @@ bool FileGrepper::grepBasic(const std::string& filename, const std::string& sear
 
 			afterLinesToPrint--;
 		}
-		else if (m_shortCircuit)
+
+		if (shouldShortCircuit)
 		{
-			const char* findI = strstr(buf, m_shortCircuitString.c_str());
-			if (findI != nullptr)
-			{
-				break;
-			}
+			break;
 		}
 
 		lineIndex ++;
@@ -338,6 +346,8 @@ bool FileGrepper::matchBasicOr(const std::string& filename, bool foundPreviousFi
 
 	unsigned int afterLinesToPrint = 0;
 
+	bool shouldShortCircuit = false;
+
 	char buf[kStringLength];
 
 	unsigned int lineIndex = 1; // start at one as this value is only used for printing line number purposes
@@ -352,6 +362,15 @@ bool FileGrepper::matchBasicOr(const std::string& filename, bool foundPreviousFi
 			{
 				foundAString = true;
 				break;
+			}
+		}
+
+		if (m_shortCircuit && !shouldShortCircuit)
+		{
+			const char* findI = strstr(buf, m_shortCircuitString.c_str());
+			if (findI != nullptr)
+			{
+				shouldShortCircuit = true;
 			}
 		}
 		
@@ -431,13 +450,10 @@ bool FileGrepper::matchBasicOr(const std::string& filename, bool foundPreviousFi
 
 			afterLinesToPrint--;
 		}
-		else if (m_shortCircuit)
+
+		if (shouldShortCircuit)
 		{
-			const char* findI = strstr(buf, m_shortCircuitString.c_str());
-			if (findI != nullptr)
-			{
-				break;
-			}
+			break;
 		}
 
 		lineIndex ++;
@@ -478,6 +494,8 @@ bool FileGrepper::matchBasicAnd(const std::string& filename, bool foundPreviousF
 	bool foundAll = false;
 	
 	unsigned int afterLinesToPrint = 0;
+
+	bool shouldShortCircuit = false;
 	
 	// temp buffer for formatting output
 	char szTemp[kStringLength];
@@ -491,19 +509,24 @@ bool FileGrepper::matchBasicAnd(const std::string& filename, bool foundPreviousF
 
 	while (fileStream.getline(buf, kStringLength))
 	{
+		if (m_shortCircuit && !shouldShortCircuit)
+		{
+			const char* findI = strstr(buf, m_shortCircuitString.c_str());
+			if (findI != nullptr)
+			{
+				shouldShortCircuit = true;
+			}
+		}
+
 		if (strstr(buf, itemToMatch.c_str()) == nullptr)
 		{
 			if (!foundAll)
 			{
-				if (m_shortCircuit)
+				if (shouldShortCircuit)
 				{
-					const char* findI = strstr(buf, m_shortCircuitString.c_str());
-					if (findI != nullptr)
-					{
-						break;
-					}
+					break;
 				}
-				
+
 				// didn't find it, and haven't found the last item yet, so continue on to the next line
 				lineIndex ++;
 				continue;

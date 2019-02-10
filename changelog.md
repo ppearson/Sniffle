@@ -1,6 +1,9 @@
 Sniffle changelog
 =================
 
+Version 0.4
+-----------
+
 * Added short circuit option, which when enabled will make Sniffle abort processing the current file
   when it finds the specified string
 * Optimised file finding algorithm to check filename before doing a stat() for any find filters, so as
@@ -9,6 +12,7 @@ Sniffle changelog
   in grep mode (support for within other modes to follow later).
 * Added special-casing to file find functionality to allow specifying a single file (effectively short-circuits
   the find process).
+* Fixed some issues with short circuit option not always triggering correctly.
 
 Version 0.3
 -----------
