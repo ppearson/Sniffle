@@ -1,6 +1,6 @@
 /*
  Sniffle
- Copyright 2018 Peter Pearson.
+ Copyright 2018-2019 Peter Pearson.
 
  Licensed under the Apache License, Version 2.0 (the "License");
  You may not use this file except in compliance with the License.
@@ -560,6 +560,7 @@ PatternSearch Sniffle::classifyPattern(const std::string& pattern)
 	// currently we only support one wildcard directory
 
 	bool foundDirWildcard = false;
+	bool foundAnyWildcard = false;
 	bool collapseRemainderDirs = true; // collapse remainder directories into one item if possible
 	std::string remainderDirsItem;
 
@@ -567,6 +568,11 @@ PatternSearch Sniffle::classifyPattern(const std::string& pattern)
 	for (unsigned int i = 0; i < patternTokens.size(); i++)
 	{
 		const std::string& token = patternTokens[i];
+
+		if (token.find("*") != std::string::npos)
+		{
+			foundAnyWildcard = true;
+		}
 
 		bool lastToken = i == (patternTokens.size() - 1);
 
@@ -616,13 +622,20 @@ PatternSearch Sniffle::classifyPattern(const std::string& pattern)
 
 	if (!result.fileMatch.empty())
 	{
-		if (foundDirWildcard)
+		if (foundAnyWildcard)
 		{
-			result.type = PatternSearch::ePatternWildcardDir;
+			if (foundDirWildcard)
+			{
+				result.type = PatternSearch::ePatternWildcardDir;
+			}
+			else
+			{
+				result.type = PatternSearch::ePatternSimple;
+			}
 		}
 		else
 		{
-			result.type = PatternSearch::ePatternSimple;
+			result.type = PatternSearch::ePatternSingleFile;
 		}
 	}
 
@@ -725,6 +738,14 @@ bool Sniffle::configureFileFinder(const PatternSearch& pattern)
 bool Sniffle::findFiles(const std::string& pattern, std::vector<std::string>& foundFiles, unsigned int findFlags)
 {
 	PatternSearch patternRes = classifyPattern(pattern);
+
+	// special-case single file just for completeness...
+	if (patternRes.type == PatternSearch::ePatternSingleFile)
+	{
+		// TODO: check file exists
+		foundFiles.push_back(pattern);
+		return true;
+	}
 
 	if (!configureFilenameMatcher(patternRes))
 	{

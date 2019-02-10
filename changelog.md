@@ -7,6 +7,8 @@ Sniffle changelog
   to avoid needlessly doing stat() calls on files which were never going to match anyway.
 * Added support for outputting content lines before the found line (-B or with -C for both before and after)
   in grep mode (support for within other modes to follow later).
+* Added special-casing to file find functionality to allow specifying a single file (effectively short-circuits
+  the find process).
 
 Version 0.3
 -----------
