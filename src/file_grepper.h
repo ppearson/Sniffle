@@ -65,10 +65,10 @@ private:
 		eMatchTypeAnd
 	};
 
-
 	// cached stuff
 	unsigned int		m_readBufferSize;
 	
+	bool				m_cacheBeforeLines;
 	StringBuffer		m_stringBuffer;
 	
 	// match items

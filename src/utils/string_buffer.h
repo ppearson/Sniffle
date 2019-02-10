@@ -1,6 +1,6 @@
 /*
  Sniffle
- Copyright 2018 Peter Pearson.
+ Copyright 2018-2019 Peter Pearson.
 
  Licensed under the Apache License, Version 2.0 (the "License");
  You may not use this file except in compliance with the License.
@@ -28,8 +28,9 @@ class StringBuffer
 {
 public:
 	StringBuffer() :
-	    m_size(0),
-	    m_currentIndex(0)
+		m_bufferSize(0),
+		m_currentIndex(0),
+		m_itemCount(0)
 	{
 	}
 
@@ -37,7 +38,7 @@ public:
 	{
 		m_buffers.resize(numStrings);
 
-		m_size = numStrings;
+		m_bufferSize = numStrings;
 
 		for (std::string& buffer : m_buffers)
 		{
@@ -45,18 +46,22 @@ public:
 		}
 
 		m_currentIndex = 0;
+		m_itemCount = 0;
 	}
 
 	void reset()
 	{
 		m_currentIndex = 0;
+		m_itemCount = 0;
 	}
 
 	char* getNextBuffer()
 	{
 		char* buffer = (char*)m_buffers[m_currentIndex].c_str();
 
-		m_currentIndex = (m_currentIndex + 1) % m_size;
+		m_currentIndex = (m_currentIndex + 1) % m_bufferSize;
+
+		m_itemCount++;
 
 		return buffer;
 	}
@@ -66,12 +71,15 @@ public:
 	{
 		// do this as signed...
 		int offset = ((int)index - (int)m_currentIndex);
+
+		unsigned int maxNum = std::min(m_bufferSize, m_itemCount);
+
 		if (offset < 0)
 		{
-			offset += m_size;
+			offset += maxNum;
 		}
 
-		offset = m_size - offset - 1;
+		offset = maxNum - offset - 1;
 
 //		fprintf(stderr, " lastIndex: %i\n", offset);
 
@@ -83,8 +91,9 @@ protected:
 	// TODO: allocate this in one big block to avoid cache misses?
 	std::vector<std::string>	m_buffers;
 
-	unsigned int				m_size;
+	unsigned int				m_bufferSize;
 	unsigned int				m_currentIndex;
+	unsigned int				m_itemCount;
 };
 
 #endif // STRING_BUFFER_H

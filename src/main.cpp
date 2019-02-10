@@ -48,7 +48,7 @@ static void printHelp(bool fullOptions)
 		fprintf(stderr, " -rd <limit>\t\t\tDirectory recursion depth limit.\n");
 		fprintf(stderr, " -sc <string>\t\tShort Circuit string.\n");
 		fprintf(stderr, " -C <line_count>\t\tContext lines to print either side of match.\n");
-//		fprintf(stderr, " -B <line_count>\t\tContext lines to print before match.\n");
+		fprintf(stderr, " -B <line_count>\t\tContext lines to print before match.\n");
 		fprintf(stderr, " -A <line_count>\t\tContext lines to print after match.\n");
 		
 		fprintf(stderr, "\nFilters:\n");

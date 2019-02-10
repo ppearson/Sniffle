@@ -5,6 +5,8 @@ Sniffle changelog
   when it finds the specified string
 * Optimised file finding algorithm to check filename before doing a stat() for any find filters, so as
   to avoid needlessly doing stat() calls on files which were never going to match anyway.
+* Added support for outputting content lines before the found line (-B or with -C for both before and after)
+  in grep mode (support for within other modes to follow later).
 
 Version 0.3
 -----------

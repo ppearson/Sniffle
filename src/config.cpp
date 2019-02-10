@@ -57,6 +57,8 @@ void Config::loadConfigFile()
 	if (!homeDir)
 		return;
 
+	// TODO: $XDG_CONFIG_HOME
+
 	std::string configFilePath = FileHelpers::combinePaths(std::string(homeDir), ".config/sniffle.conf");
 
 	std::fstream fileStream(configFilePath.c_str(), std::ios::in);
@@ -266,7 +268,7 @@ void Config::printFullOptions() const
 	fprintf(stderr, "shortCircuitString: %s:\n", m_shortCircuitString.c_str());
 	fprintf(stderr, "context:\t\t\tContent lines to print either side of match.\n");
 	fprintf(stderr, "after-context:\t\t\tContent lines to print after match.\n");
-//	fprintf(stderr, "before-context:\t\t\tContent lines to print before match.\n");
+	fprintf(stderr, "before-context:\t\t\tContent lines to print before match.\n");
 }
 
 // for config file

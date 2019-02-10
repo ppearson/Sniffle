@@ -28,6 +28,7 @@
 static const unsigned int kStringLength = 2048;
 
 FileGrepper::FileGrepper(const Config& config) : m_config(config),
+	m_cacheBeforeLines(false),
 	m_shortCircuit(false)
 {
 	m_readBufferSize = 4096;
@@ -39,7 +40,10 @@ FileGrepper::FileGrepper(const Config& config) : m_config(config),
 	
 	if (m_config.getBeforeLines() > 0)
 	{
-		m_stringBuffer.init(m_config.getBeforeLines(), kStringLength);
+		m_cacheBeforeLines = true;
+		// allocate one extra, as otherwise we can overwrite a previous line we need as the current line
+		// we're processing currently occupies one buffer slot
+		m_stringBuffer.init(m_config.getBeforeLines() + 1, kStringLength);
 	}
 	
 	if (!m_config.getShortCircuitString().empty())
@@ -94,8 +98,19 @@ bool FileGrepper::grepBasic(const std::string& filename, const std::string& sear
 
 	unsigned int lineIndex = 1; // start at one as this value is only used for printing line number purposes
 
+	// make a note of the list line we printed output lines for so we can prevent outputting lines multiple times
+	// when context (before and after) content line output is enabled.
+	unsigned int lastOutputContentLine = 0;
+
 	while (fileStream.getline(buf, kStringLength))
 	{
+		if (m_cacheBeforeLines)
+		{
+			char* nextBeforeBuffer = m_stringBuffer.getNextBuffer();
+			// TODO: we could get rid of this strcpy() if we did the fileStream.getline() directly into the nextBeforeBuffer itself...
+			strcpy(nextBeforeBuffer, buf);
+		}
+
 		const char* findI = strstr(buf, searchString.c_str());
 		
 		if (findI != nullptr)
@@ -153,6 +168,30 @@ bool FileGrepper::grepBasic(const std::string& filename, const std::string& sear
 
 			if (m_config.getOutputContentLines())
 			{
+				// see if we need to output before lines first
+				if (m_cacheBeforeLines)
+				{
+					unsigned int minLine = lineIndex - 1; // lineIndex starts at 1, so can't be 0
+					// check lastOutputContentLine to make sure we don't output lines multiple times
+					unsigned int lastOutputLineDiff = minLine - lastOutputContentLine;
+					minLine = std::min(minLine, lastOutputLineDiff);
+					unsigned int beforeLinesToPrint = std::min(m_config.getBeforeLines(), minLine);
+
+					for (unsigned int i = beforeLinesToPrint; i > 0; i--)
+					{
+						const char* prevBuffer = m_stringBuffer.getPreviousBuffer(i);
+
+						if (m_config.getOutputLineNumbers())
+						{
+							fprintf(stdout, "%u: %s\n", lineIndex - i, prevBuffer);
+						}
+						else
+						{
+							fprintf(stdout, "%s\n", prevBuffer);
+						}
+					}
+				}
+
 				if (m_config.getOutputLineNumbers())
 				{
 					fprintf(stdout, "%u: %s\n", lineIndex, buf);
@@ -161,6 +200,8 @@ bool FileGrepper::grepBasic(const std::string& filename, const std::string& sear
 				{
 					fprintf(stdout, "%s\n", buf);
 				}
+
+				lastOutputContentLine = lineIndex;
 			}
 			
 			bool haveFoundEnoughItems = m_config.getMatchCount() != -1 && foundCount >= m_config.getMatchCount();
@@ -171,7 +212,7 @@ bool FileGrepper::grepBasic(const std::string& filename, const std::string& sear
 				break;
 			}
 		}
-		else if (afterLinesToPrint > 0)
+		else if (m_config.getOutputContentLines() && afterLinesToPrint > 0)
 		{
 			// if we've found it before, we need to output additional lines...
 			if (m_config.getOutputLineNumbers())
@@ -182,6 +223,8 @@ bool FileGrepper::grepBasic(const std::string& filename, const std::string& sear
 			{
 				fprintf(stdout, "%s\n", buf);
 			}
+
+			lastOutputContentLine = lineIndex;
 
 			afterLinesToPrint--;
 		}
