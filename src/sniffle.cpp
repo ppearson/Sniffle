@@ -665,14 +665,15 @@ bool Sniffle::configureFilenameMatcher(const PatternSearch& pattern)
 	size_t sepPos = pattern.fileMatch.find(".");
 	if (sepPos == std::string::npos)
 	{
-		m_pFilenameMatcher = new FilenameMatcherExtension("*");
+		// no extension
+		m_pFilenameMatcher = new FilenameMatcherExactFilename(pattern.fileMatch, "");
 		return true;
 	}
 
 	std::string filenameCorePart = pattern.fileMatch.substr(0, sepPos);
 	std::string extensionPart = pattern.fileMatch.substr(sepPos + 1);
 
-	// simple extension only filter
+	// simple extension only filter with full wildcard filename part
 	if (extensionPart.find("*", sepPos) == std::string::npos && filenameCorePart == "*")
 	{
 		// just a simple filename extension filter
@@ -680,28 +681,17 @@ bool Sniffle::configureFilenameMatcher(const PatternSearch& pattern)
 		return true;
 	}
 
-	// currently we only support partial wildcards in the filename part (not extension)
-	// TODO: implement this correctly
-
-	// otherwise, it's the more complex type
 	if (filenameCorePart.find("*") == std::string::npos)
 	{
-		// something weird's going on, and we don't support this currently.
-		fprintf(stderr, "Error creating filename matcher with file match string: %s\n", pattern.fileMatch.c_str());
-		return false;
+		// exact filename...
+		m_pFilenameMatcher = new FilenameMatcherExactFilename(filenameCorePart, extensionPart);
+		return true;
 	}
 
-	// for the moment, assume there are wildcards either side by replacing wildcard chars
-	if (filenameCorePart[0] != '*' || filenameCorePart[filenameCorePart.size() - 1] != '*')
-	{
-		// something weird's going on, and we don't support this currently.
-		fprintf(stderr, "Error creating filename matcher with file match string: %s\n", pattern.fileMatch.c_str());
-		return false;
-	}
+	// currently we only support partial wildcards in the filename part (not extension)
 
-	std::string filenameMatchItem = filenameCorePart.substr(1, filenameCorePart.size() - 2);
-
-	m_pFilenameMatcher = new AdvancedFilenameMatcher(filenameMatchItem, extensionPart);
+	// otherwise, it's the more complex type
+	m_pFilenameMatcher = new FilenameMatcherNameWildcard(filenameCorePart, extensionPart);
 	return true;
 }
 
@@ -742,7 +732,14 @@ bool Sniffle::findFiles(const std::string& pattern, std::vector<std::string>& fo
 	// special-case single file just for completeness...
 	if (patternRes.type == PatternSearch::ePatternSingleFile)
 	{
-		// TODO: check file exists
+		// check the file exists
+		FILE* pFile = fopen(pattern.c_str(), "r");
+		if (!pFile)
+		{
+			// it doesn't exist
+			return false;
+		}
+		fclose(pFile);
 		foundFiles.push_back(pattern);
 		return true;
 	}

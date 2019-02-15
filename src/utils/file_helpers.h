@@ -1,6 +1,6 @@
 /*
  Sniffle
- Copyright 2018 Peter Pearson.
+ Copyright 2018-2019 Peter Pearson.
 
  Licensed under the Apache License, Version 2.0 (the "License");
  You may not use this file except in compliance with the License.
@@ -30,6 +30,9 @@ public:
 	static std::string getFileExtension(const std::string& path);
 	static std::string getFileDirectory(const std::string& path);
 	static std::string getFileName(const std::string& path);
+
+	// for local filenames only (no paths)
+	static std::string stripExtensionFromFilename(const std::string& filename);
 
 	static std::string combinePaths(const std::string& path0, const std::string& path1);
 	static std::string combinePaths(const std::vector<std::string>& pathItems);

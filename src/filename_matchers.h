@@ -41,7 +41,7 @@ public:
 	virtual bool canSkipPotentialSymlinkFile(const char* filename) const = 0;
 };
 
-// extension only matcher
+// extension only matcher, any core filename
 class FilenameMatcherExtension : public FilenameMatcher
 {
 public:
@@ -59,13 +59,41 @@ protected:
 	std::string		m_extension;
 };
 
-// more advanced version supporting primitive filename wildcards
-class AdvancedFilenameMatcher : public FilenameMatcher
+// designed for a wildcard match of the main filename - i.e. "tes*", "*est", "t*t"
+class FilenameMatcherNameWildcard : public FilenameMatcher
 {
 public:
-	AdvancedFilenameMatcher(const std::string& filenameItem, const std::string& extension) :
-		m_filenameItem(filenameItem),
-		m_extension(extension)
+	FilenameMatcherNameWildcard(const std::string& matchString, const std::string& extension);
+
+	enum MatchType
+	{
+		eMTItemLeft,			// "tes*"
+		eMTItemInner,			// "*es*"
+		eMTItemRight,			// "*est"
+		eMTItemOuter,			// "t*t"
+		eMTItemFullWildcard		// "*"
+	};
+
+	virtual bool doesMatch(const std::string& filename) const override;
+
+	virtual bool canSkipPotentialSymlinkFile(const char* filename) const override;
+
+protected:
+	MatchType		m_matchType;
+	std::string		m_filenameMatchItemMain; // used for all type
+	std::string		m_filenameMatchItemExtra; // used for eMTItemsOuter for the right-side item match
+
+	std::string		m_extension;
+};
+
+// matches exact filename, optionally with extension
+class FilenameMatcherExactFilename : public FilenameMatcher
+{
+public:
+	FilenameMatcherExactFilename(const std::string& filenameMatch,
+							 const std::string& extensionMatch) :
+		m_filenameMatch(filenameMatch),
+		m_extensionMatch(extensionMatch)
 	{
 
 	}
@@ -75,8 +103,8 @@ public:
 	virtual bool canSkipPotentialSymlinkFile(const char* filename) const override;
 
 protected:
-	std::string		m_filenameItem;
-	std::string		m_extension;
+	std::string		m_filenameMatch;
+	std::string		m_extensionMatch;
 };
 
 #endif // FILENAME_MATCHERS_H

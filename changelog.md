@@ -1,6 +1,8 @@
 Sniffle changelog
 =================
 
+* Implemented more comprehensive filename pattern matching.
+
 Version 0.4
 -----------
 

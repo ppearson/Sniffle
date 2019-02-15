@@ -1,6 +1,6 @@
 /*
  Sniffle
- Copyright 2018 Peter Pearson.
+ Copyright 2018-2019 Peter Pearson.
 
  Licensed under the Apache License, Version 2.0 (the "License");
  You may not use this file except in compliance with the License.
@@ -65,6 +65,15 @@ std::string FileHelpers::getFileName(const std::string& path)
 		return path;
 
 	return fileName;
+}
+
+std::string FileHelpers::stripExtensionFromFilename(const std::string& filename)
+{
+	size_t dotPos = filename.find_last_of('.');
+	if (dotPos == std::string::npos)
+		return filename;
+
+	return filename.substr(0, dotPos);
 }
 
 std::string FileHelpers::combinePaths(const std::string& path0, const std::string& path1)
