@@ -22,15 +22,21 @@
 
 #include "sniffle.h"
 
+#define RUN_TESTS 0
+
+#if RUN_TESTS
+#include "tests/tests.h"
+#endif
+
 static void printHelp(bool fullOptions)
 {
-	fprintf(stderr, "Sniffle version 0.4.\n");
+	fprintf(stderr, "Sniffle version 0.5x.\n");
 	fprintf(stderr, "Usage:\n");
 	fprintf(stderr, "sniffle [options] find <\"/path/to/search/*.log\">\n");
 	fprintf(stderr, "sniffle [options] find <\"/path/to/*/search/*.log\">\n");
-	fprintf(stderr, "sniffle [options] find [filter] <\"/path/to/search/*.log\">\n");
+	fprintf(stderr, "sniffle [options] [filter] find <\"/path/to/search/*.log\">\n");
 	fprintf(stderr, "sniffle [options] grep <stringToFind> <\"/path/to/search/*.log\">\n");
-	fprintf(stderr, "sniffle [options] grep <stringToFind> <\"/path/to/*/search/*.log\">\n");
+	fprintf(stderr, "sniffle [options] [filter] grep <stringToFind> <\"/path/to/*/search/*.log\">\n");
 	fprintf(stderr, "sniffle [options] count <stringToFind>  <\"/path/to/*/search/*.log\">\n");
 	fprintf(stderr, "sniffle [options] match <tokens|to|find> <\"/path/to/search/*.log\">\n");
 	fprintf(stderr, "sniffle [options] match <tokens&to&find> <\"/path/to/*/search/*.log\">\n");
@@ -46,7 +52,7 @@ static void printHelp(bool fullOptions)
 //		fprintf(stderr, " -gt <thread_count>\t\t\tNumber of threads to use to grep/process files.\n");
 		fprintf(stderr, " -n\t\t\t\tOutput line numbers alongside content.\n");
 		fprintf(stderr, " -rd <limit>\t\t\tDirectory recursion depth limit.\n");
-		fprintf(stderr, " -sc <string>\t\tShort Circuit string.\n");
+		fprintf(stderr, " -sc <string>\t\t\tShort Circuit string.\n");
 		fprintf(stderr, " -C <line_count>\t\tContext lines to print either side of match.\n");
 		fprintf(stderr, " -B <line_count>\t\tContext lines to print before match.\n");
 		fprintf(stderr, " -A <line_count>\t\tContext lines to print after match.\n");
@@ -62,6 +68,19 @@ static void printHelp(bool fullOptions)
 
 int main(int argc, char** argv)
 {
+#if RUN_TESTS
+	SniffleTests tests;
+	if (tests.testFilenameMatchers())
+	{
+		fprintf(stderr, "Tested ran okay.\n");
+	}
+	else
+	{
+		fprintf(stderr, "Tested failed.\n");
+	}
+	return 0;
+#endif
+	
 	if (argc <= 1)
 	{
 		printHelp(false);
@@ -70,7 +89,8 @@ int main(int argc, char** argv)
 	
 	Sniffle sniffle;
 	
-	// the assumption here is that optional options (starting with '-') are always the first arguments...
+	// the assumption here is that optional options (starting with '-') are always the first arguments,
+	// followed by any filters, followed by the main command + args for that...
 	
 	int nextArg = 1;
 	
@@ -165,10 +185,6 @@ int main(int argc, char** argv)
 		std::string filePattern = argv[nextArg + 2];
 		
 		sniffle.runMatch(filePattern, contentsPattern);
-	}
-	else if (mainCommand == "count")
-	{
-		
 	}
 	else if (mainCommand == "debug")
 	{

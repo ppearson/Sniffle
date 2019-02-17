@@ -1,6 +1,6 @@
 /*
  Sniffle
- Copyright 2018 Peter Pearson.
+ Copyright 2018-2019 Peter Pearson.
 
  Licensed under the Apache License, Version 2.0 (the "License");
  You may not use this file except in compliance with the License.
@@ -32,6 +32,8 @@ public:
 
 	static std::string formatSize(size_t amount);
 	static std::string formatNumberThousandsSeparator(size_t value);
+	
+	static bool stringMatches(const char* needle, size_t needleLength, const char* haystack, size_t haystackStartPos);
 };
 
 #endif // STRING_HELPERS_H

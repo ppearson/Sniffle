@@ -85,9 +85,9 @@ bool FileFinder::getRelativeFilesInDirectoryRecursive(const std::string& searchD
 		}
 		else if (dirEnt->d_type == DT_LNK && m_config.getFollowSymlinks())
 		{
-			// if preemptive symlink skipping is enabled, see if we can skip the path without having to read the link
+			// if preemptive skipping is enabled, see if we can skip the path without having to read the link
 			// or do an expensive stat() call...
-			if (m_config.getPreEmptiveSymlinkSkipping() && m_pFilenameMatcher->canSkipPotentialSymlinkFile(dirEnt->d_name))
+			if (m_config.getPreEmptiveSkipping() && m_pFilenameMatcher->canSkipPotentialFile(dirEnt->d_name))
 			{
 				// we can skip it
 				continue;
@@ -234,15 +234,18 @@ bool FileFinder::getRelativeFilesInDirectoryRecursive(const std::string& searchD
 			std::string fullRelativePath = FileHelpers::combinePaths(relativeDirectoryPath, dirEnt->d_name);
 			files.push_back(fullRelativePath);
 		}
-		else
+		else if (dirEnt->d_type == DT_UNKNOWN)
 		{
-			// we don't know what type it is, so
-			// check stat() to see what it really is...
-			// This generally seems to happen when the symlink points to a file on a different server...
+			// we don't know what type it is.
+			// This situation can happen on older XFS filesystems and NFS mounts.
+			// the struct dirent d_type entry can validly be DT_UNKNOWN, in which case we really need to
+			// perform a stat() to work out what type it is (file, symlink, directory).
+			// However, this is pretty expensive, so as an optional (but default) optimisation, we can attempt
+			// to first see if we can skip the item completely, based off its name.
 
-			// if preemptive symlink skipping is enabled, see if we can skip the path without having to read the link
+			// if preemptive skipping is enabled, see if we can skip the path without having to read the link
 			// or do an expensive stat() call...
-			if (m_config.getPreEmptiveSymlinkSkipping() && m_pFilenameMatcher->canSkipPotentialSymlinkFile(dirEnt->d_name))
+			if (m_config.getPreEmptiveSkipping() && m_pFilenameMatcher->canSkipPotentialFile(dirEnt->d_name))
 			{
 				// we can skip it
 				continue;
@@ -250,6 +253,8 @@ bool FileFinder::getRelativeFilesInDirectoryRecursive(const std::string& searchD
 
 			struct stat statState;
 			std::string newRelativePath = FileHelpers::combinePaths(relativeDirectoryPath, dirEnt->d_name);
+			// Note: we explicitly call lstat() here, on the assumption it *might* be a symlink, in which
+			//       case using lstat() saves us a readlink() in that case.
 			int ret = lstat(newRelativePath.c_str(), &statState);
 
 			if (ret == -1)
@@ -310,6 +315,8 @@ bool FileFinder::getRelativeFilesInDirectoryRecursive(const std::string& searchD
 			{
 				// not sure what's happened here...
 				// another symlink?
+				// TODO: handle this correctly, at least for symlinks, although need to work out what lstat()
+				//       does in that case...
 				continue;
 			}
 		}

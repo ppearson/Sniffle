@@ -1,6 +1,6 @@
 /*
  Sniffle
- Copyright 2018 Peter Pearson.
+ Copyright 2018-2019 Peter Pearson.
 
  Licensed under the Apache License, Version 2.0 (the "License");
  You may not use this file except in compliance with the License.
@@ -108,4 +108,24 @@ std::string StringHelpers::formatNumberThousandsSeparator(size_t value)
 	std::reverse(final.begin(), final.end());
 
 	return final;
+}
+
+bool StringHelpers::stringMatches(const char* needle, size_t needleLength, const char* haystack, size_t haystackStartPos)
+{
+	// TODO: what about length validation?
+	const char* haystackStartChar = haystack + haystackStartPos;
+	
+	unsigned int i = 0;
+	for (; i < needleLength; i++)
+	{
+		if (haystackStartChar[i] == 0)
+			break;
+		
+		if (haystackStartChar[i] != needle[i])
+		{
+			return false;
+		}
+	}
+	
+	return (i == needleLength);
 }

@@ -36,9 +36,14 @@ public:
 	// they might only look at the extension)
 	virtual bool doesMatch(const std::string& filename) const = 0;
 
-	// for use on symlinks to intelligently reject any obviously unwanted files before bothering
-	// to stat() them. Must return false if there is no extension (so possibly not a file)
-	virtual bool canSkipPotentialSymlinkFile(const char* filename) const = 0;
+	// for use on unknown directory entries to intelligently reject any obviously unwanted files
+	// before bothering to stat() them (which is expensive).
+	// struct dirent->d_type returned from readdir() can (validly) be DT_UNKNOWN in some cases,
+	// especially older XFS filesystem versions and NFS mounts.
+	
+	// The implementation of this function must return false if there is no extension
+	// (so possibly not a file).
+	virtual bool canSkipPotentialFile(const char* filename) const = 0;
 };
 
 // extension only matcher, any core filename
@@ -53,13 +58,13 @@ public:
 
 	virtual bool doesMatch(const std::string& filename) const override;
 
-	virtual bool canSkipPotentialSymlinkFile(const char* filename) const override;
+	virtual bool canSkipPotentialFile(const char* filename) const override;
 
 protected:
 	std::string		m_extension;
 };
 
-// designed for a wildcard match of the main filename - i.e. "tes*", "*est", "t*t"
+// designed for a wildcard match of the main filename - i.e. "tes*", "*es*", "*est", "t*t"
 class FilenameMatcherNameWildcard : public FilenameMatcher
 {
 public:
@@ -76,7 +81,7 @@ public:
 
 	virtual bool doesMatch(const std::string& filename) const override;
 
-	virtual bool canSkipPotentialSymlinkFile(const char* filename) const override;
+	virtual bool canSkipPotentialFile(const char* filename) const override;
 
 protected:
 	MatchType		m_matchType;
@@ -100,7 +105,7 @@ public:
 
 	virtual bool doesMatch(const std::string& filename) const override;
 
-	virtual bool canSkipPotentialSymlinkFile(const char* filename) const override;
+	virtual bool canSkipPotentialFile(const char* filename) const override;
 
 protected:
 	std::string		m_filenameMatch;

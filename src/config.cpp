@@ -34,7 +34,7 @@ Config::Config() :
 	m_ignoreHiddenFiles(true),
 	m_ignoreHiddenDirectories(true),
 	m_followSymlinks(true),
-	m_preEmptiveSymlinkSkipping(true),
+	m_preEmptiveSkipping(true),
 	m_matchCount(-1),
 	m_flushOutput(true),
 	m_outputFilename(true),
@@ -153,7 +153,8 @@ Config::ParseResult Config::parseArgs(int argc, char** argv, int startOptionArg,
 			
 			std::string nextArg(argv[i + 1]);
 			m_findThreads = atoi(nextArg.c_str());
-
+			
+			i++;
 			lastProcessedArg ++;
 		}
 		else if (argString == "-gt")
@@ -162,14 +163,16 @@ Config::ParseResult Config::parseArgs(int argc, char** argv, int startOptionArg,
 			
 			std::string nextArg(argv[i + 1]);
 			m_grepThreads = atoi(nextArg.c_str());
-
+			
+			i++;
 			lastProcessedArg ++;
 		}
 		else if (argString == "-m")
 		{
 			std::string nextArg(argv[i + 1]);
 			m_matchCount = atoi(nextArg.c_str());
-
+			
+			i++;
 			lastProcessedArg ++;
 		}
 		else if (argString == "-firstOnly")
@@ -187,7 +190,8 @@ Config::ParseResult Config::parseArgs(int argc, char** argv, int startOptionArg,
 
 			m_afterLines = contextLines;
 			m_beforeLines = contextLines;
-
+			
+			i++;
 			lastProcessedArg ++;
 		}
 		else if (argString == "-B")
@@ -196,7 +200,8 @@ Config::ParseResult Config::parseArgs(int argc, char** argv, int startOptionArg,
 			int contextLines = atoi(nextArg.c_str());
 
 			m_beforeLines = contextLines;
-
+			
+			i++;
 			lastProcessedArg ++;
 		}
 		else if (argString == "-A")
@@ -205,7 +210,8 @@ Config::ParseResult Config::parseArgs(int argc, char** argv, int startOptionArg,
 			int contextLines = atoi(nextArg.c_str());
 
 			m_afterLines = contextLines;
-
+			
+			i++;
 			lastProcessedArg ++;
 		}
 		else if (argString == "-rd")
@@ -214,7 +220,8 @@ Config::ParseResult Config::parseArgs(int argc, char** argv, int startOptionArg,
 			int recursionDepthLimit = atoi(nextArg.c_str());
 
 			m_directoryRecursionDepth = recursionDepthLimit;
-
+			
+			i++;
 			lastProcessedArg ++;
 		}
 		else if (argString == "-sc")
@@ -222,6 +229,8 @@ Config::ParseResult Config::parseArgs(int argc, char** argv, int startOptionArg,
 			std::string nextArg(argv[i + 1]);
 			
 			m_shortCircuitString = nextArg;
+			
+			i++;			
 			lastProcessedArg ++;
 		}
 		else
@@ -255,7 +264,7 @@ void Config::printFullOptions() const
 	fprintf(stderr, "ignoreHiddenFiles: %i:\n", m_ignoreHiddenFiles);
 	fprintf(stderr, "ignoreHiddenDirectories: %i:\n", m_ignoreHiddenDirectories);
 	fprintf(stderr, "followSymlinks: %i:\n", m_followSymlinks);
-	fprintf(stderr, "preEmptiveSymlinkSkipping: %i:\n", m_preEmptiveSymlinkSkipping);
+	fprintf(stderr, "preEmptiveSkipping: %i:\n", m_preEmptiveSkipping);
 	fprintf(stderr, "matchCount: %i:\n", m_matchCount);
 	fprintf(stderr, "flushOutput: %i:\n", m_flushOutput);
 	fprintf(stderr, "outputFilename: %i:\t\tOutput the filename before matched results within file.\n", m_outputFilename);
@@ -333,9 +342,9 @@ bool Config::applyKeyValueSetting(const std::string& key, const std::string& val
 	{
 		m_followSymlinks = getBooleanValueFromString(value);
 	}
-	else if (key == "preEmptiveSymlinkSkipping")
+	else if (key == "preEmptiveSkipping")
 	{
-		m_preEmptiveSymlinkSkipping = getBooleanValueFromString(value);
+		m_preEmptiveSkipping = getBooleanValueFromString(value);
 	}
 	else if (key == "matchCount")
 	{

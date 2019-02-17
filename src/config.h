@@ -76,9 +76,9 @@ public:
 		return m_followSymlinks;
 	}
 
-	bool getPreEmptiveSymlinkSkipping() const
+	bool getPreEmptiveSkipping() const
 	{
-		return m_preEmptiveSymlinkSkipping;
+		return m_preEmptiveSkipping;
 	}
 
 	int getMatchCount() const
@@ -171,7 +171,7 @@ private:
 
 	bool			m_followSymlinks;
 
-	bool			m_preEmptiveSymlinkSkipping; // whether to attempt to skip statting / following a symlink based on its likely filenames
+	bool			m_preEmptiveSkipping; // whether to attempt to skip statting an unknown directory entry based off its filename
 
 	int				m_matchCount;
 

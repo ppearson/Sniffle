@@ -21,6 +21,7 @@
 #include <string.h>
 
 #include "utils/file_helpers.h"
+#include "utils/string_helpers.h"
 
 // TODO: if CPU performance ever becomes an issue, remove some of these string copies...
 
@@ -34,22 +35,19 @@ bool FilenameMatcherExtension::doesMatch(const std::string& filename) const
 	return false;
 }
 
-bool FilenameMatcherExtension::canSkipPotentialSymlinkFile(const char* filename) const
+bool FilenameMatcherExtension::canSkipPotentialFile(const char* filename) const
 {
 	const char* dotPos = strrchr(filename, '.');
-
 	if (!dotPos)
 	{
 		// it's very unlikely to be a filename, so we can't skip it...
 		return false;
 	}
-
-	// otherwise, see if the extension matches. The current assumption is that at least
-	// the file extension will match between the symlink filename and the target of the symlink.
-
+	
 	if (m_extension == "*")
 		return false;
 
+	// otherwise, see if the extension matches.
 	int compValue = strcmp(dotPos + 1, m_extension.c_str());
 	return (compValue != 0);
 }
@@ -102,7 +100,7 @@ bool FilenameMatcherNameWildcard::doesMatch(const std::string& filename) const
 	if (m_matchType == eMTItemFullWildcard)
 		return true;
 
-	const std::string& mainFilename = FileHelpers::stripExtensionFromFilename(filename);
+	const std::string mainFilename = FileHelpers::stripExtensionFromFilename(filename);
 
 	// TODO: remove substr() allocations below by doing direct comparisons...
 
@@ -145,24 +143,67 @@ bool FilenameMatcherNameWildcard::doesMatch(const std::string& filename) const
 	return false;
 }
 
-bool FilenameMatcherNameWildcard::canSkipPotentialSymlinkFile(const char* filename) const
+bool FilenameMatcherNameWildcard::canSkipPotentialFile(const char* filename) const
 {
+	if (m_matchType == eMTItemFullWildcard)
+		return false;
+	
 	const char* dotPos = strrchr(filename, '.');
-
 	if (!dotPos)
 	{
 		// it's very unlikely to be a filename, so we can't skip it...
 		return false;
 	}
+	
+	if (m_extension != "*")
+	{
+		// otherwise, see if the extension matches.
+		bool extensionMatches = strcmp(dotPos + 1, m_extension.c_str()) == 0;
+		// if it doesn't, we can skip it
+		if (!extensionMatches)
+			return true;
+	}
+	
+	// if it does, do a more thorough check on the core filename. We *could* (maybe should?) use
+	// doesMatch(), but that involves a further string alloc and copy, and long-term it'd be
+	// nice to reduce those to as few as possible, so we'll implement a different version for the moment...
+	
+	size_t mainFilenameLength = dotPos - filename;
+	
+	if (m_matchType == eMTItemInner)
+	{
+		// TODO: this isn't completely correct, as we're also potentially matching in the extension of "filename"...
+		const char* findItem = strstr(filename, m_filenameMatchItemMain.c_str());
+		// we didn't find the string, so we can skip it.
+		if (findItem == nullptr)
+			return true;
+	}
+	else if (m_matchType == eMTItemLeft)
+	{
+		bool leftMatches = StringHelpers::stringMatches(m_filenameMatchItemMain.c_str(), m_filenameMatchItemMain.size(),
+														filename, 0);
+		return !leftMatches;
+	}
+	else if (m_matchType == eMTItemRight)
+	{
+		// can't match...
+		if (mainFilenameLength < m_filenameMatchItemMain.size())
+		{
+			// skip it
+			return true;
+		}
 
-	// otherwise, see if the extension matches. The current assumption is that at least
-	// the file extension will match between the symlink filename and the target of the symlink.
-
-	if (m_extension == "*")
-		return false;
-
-	int compValue = strcmp(dotPos + 1, m_extension.c_str());
-	return (compValue != 0);
+		size_t diff = mainFilenameLength - m_filenameMatchItemMain.size();
+		bool rightMatches = StringHelpers::stringMatches(m_filenameMatchItemMain.c_str(), m_filenameMatchItemMain.size(),
+														 filename, diff);
+		return !rightMatches;
+	}
+	else if (m_matchType == eMTItemOuter)
+	{
+		// TODO: 		
+	}
+	
+	return false;
 }
 
 ////
@@ -186,18 +227,16 @@ bool FilenameMatcherExactFilename::doesMatch(const std::string& filename) const
 	return m_filenameMatch == filenameCorePart;
 }
 
-bool FilenameMatcherExactFilename::canSkipPotentialSymlinkFile(const char* filename) const
+bool FilenameMatcherExactFilename::canSkipPotentialFile(const char* filename) const
 {
 	const char* dotPos = strrchr(filename, '.');
-
 	if (!dotPos)
 	{
 		// it's very unlikely to be a filename, so we can't skip it...
 		return false;
 	}
 
-	// otherwise, see if the extension matches. The current assumption is that at least
-	// the file extension will match between the symlink filename and the target of the symlink.
+	// otherwise, see if the extension matches.
 
 	if (m_extensionMatch == "*")
 		return false;
