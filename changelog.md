@@ -4,6 +4,7 @@ Sniffle changelog
 * Implemented more comprehensive filename pattern matching.
 * Implemented more comprehensive and accurate filename preemptive skipping.
 * Added fileReadBufferSize option, which allows overriding of default (now 32KB, previously was 8KB) read buffer size.
+* #ifdeffed out some debug code that was doing extra opendir()/closedir() calls that wasn't really necessary.
 
 Version 0.4
 -----------

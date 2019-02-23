@@ -29,6 +29,8 @@
 
 #include "utils/file_helpers.h"
 
+#define EXTRA_DEBUG_OPENEDIRS 0
+
 FileFinder::FileFinder(const Config& config,
                        const FilenameMatcher* pFilenameMatcher,
 			           const PatternSearch& patternSearch) :
@@ -381,8 +383,7 @@ bool FileFinderBasicRecursiveDirectoryWildcard::findFiles(std::vector<std::strin
 	{
 		std::string testDir = FileHelpers::combinePaths(m_patternSearch.baseSearchPath, wildcardDir);
 
-		// TODO: this check technically isn't needed, but for the moment it's helpful to guarentee things are doing what they should be,
-		//       and there might be issues with symlinks...
+#if EXTRA_DEBUG_OPENEDIRS
 		DIR* dir = opendir(testDir.c_str());
 		if (!dir)
 		{
@@ -390,6 +391,9 @@ bool FileFinderBasicRecursiveDirectoryWildcard::findFiles(std::vector<std::strin
 			continue;
 		}
 		closedir(dir);
+#else
+		DIR* dir;
+#endif
 
 		bool dirToCheck = true;
 
@@ -485,15 +489,17 @@ void FileFinderBasicRecursiveDirectoryWildcardParallel::processTask(Task* pTask)
 	
 	std::string testDir = FileHelpers::combinePaths(m_patternSearch.baseSearchPath, pWildcardTask->m_dirItem);
 
-	// TODO: this check technically isn't needed, but for the moment it's helpful to guarentee things are doing what they should be,
-	//       and there might be issues with symlinks...
+#if EXTRA_DEBUG_OPENEDIRS
 	DIR* dir = opendir(testDir.c_str());
 	if (!dir)
 	{
 		fprintf(stderr, "Error: 55\n");
-		return;
+		continue;
 	}
 	closedir(dir);
+#else
+	DIR* dir;
+#endif
 
 	bool dirToCheck = true;
 
