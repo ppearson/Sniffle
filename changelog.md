@@ -2,6 +2,7 @@ Sniffle changelog
 =================
 
 * Implemented more comprehensive filename pattern matching.
+* Implemented more comprehensive and accurate filename preemptive skipping.
 * Added fileReadBufferSize option, which allows overriding of default (now 32KB, previously was 8KB) read buffer size.
 
 Version 0.4
@@ -15,7 +16,6 @@ Version 0.4
   in grep mode (support for within other modes to follow later).
 * Added special-casing to file find functionality to allow specifying a single file (effectively short-circuits
   the find process).
-* Fixed some issues with short circuit option not always triggering correctly.
 
 Version 0.3
 -----------
