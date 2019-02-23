@@ -1,6 +1,9 @@
 Sniffle changelog
 =================
 
+Version 0.5
+-----------
+
 * Implemented more comprehensive filename pattern matching.
 * Implemented more comprehensive and accurate filename preemptive skipping.
 * Added fileReadBufferSize option, which allows overriding of default (now 32KB, previously was 8KB) read buffer size.

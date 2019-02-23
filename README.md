@@ -3,22 +3,26 @@ Sniffle
 
 Created by Peter Pearson in 2018.
 
-Sniffle is a program designed to allow easy and flexible searching of text in log files,
-with an emphasis on performing the search over busy NFS networks where there are many symlinks
+Sniffle is a program designed to allow fast, easy and flexible searching of text in log files,
+with a heavy emphasis on performing the search over busy NFS networks where there are many symlinks
 involved in the directory/file structure, and where the number of resultant files to match content
-in can number the hundreds of thousands. As such, it has the ability to semi-intelligently
-skip doing expensive stat calls on symlinks based off the apparent filename of the link,
-and has defaults (which can be configured with a config file) which make sense for this
-workflow compared to other grep/search tools (i.e. following symlinks is enabled by default).
+in can number the hundreds of thousands and where directory/file operations / syscalls can have
+a significant overhead to finding files.
 
-It is *not* designed as a complete grep / ack / ag replacement for general file searches
-(although it can do that to a degree with certain by-design limitations).
+As such, it has the ability to semi-intelligently skip doing expensive stat calls on unknown file
+types (which can happen a lot on large NFS networks) based off the apparent filename of the
+directory entry, and has defaults (which can be configured with a config file) which make sense
+for this workflow compared to other grep/search tools (i.e. following symlinks is enabled by default).
+
+It is *not* designed as a complete grep / ack / ag replacement for general file searches on local file
+systems, although it can do that to a degree with certain by-design limitations: however, it is likely
+that these other tools will be more efficient for searching local (non-network) filesystems.
 
 Currently it does not use the most optimum algorithm for searching content (currently uses
 linear line-by-line search instead of something like Boyer-Moore) - in the future this will
 be improved.
 
-It can perform file searches, grepping of content of files, counting occurances of strings, 
+It can perform file searches, grepping of content of files, counting occurrences of strings, 
 matching multiple search strings within files, and more functionality will be added in the future.
 
 Find:
@@ -39,7 +43,7 @@ Output matches of content in found files that contain content.
 Count:
 ------
 
-Output counts of the occurences of the searched-for string within each file, where count > 0.
+Output counts of the occurrences of the searched-for string within each file, where count > 0.
 
     sniffle count "[Warning 552]" "/path/to/logs/*/program/*.log"
 
