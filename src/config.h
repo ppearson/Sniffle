@@ -140,6 +140,11 @@ public:
 	{
 		return m_shortCircuitString;
 	}
+	
+	unsigned int getFileReadBufferSize() const
+	{
+		return m_fileReadBufferSize;
+	}
 
 	void printFullOptions() const;
 
@@ -192,6 +197,8 @@ private:
 
 	char			m_matchItemOrSeperatorChar; //
 	char			m_matchItemAndSeperatorChar; //
+	
+	unsigned int	m_fileReadBufferSize; // buffer size to use for fstream backing (in KB)
 	
 	std::string		m_shortCircuitString;
 

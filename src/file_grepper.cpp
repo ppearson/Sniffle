@@ -28,14 +28,21 @@
 static const unsigned int kStringLength = 2048;
 
 FileGrepper::FileGrepper(const Config& config) : m_config(config),
+	m_readBufferSize(8192),
+	m_pReadBuffer(nullptr),
 	m_cacheBeforeLines(false),
 	m_shortCircuit(false)
 {
-	m_readBufferSize = 4096;
+	// default on Linux is 8192, but increasing this gives a bit of a performance boost...
+	m_readBufferSize = config.getFileReadBufferSize() * 1024;
+	m_pReadBuffer = new char[m_readBufferSize];
 
 	// disable C++ sync with stdio (C) - this can speed up getline() quite a bit...
 	// we can do this as we only use C++ stuff for file reading (currently),
 	// and C stuff for output, so we don't care about synchronisation between the two
+	
+	// Note: valgrind and heaptrack show a "leak" from this, but it's not really a leak,
+	//       it's an implementation detail...
 	std::ios::sync_with_stdio(false);
 	
 	if (m_config.getBeforeLines() > 0)
@@ -50,6 +57,15 @@ FileGrepper::FileGrepper(const Config& config) : m_config(config),
 	{
 		m_shortCircuit = true;
 		m_shortCircuitString = m_config.getShortCircuitString();
+	}
+}
+
+FileGrepper::~FileGrepper()
+{
+	if (m_pReadBuffer)
+	{
+		delete m_pReadBuffer;
+		m_pReadBuffer = nullptr;
 	}
 }
 
@@ -634,8 +650,10 @@ bool FileGrepper::openFileStream(const std::string& filename, std::fstream& file
 {
 	std::ios::openmode mode = std::ios::in;
 
-//	char buffer[8*1024];
-//	fileStream.rdbuf()->pubsetbuf(buffer, sizeof(buffer));
+	if (m_pReadBuffer)
+	{
+		fileStream.rdbuf()->pubsetbuf(m_pReadBuffer, m_readBufferSize);
+	}
 
 	fileStream.open(filename.c_str(), mode);
 

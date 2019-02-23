@@ -46,7 +46,8 @@ Config::Config() :
 	m_afterLines(0),
 	m_blankLinesBetweenFiles(true),
 	m_matchItemOrSeperatorChar('|'),
-	m_matchItemAndSeperatorChar('&')
+	m_matchItemAndSeperatorChar('&'),
+	m_fileReadBufferSize(32)
 {
 
 }
@@ -278,6 +279,7 @@ void Config::printFullOptions() const
 	fprintf(stderr, "context:\t\t\tContent lines to print either side of match.\n");
 	fprintf(stderr, "after-context:\t\t\tContent lines to print after match.\n");
 	fprintf(stderr, "before-context:\t\t\tContent lines to print before match.\n");
+	fprintf(stderr, "fileReadBufferSize: %d:\t\tBuffer size (in KB) to use for reading files.\n", m_fileReadBufferSize);
 }
 
 // for config file
@@ -411,6 +413,11 @@ bool Config::applyKeyValueSetting(const std::string& key, const std::string& val
 	{
 		unsigned int intValue = atoi(value.c_str());
 		m_beforeLines = intValue;
+	}
+	else if (key == "fileReadBufferSize")
+	{
+		unsigned int intValue = atoi(value.c_str());
+		m_fileReadBufferSize = intValue;
 	}
 	else
 	{

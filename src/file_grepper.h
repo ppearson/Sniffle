@@ -31,6 +31,7 @@ class FileGrepper
 {
 public:
 	FileGrepper(const Config& config);
+	~FileGrepper();
 
 	// compute cached values for matching mode
 	bool initMatch(const std::string& matchString);
@@ -67,6 +68,7 @@ private:
 
 	// cached stuff
 	unsigned int		m_readBufferSize;
+	char*				m_pReadBuffer;
 	
 	bool				m_cacheBeforeLines;
 	StringBuffer		m_stringBuffer;

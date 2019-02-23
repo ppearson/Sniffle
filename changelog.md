@@ -2,6 +2,7 @@ Sniffle changelog
 =================
 
 * Implemented more comprehensive filename pattern matching.
+* Added fileReadBufferSize option, which allows overriding of default (now 32KB, previously was 8KB) read buffer size.
 
 Version 0.4
 -----------
