@@ -1,6 +1,6 @@
 /*
  Sniffle
- Copyright 2018 Peter Pearson.
+ Copyright 2018-2019 Peter Pearson.
 
  Licensed under the Apache License, Version 2.0 (the "License");
  You may not use this file except in compliance with the License.
@@ -200,7 +200,27 @@ bool FilenameMatcherNameWildcard::canSkipPotentialFile(const char* filename) con
 	}
 	else if (m_matchType == eMTItemOuter)
 	{
-		// TODO: 		
+		if (mainFilenameLength < m_filenameMatchItemMain.size() + m_filenameMatchItemExtra.size())
+		{
+			// skip it
+			return true;
+		}
+		
+		bool leftMatches = StringHelpers::stringMatches(m_filenameMatchItemMain.c_str(), m_filenameMatchItemMain.size(),
+														filename, 0);
+		if (!leftMatches)
+		{
+			return true;
+		}
+		
+		size_t diff = mainFilenameLength - m_filenameMatchItemExtra.size();
+		bool rightMatches = StringHelpers::stringMatches(m_filenameMatchItemExtra.c_str(), m_filenameMatchItemExtra.size(),
+														 filename, diff);
+		
+		if (!rightMatches)
+		{
+			return true;
+		}
 	}
 	
 	return false;

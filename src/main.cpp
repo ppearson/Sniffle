@@ -30,7 +30,7 @@
 
 static void printHelp(bool fullOptions)
 {
-	fprintf(stderr, "Sniffle version 0.5x.\n");
+	fprintf(stderr, "Sniffle version 0.5.\n");
 	fprintf(stderr, "Usage:\n");
 	fprintf(stderr, "sniffle [options] find <\"/path/to/search/*.log\">\n");
 	fprintf(stderr, "sniffle [options] find <\"/path/to/*/search/*.log\">\n");
@@ -72,11 +72,11 @@ int main(int argc, char** argv)
 	SniffleTests tests;
 	if (tests.testFilenameMatchers())
 	{
-		fprintf(stderr, "Tested ran okay.\n");
+		fprintf(stderr, "Tests ran okay.\n");
 	}
 	else
 	{
-		fprintf(stderr, "Tested failed.\n");
+		fprintf(stderr, "Tests failed.\n");
 	}
 	return 0;
 #endif
@@ -100,7 +100,7 @@ int main(int argc, char** argv)
 	if (res == Config::eParseHelpWanted)
 	{
 		printHelp(true);
-		return -1;
+		return 0;
 	}
 	else if (res == Config::eParseError)
 	{
