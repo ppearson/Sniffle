@@ -258,28 +258,28 @@ void Config::printFullOptions() const
 {
 	fprintf(stderr, "\nFull options: (specify with --<option>=<value> or in sniffle.conf file):\n");
 	fprintf(stderr, "(showing defaults):\n");
-	fprintf(stderr, "findThreads: %u: \n", m_findThreads);
-//	fprintf(stderr, "grepThreads: %u: \n", m_grepThreads);
-	fprintf(stderr, "printProgressWhenOutToStdOut: %i:\n", m_printProgressWhenOutToStdOut);
-	fprintf(stderr, "directoryRecursionDepth: %i:\n", m_directoryRecursionDepth);
-	fprintf(stderr, "ignoreHiddenFiles: %i:\n", m_ignoreHiddenFiles);
-	fprintf(stderr, "ignoreHiddenDirectories: %i:\n", m_ignoreHiddenDirectories);
-	fprintf(stderr, "followSymlinks: %i:\n", m_followSymlinks);
-	fprintf(stderr, "preEmptiveSkipping: %i:\n", m_preEmptiveSkipping);
-	fprintf(stderr, "matchCount: %i:\n", m_matchCount);
-	fprintf(stderr, "flushOutput: %i:\n", m_flushOutput);
-	fprintf(stderr, "outputFilename: %i:\t\tOutput the filename before matched results within file.\n", m_outputFilename);
-	fprintf(stderr, "outputRelativeFilename: %i:\t\n", m_outputRelativeFilename);
-	fprintf(stderr, "outputContentLines: %i:\n", m_outputContentLines);
-	fprintf(stderr, "outputLineNumbers: %i:\n", m_outputLineNumbers);
-	fprintf(stderr, "blankLinesBetweenFiles: %i:\n", m_blankLinesBetweenFiles);
-	fprintf(stderr, "matchItemOrSeperatorChar: %c:\n", m_matchItemOrSeperatorChar);
-	fprintf(stderr, "matchItemAndSeperatorChar: %c:\n", m_matchItemAndSeperatorChar);
-	fprintf(stderr, "shortCircuitString: %s:\n", m_shortCircuitString.c_str());
-	fprintf(stderr, "context:\t\t\tContent lines to print either side of match.\n");
-	fprintf(stderr, "after-context:\t\t\tContent lines to print after match.\n");
-	fprintf(stderr, "before-context:\t\t\tContent lines to print before match.\n");
-	fprintf(stderr, "fileReadBufferSize: %d:\t\tBuffer size (in KB) to use for reading files.\n", m_fileReadBufferSize);
+	fprintf(stderr, "findThreads:\t\t\t%u: \n", m_findThreads);
+//	fprintf(stderr, "grepThreads:\t\t\t%u: \n", m_grepThreads);
+	fprintf(stderr, "printProgressWhenOutToStdOut:\t%i:\n", m_printProgressWhenOutToStdOut);
+	fprintf(stderr, "directoryRecursionDepth:\t%i:\n", m_directoryRecursionDepth);
+	fprintf(stderr, "ignoreHiddenFiles:\t\t%i:\n", m_ignoreHiddenFiles);
+	fprintf(stderr, "ignoreHiddenDirectories:\t%i:\n", m_ignoreHiddenDirectories);
+	fprintf(stderr, "followSymlinks:\t\t\t%i:\n", m_followSymlinks);
+	fprintf(stderr, "preEmptiveSkipping:\t\t%i:\n", m_preEmptiveSkipping);
+	fprintf(stderr, "matchCount:\t\t\t%i:\n", m_matchCount);
+	fprintf(stderr, "flushOutput:\t\t\t%i:\n", m_flushOutput);
+	fprintf(stderr, "outputFilename:\t\t\t%i:\t\tOutput the filename before matched results within file.\n", m_outputFilename);
+	fprintf(stderr, "outputRelativeFilename:\t\t%i:\t\n", m_outputRelativeFilename);
+	fprintf(stderr, "outputContentLines:\t\t%i:\n", m_outputContentLines);
+	fprintf(stderr, "outputLineNumbers:\t\t%i:\n", m_outputLineNumbers);
+	fprintf(stderr, "blankLinesBetweenFiles:\t\t%i:\n", m_blankLinesBetweenFiles);
+	fprintf(stderr, "matchItemOrSeperatorChar:\t'%c' :\n", m_matchItemOrSeperatorChar);
+	fprintf(stderr, "matchItemAndSeperatorChar:\t'%c' :\n", m_matchItemAndSeperatorChar);
+	fprintf(stderr, "shortCircuitString:\t\t'%s' :\n", m_shortCircuitString.c_str());
+	fprintf(stderr, "context:\t\t\t\t\tContent lines to print either side of match.\n");
+	fprintf(stderr, "after-context:\t\t\t%u:\t\tContent lines to print after match.\n", m_afterLines);
+	fprintf(stderr, "before-context:\t\t\t%u:\t\tContent lines to print before match.\n", m_beforeLines);
+	fprintf(stderr, "fileReadBufferSize:\t\t%u (KB):\tBuffer size (in KB) to use for reading files.\n", m_fileReadBufferSize);
 }
 
 // for config file

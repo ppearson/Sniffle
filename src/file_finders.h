@@ -64,7 +64,7 @@ public:
 							 const FilenameMatcher* pFilenameMatcher,
 							 const PatternSearch& patternSearch);
 	
-	virtual bool findFiles(std::vector<std::string>& foundFiles);
+	virtual bool findFiles(std::vector<std::string>& foundFiles) override;
 };
 
 //
@@ -76,7 +76,7 @@ public:
 											  const FilenameMatcher* pFilenameMatcher,
 											  const PatternSearch& patternSearch);
 	
-	virtual bool findFiles(std::vector<std::string>& foundFiles);
+	virtual bool findFiles(std::vector<std::string>& foundFiles) override;
 };
 
 //
@@ -88,9 +88,9 @@ public:
 													  const FilenameMatcher* pFilenameMatcher,
 													  const PatternSearch& patternSearch);
 	
-	virtual bool findFiles(std::vector<std::string>& foundFiles);
+	virtual bool findFiles(std::vector<std::string>& foundFiles) override;
 	
-	virtual void processTask(Task* pTask);
+	virtual void processTask(Task* pTask) override;
 	
 	class WildcardDirTask : public Task
 	{

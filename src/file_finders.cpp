@@ -523,14 +523,13 @@ void FileFinderBasicRecursiveDirectoryWildcardParallel::processTask(Task* pTask)
 
 		remainderFullDir = FileHelpers::combinePaths(remainderFullDir, remainderDir);
 	}
-	
-	std::vector<std::string>& foundFiles = pWildcardTask->m_foundFiles;
 
 	if (dirToCheck)
 	{
 		// otherwise, we should have a final directory matching the pattern, including the directory wildcard.
 		// so now do a file search at that level
 		
+		std::vector<std::string>& foundFiles = pWildcardTask->m_foundFiles;
 		getRelativeFilesInDirectoryRecursive(remainderFullDir, remainderFullDir, 0, foundFiles);
 	}
 

@@ -21,7 +21,8 @@
 #include <functional> // for bind()
 
 ThreadedTaskPool::ThreadedTaskPool() : 
-    m_active(false)
+    m_active(false),
+	m_numThreads(1)
 {
 	
 }

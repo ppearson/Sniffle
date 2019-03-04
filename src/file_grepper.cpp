@@ -133,8 +133,8 @@ bool FileGrepper::grepBasic(const std::string& filename, const std::string& sear
 
 		if (m_shortCircuit && !shouldShortCircuit)
 		{
-			const char* findI = strstr(buf, m_shortCircuitString.c_str());
-			if (findI != nullptr)
+			const char* findSCI = strstr(buf, m_shortCircuitString.c_str());
+			if (findSCI != nullptr)
 			{
 				shouldShortCircuit = true;
 			}
