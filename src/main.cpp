@@ -17,6 +17,7 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <string>
 
@@ -40,6 +41,7 @@ static void printHelp(bool fullOptions)
 	fprintf(stderr, "sniffle [options] count <stringToFind>  <\"/path/to/*/search/*.log\">\n");
 	fprintf(stderr, "sniffle [options] match <tokens|to|find> <\"/path/to/search/*.log\">\n");
 	fprintf(stderr, "sniffle [options] match <tokens&to&find> <\"/path/to/*/search/*.log\">\n");
+	fprintf(stderr, "sniffle [options] tsdelta <mins> <\"/path/to/search/*.log\">\n");
 	fprintf(stderr, "sniffle [options] debug <args>...    print args received.\n");
 	fprintf(stderr, "\nNote: in some shells, a path with wildcards in might have to be escaped/quoted to prevent auto-completed arguments being given to Sniffle.\n");
 	
@@ -185,6 +187,39 @@ int main(int argc, char** argv)
 		std::string filePattern = argv[nextArg + 2];
 		
 		sniffle.runMatch(filePattern, contentsPattern);
+	}
+	else if (mainCommand == "tsdelta")
+	{
+		if (commandArgs < 3)
+		{
+			fprintf(stderr, "Error: Insufficient number of arguments for 'tsdelta' command.\n");
+			return -1;
+		}
+
+		std::string tsDeltaParams = argv[nextArg + 1];
+
+		uint64_t tsDelta = 0; // in minutes by default
+
+		// see if we have non-numeric char at the end
+		if (!isdigit(tsDeltaParams[tsDeltaParams.size() - 1]))
+		{
+			char postFixChar = tsDeltaParams[tsDeltaParams.size() - 1];
+			std::string valueString = tsDeltaParams.substr(0, tsDeltaParams.size() - 1);
+			tsDelta = atoi(valueString.c_str());
+
+			if (postFixChar == 'h')
+			{
+				tsDelta *= 24;
+			}
+		}
+		else
+		{
+			tsDelta = atoi(tsDeltaParams.c_str());
+		}
+
+		std::string filePattern = argv[nextArg + 2];
+
+		sniffle.runTimestampDeltaFind(filePattern, tsDelta * 60);
 	}
 	else if (mainCommand == "debug")
 	{

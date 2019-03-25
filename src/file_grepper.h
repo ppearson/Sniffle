@@ -53,6 +53,8 @@ public:
 	bool matchBasicOr(const std::string& filename, bool foundPreviousFile);
 	bool matchBasicAnd(const std::string& filename, bool foundPreviousFile);
 
+	bool findTimestampDelta(const std::string& filename, uint64_t timeDeltaSeconds, bool foundPreviousFile);
+
 
 private:
 	bool openFileStream(const std::string& filename, std::fstream& fileStream);

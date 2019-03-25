@@ -197,6 +197,8 @@ private:
 
 	char			m_matchItemOrSeperatorChar; //
 	char			m_matchItemAndSeperatorChar; //
+
+	std::string		m_logTimestampFormat;
 	
 	unsigned int	m_fileReadBufferSize; // buffer size to use for fstream backing (in KB)
 	

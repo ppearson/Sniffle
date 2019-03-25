@@ -48,6 +48,8 @@ public:
 	
 	void runMatch(const std::string& filePattern, const std::string& contentsPattern);
 
+	void runTimestampDeltaFind(const std::string& filePattern, uint64_t timeDeltaSecond);
+
 private:
 
 	enum FindFlags

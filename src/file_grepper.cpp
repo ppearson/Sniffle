@@ -19,6 +19,7 @@
 #include "file_grepper.h"
 
 #include <string.h>
+#include <time.h>
 
 #include "utils/string_helpers.h"
 
@@ -644,6 +645,133 @@ bool FileGrepper::matchBasicAnd(const std::string& filename, bool foundPreviousF
 	}
 	
 	return foundAll;
+}
+
+bool FileGrepper::findTimestampDelta(const std::string& filename, uint64_t timeDeltaSeconds, bool foundPreviousFile)
+{
+	std::fstream fileStream;
+	if (!openFileStream(filename, fileStream))
+		return false;
+
+	char buf[kStringLength];
+
+	unsigned int lineIndex = 1; // start at one as this value is only used for printing line number purposes
+
+	std::string lastString; // TODO: could optimise this to not need this, and use double-buffering of actual char buffers
+
+	uint64_t lastTime = 0;
+
+	unsigned int foundCount = 0;
+
+	while (fileStream.getline(buf, kStringLength))
+	{
+		if (m_shortCircuit)
+		{
+			const char* findSCI = strstr(buf, m_shortCircuitString.c_str());
+			if (findSCI != nullptr)
+			{
+				break;
+			}
+		}
+
+		if (buf[0] == 0 || buf[0] != '[')
+		{
+			lineIndex ++;
+			continue;
+		}
+
+		std::string currentString(buf);
+
+		size_t timestampStart = 1;
+		size_t timestampEnd = currentString.find("]", timestampStart);
+		if (timestampEnd == std::string::npos)
+		{
+			lineIndex ++;
+			continue;
+		}
+
+		// this is more efficient than using sscanf() or strptime(), due to the lack of mktime() which is slow,
+		// although this is obviously more limited in terms of formats, so...
+
+		uint64_t yearVal = (currentString[timestampStart] - '0') * 1000;
+		yearVal += (currentString[timestampStart + 1] - '0') * 100;
+		yearVal += (currentString[timestampStart + 2] - '0') * 10;
+		yearVal += (currentString[timestampStart + 3] - '0');
+
+		uint64_t monthVal = (currentString[timestampStart + 5] - '0') * 10;
+		monthVal += (currentString[timestampStart + 6] - '0');
+
+		uint64_t dayVal = (currentString[timestampStart + 8] - '0') * 10;
+		dayVal += (currentString[timestampStart + 9] - '0');
+
+		uint64_t hourVal = (currentString[timestampStart + 11] - '0') * 10;
+		hourVal += (currentString[timestampStart + 12] - '0');
+
+		uint64_t minuteVal = (currentString[timestampStart + 14] - '0') * 10;
+		minuteVal += (currentString[timestampStart + 15] - '0');
+
+		uint64_t secondVal = (currentString[timestampStart + 17] - '0') * 10;
+		secondVal += (currentString[timestampStart + 18] - '0');
+
+		// TODO: handle months and years properly, not in this hacky way
+		// Note: this year/month thing is a hack, but in practice should work ignoring the year change which is extremely unlikely.
+		//       On the assumption that a timestamp delta is very unlikely to be > month, this should work, but is obviously not very
+		//       principled.
+
+		uint64_t currentTime = (yearVal * 365 * 31 * 24 * 60 * 60) + (monthVal * 31 * 24 * 60 * 60);
+		currentTime += (dayVal * 24 * 60 * 60) + (hourVal * 60 * 60) + (minuteVal * 60) + secondVal;
+
+		if (lastTime != 0 && (currentTime - lastTime >= timeDeltaSeconds))
+		{
+			if (m_config.getOutputFilename() && foundCount == 0)
+			{
+				if (foundPreviousFile && m_config.getBlankLinesBetweenFiles())
+				{
+					fprintf(stdout, "\n");
+				}
+				fprintf(stdout, "%s :\n", filename.c_str());
+			}
+
+			if (m_config.getOutputContentLines())
+			{
+				if (foundCount > 0)
+				{
+					fprintf(stdout, "\n");
+				}
+
+				if (m_config.getOutputLineNumbers())
+				{
+					fprintf(stdout, "%u: %s\n%s\n", lineIndex, lastString.c_str(), buf);
+				}
+				else
+				{
+					fprintf(stdout, "%s\n%s\n", lastString.c_str(), buf);
+				}
+			}
+
+			foundCount += 1;
+
+			if (m_config.getFlushOutput())
+			{
+				fflush(stdout);
+			}
+
+			bool haveFoundEnoughItems = m_config.getMatchCount() != -1 && foundCount >= m_config.getMatchCount();
+
+			if (haveFoundEnoughItems)
+			{
+				fileStream.close();
+				return true;
+			}
+		}
+
+		lastTime = currentTime;
+		lastString = currentString;
+	}
+
+	fileStream.close();
+
+	return foundCount > 0;
 }
 
 bool FileGrepper::openFileStream(const std::string& filename, std::fstream& fileStream)
