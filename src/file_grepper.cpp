@@ -28,13 +28,21 @@
 // somewhat arbitrary, and obviously not perfect, but good enough for now...
 static const unsigned int kStringLength = 2048;
 
+//static const unsigned int kNumDaysInMonths[12] =			{ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+//static const unsigned int kNumDaysInMonthsLeapYear[12] =	{ 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+
+// pre-calculated totals for numbers of days from start of year for each month
+static const unsigned int kCumulativeDaysInYearForMonth[12] =			{ 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
+static const unsigned int kCumulativeDaysInYearForMonthLeapYear[12] =	{ 0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335 };
+
 FileGrepper::FileGrepper(const Config& config) : m_config(config),
 	m_readBufferSize(8192),
 	m_pReadBuffer(nullptr),
 	m_cacheBeforeLines(false),
 	m_shortCircuit(false)
 {
-	// default on Linux is 8192, but increasing this gives a bit of a performance boost...
+	// default on Linux is 8192, but increasing this gives a bit of a performance boost, especially
+	// for reading files across a network...
 	m_readBufferSize = config.getFileReadBufferSize() * 1024;
 	m_pReadBuffer = new char[m_readBufferSize];
 
@@ -663,6 +671,9 @@ bool FileGrepper::findTimestampDelta(const std::string& filename, uint64_t timeD
 
 	unsigned int foundCount = 0;
 
+	unsigned int currentYear = 0;
+	const unsigned int* pCumulativeDaysInMonth = nullptr;
+
 	while (fileStream.getline(buf, kStringLength))
 	{
 		if (m_shortCircuit)
@@ -682,6 +693,12 @@ bool FileGrepper::findTimestampDelta(const std::string& filename, uint64_t timeD
 
 		std::string currentString(buf);
 
+		if (currentString.size() < 21)
+		{
+			lineIndex ++;
+			continue;
+		}
+
 		size_t timestampStart = 1;
 		size_t timestampEnd = currentString.find("]", timestampStart);
 		if (timestampEnd == std::string::npos)
@@ -690,13 +707,26 @@ bool FileGrepper::findTimestampDelta(const std::string& filename, uint64_t timeD
 			continue;
 		}
 
-		// this is more efficient than using sscanf() or strptime(), due to the lack of mktime() which is slow,
-		// although this is obviously more limited in terms of formats, so...
+		// this is much more efficient than using sscanf() or strptime(), due to the lack of mktime() which is slow,
+		// and is somewhat noticable even though we're normally IO-bound, so for the moment it appears to be worth
+		// doing it this way, although this is obviously more limited in terms of formats, and probably less robust, so...
 
 		uint64_t yearVal = (currentString[timestampStart] - '0') * 1000;
 		yearVal += (currentString[timestampStart + 1] - '0') * 100;
 		yearVal += (currentString[timestampStart + 2] - '0') * 10;
 		yearVal += (currentString[timestampStart + 3] - '0');
+
+		// we assume that for the leap-year calculation, the year doesn't change after the first log line with a timestamp in,
+		// which under the assumption of a timestamp delta we're supporting being less than a week, is wrong, but acceptable, as we then won't be able
+		// to go from December (year before) to end of Feb and have a miss-match, so with that restriction, the code will work.
+		if (currentYear == 0)
+		{
+			currentYear = yearVal;
+
+			// exactly divisible by 400, not exactly devisible by 100
+			bool isLeapYear = ((currentYear % 400 == 0) || (currentYear % 100 != 0)) && (currentYear % 4 == 0);
+			pCumulativeDaysInMonth = (isLeapYear) ? kCumulativeDaysInYearForMonthLeapYear : kCumulativeDaysInYearForMonth;
+		}
 
 		uint64_t monthVal = (currentString[timestampStart + 5] - '0') * 10;
 		monthVal += (currentString[timestampStart + 6] - '0');
@@ -715,10 +745,12 @@ bool FileGrepper::findTimestampDelta(const std::string& filename, uint64_t timeD
 
 		// TODO: handle months and years properly, not in this hacky way
 		// Note: this year/month thing is a hack, but in practice should work ignoring the year change which is extremely unlikely.
-		//       On the assumption that a timestamp delta is very unlikely to be > month, this should work, but is obviously not very
+		//       On the assumption that a timestamp delta is very unlikely to be > week, this should work, but is obviously not very
 		//       principled.
 
-		uint64_t currentTime = (yearVal * 365 * 31 * 24 * 60 * 60) + (monthVal * 31 * 24 * 60 * 60);
+		unsigned int numDaysSinceStartOfYearToMonth = pCumulativeDaysInMonth[monthVal - 1];
+
+		uint64_t currentTime = (yearVal * 365 * 31 * 24 * 60 * 60) + (numDaysSinceStartOfYearToMonth * 24 * 60 * 60);
 		currentTime += (dayVal * 24 * 60 * 60) + (hourVal * 60 * 60) + (minuteVal * 60) + secondVal;
 
 		if (lastTime != 0 && (currentTime - lastTime >= timeDeltaSeconds))

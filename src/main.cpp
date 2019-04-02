@@ -209,7 +209,7 @@ int main(int argc, char** argv)
 
 			if (postFixChar == 'h')
 			{
-				tsDelta *= 24;
+				tsDelta *= 60;
 			}
 		}
 		else

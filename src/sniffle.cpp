@@ -481,7 +481,9 @@ void Sniffle::runMatch(const std::string& filePattern, const std::string& conten
 	if (printProgress)
 	{
 		// annoyingly, we need to clear the remainder of previous progress line here, hence the space padding...
-		fprintf(stderr, "\rFound content in %zu %s. Output piped to stdout.%-5s\n", foundCount, foundCount == 1 ? "file" : "files", " ");
+		fprintf(stderr, "\rFound content in %s %s. Output piped to stdout.%-5s\n",
+						StringHelpers::formatNumberThousandsSeparator(foundCount).c_str(),
+						foundCount == 1 ? "file" : "files", " ");
 	}
 	else
 	{
@@ -560,7 +562,9 @@ void Sniffle::runTimestampDeltaFind(const std::string& filePattern, uint64_t tim
 	if (printProgress)
 	{
 		// annoyingly, we need to clear the remainder of previous progress line here, hence the space padding...
-		fprintf(stderr, "\rFound matching timestamp deltas in %zu %s. Output piped to stdout.%-5s\n", foundCount, foundCount == 1 ? "file" : "files", " ");
+		fprintf(stderr, "\rFound matching timestamp deltas in %s %s. Output piped to stdout.%-5s\n",
+								StringHelpers::formatNumberThousandsSeparator(foundCount).c_str(),
+								foundCount == 1 ? "file" : "files", " ");
 	}
 	else
 	{
