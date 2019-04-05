@@ -18,11 +18,12 @@
 
 #include "config.h"
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <fstream>
+#include <cstdlib>
+#include <cstdio>
+#include <cstring>
 #include <cctype> // for isdigit()
+
+#include <fstream>
 
 #include "utils/file_helpers.h"
 
@@ -47,6 +48,7 @@ Config::Config() :
 	m_blankLinesBetweenFiles(true),
 	m_matchItemOrSeperatorChar('|'),
 	m_matchItemAndSeperatorChar('&'),
+	m_logTimestampFormat("[%ts%]"),
 	m_fileReadBufferSize(32)
 {
 
@@ -279,6 +281,7 @@ void Config::printFullOptions() const
 	fprintf(stderr, "context:\t\t\t\t\tContent lines to print either side of match.\n");
 	fprintf(stderr, "after-context:\t\t\t%u:\t\tContent lines to print after match.\n", m_afterLines);
 	fprintf(stderr, "before-context:\t\t\t%u:\t\tContent lines to print before match.\n", m_beforeLines);
+	fprintf(stderr, "logTimestampFormat:\t\t'%s':\tFormat of log timestamp at beginning of lines.\n", m_logTimestampFormat.c_str());
 	fprintf(stderr, "fileReadBufferSize:\t\t%u (KB):\tBuffer size (in KB) to use for reading files.\n", m_fileReadBufferSize);
 }
 
@@ -413,6 +416,20 @@ bool Config::applyKeyValueSetting(const std::string& key, const std::string& val
 	{
 		unsigned int intValue = atoi(value.c_str());
 		m_beforeLines = intValue;
+	}
+	else if (key == "logTimestampFormat")
+	{
+		if (!value.empty())
+		{
+			m_logTimestampFormat = value;
+			
+			if (m_logTimestampFormat.find("%ts%") == std::string::npos)
+			{
+				fprintf(stderr, "Invalid logTimestampFormat specified. Ignoring and using default.\n");
+				m_logTimestampFormat = "[%ts%]";
+				return false;
+			}
+		}
 	}
 	else if (key == "fileReadBufferSize")
 	{

@@ -39,7 +39,11 @@ FileGrepper::FileGrepper(const Config& config) : m_config(config),
 	m_readBufferSize(8192),
 	m_pReadBuffer(nullptr),
 	m_cacheBeforeLines(false),
-	m_shortCircuit(false)
+	m_shortCircuit(false),
+	m_logTimestampSurround(true),
+	m_logTimestampBeforeChar('['),
+	m_logTimestampAfterChar(']'),
+	m_logTimestampMinLineLength(0)
 {
 	// default on Linux is 8192, but increasing this gives a bit of a performance boost, especially
 	// for reading files across a network...
@@ -66,6 +70,27 @@ FileGrepper::FileGrepper(const Config& config) : m_config(config),
 	{
 		m_shortCircuit = true;
 		m_shortCircuitString = m_config.getShortCircuitString();
+	}
+	
+	size_t timestampFind = m_config.getLogTimestampFormat().find("%ts%");
+	if (timestampFind != std::string::npos)
+	{
+		if (timestampFind == 0 && m_config.getLogTimestampFormat().size() == 4)
+		{
+			m_logTimestampSurround = false; // no surrounding lines, just the timestamp on its own
+			m_logTimestampMinLineLength = 19;
+		}
+		else if (timestampFind == 1 && m_config.getLogTimestampFormat().size() == 6)
+		{
+			m_logTimestampSurround = true;
+			m_logTimestampMinLineLength = 21;
+			m_logTimestampBeforeChar = m_config.getLogTimestampFormat()[0];
+			m_logTimestampAfterChar = m_config.getLogTimestampFormat()[m_config.getLogTimestampFormat().size() - 1];
+		}
+		else
+		{
+			// not supported
+		}
 	}
 }
 
@@ -685,7 +710,7 @@ bool FileGrepper::findTimestampDelta(const std::string& filename, uint64_t timeD
 			}
 		}
 
-		if (buf[0] == 0 || buf[0] != '[')
+		if (buf[0] == 0 || (m_logTimestampSurround && buf[0] != m_logTimestampBeforeChar))
 		{
 			lineIndex ++;
 			continue;
@@ -693,18 +718,21 @@ bool FileGrepper::findTimestampDelta(const std::string& filename, uint64_t timeD
 
 		std::string currentString(buf);
 
-		if (currentString.size() < 21)
+		if (currentString.size() < m_logTimestampMinLineLength)
 		{
 			lineIndex ++;
 			continue;
 		}
 
-		size_t timestampStart = 1;
-		size_t timestampEnd = currentString.find("]", timestampStart);
-		if (timestampEnd == std::string::npos)
+		const size_t timestampStart = m_logTimestampSurround ? 1 : 0;
+		if (m_logTimestampSurround)
 		{
-			lineIndex ++;
-			continue;
+			const size_t timestampEnd = currentString.find(m_logTimestampAfterChar, timestampStart);
+			if (timestampEnd == std::string::npos)
+			{
+				lineIndex ++;
+				continue;
+			}
 		}
 
 		// this is much more efficient than using sscanf() or strptime(), due to the lack of mktime() which is slow,
@@ -717,14 +745,16 @@ bool FileGrepper::findTimestampDelta(const std::string& filename, uint64_t timeD
 		yearVal += (currentString[timestampStart + 3] - '0');
 
 		// we assume that for the leap-year calculation, the year doesn't change after the first log line with a timestamp in,
-		// which under the assumption of a timestamp delta we're supporting being less than a week, is wrong, but acceptable, as we then won't be able
-		// to go from December (year before) to end of Feb and have a miss-match, so with that restriction, the code will work.
+		// which under the limiting assumption that any timestamp delta we're supporting will be less than a week, is an acceptable
+		// approximation (in which being incorrect won't matter), as we then won't be able to go from December the year before at
+		// the beginning of the log to the end of February further down and have a miss-match of Dec->Feb across a leap year, so
+		// with that restriction, this code will work.
 		if (currentYear == 0)
 		{
 			currentYear = yearVal;
 
 			// exactly divisible by 400, not exactly devisible by 100
-			bool isLeapYear = ((currentYear % 400 == 0) || (currentYear % 100 != 0)) && (currentYear % 4 == 0);
+			const bool isLeapYear = ((currentYear % 400 == 0) || (currentYear % 100 != 0)) && (currentYear % 4 == 0);
 			pCumulativeDaysInMonth = (isLeapYear) ? kCumulativeDaysInYearForMonthLeapYear : kCumulativeDaysInYearForMonth;
 		}
 
@@ -748,7 +778,7 @@ bool FileGrepper::findTimestampDelta(const std::string& filename, uint64_t timeD
 		//       On the assumption that a timestamp delta is very unlikely to be > week, this should work, but is obviously not very
 		//       principled.
 
-		unsigned int numDaysSinceStartOfYearToMonth = pCumulativeDaysInMonth[monthVal - 1];
+		const unsigned int numDaysSinceStartOfYearToMonth = pCumulativeDaysInMonth[monthVal - 1];
 
 		uint64_t currentTime = (yearVal * 365 * 31 * 24 * 60 * 60) + (numDaysSinceStartOfYearToMonth * 24 * 60 * 60);
 		currentTime += (dayVal * 24 * 60 * 60) + (hourVal * 60 * 60) + (minuteVal * 60) + secondVal;

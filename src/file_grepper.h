@@ -81,6 +81,11 @@ private:
 	
 	bool				m_shortCircuit;
 	std::string			m_shortCircuitString;
+	
+	bool				m_logTimestampSurround;
+	char				m_logTimestampBeforeChar;
+	char				m_logTimestampAfterChar;
+	unsigned int		m_logTimestampMinLineLength;
 };
 
 #endif // FILE_GREPPER_H

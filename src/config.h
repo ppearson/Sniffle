@@ -141,6 +141,11 @@ public:
 		return m_shortCircuitString;
 	}
 	
+	const std::string& getLogTimestampFormat() const
+	{
+		return m_logTimestampFormat;
+	}
+	
 	unsigned int getFileReadBufferSize() const
 	{
 		return m_fileReadBufferSize;
