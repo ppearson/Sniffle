@@ -16,8 +16,8 @@
  ---------
 */
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 
 #include <string>
 
@@ -31,7 +31,7 @@
 
 static void printHelp(bool fullOptions)
 {
-	fprintf(stderr, "Sniffle version 0.5.\n");
+	fprintf(stderr, "Sniffle version 0.6x.\n");
 	fprintf(stderr, "Usage:\n");
 	fprintf(stderr, "sniffle [options] find <\"/path/to/search/*.log\">\n");
 	fprintf(stderr, "sniffle [options] find <\"/path/to/*/search/*.log\">\n");
@@ -210,6 +210,10 @@ int main(int argc, char** argv)
 			if (postFixChar == 'h')
 			{
 				tsDelta *= 60;
+			}
+			else if (postFixChar == 'd')
+			{
+				tsDelta *= 60 * 24;
 			}
 		}
 		else

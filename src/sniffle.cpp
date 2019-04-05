@@ -18,13 +18,14 @@
 
 #include "sniffle.h"
 
-#include <stdio.h>
+#include <cstdio>
+#include <cstring>
+#include <cstdlib>
+#include <clocale>
+
 #include <dirent.h>
 #include <sys/stat.h>
-#include <string.h>
 #include <unistd.h>
-#include <stdlib.h>
-#include <locale.h>
 
 #include "utils/file_helpers.h"
 #include "utils/string_helpers.h"
@@ -605,7 +606,7 @@ PatternSearch Sniffle::classifyPattern(const std::string& pattern)
 		//       we can use it, so for the moment, just do the obvious stuff ourselves...
 
 		char szCurrDir[2048];
-		if (getcwd(szCurrDir, 2048) == NULL)
+		if (getcwd(szCurrDir, 2048) == nullptr)
 		{
 			// we couldn't get the current directory for some reason...
 			fprintf(stderr, "Error: couldn't get current working directory.\n");
@@ -615,7 +616,7 @@ PatternSearch Sniffle::classifyPattern(const std::string& pattern)
 
 		std::string currentDir(szCurrDir);
 
-		if (pattern[0] == '*' && pattern.find("/") == std::string::npos)
+		if (pattern[0] == '*' && pattern.find('/') == std::string::npos)
 		{
 			// we're likely just a file match pattern...
 			result.baseSearchPath = currentDir;
@@ -623,7 +624,7 @@ PatternSearch Sniffle::classifyPattern(const std::string& pattern)
 			result.type = PatternSearch::ePatternSimple;
 			return result;
 		}
-		else if (pattern.find("/") != std::string::npos)
+		else if (pattern.find('/') != std::string::npos)
 		{
 			// for the moment, just slap the currentDir before what we have in the hope it will work...
 			std::string expandedPath = FileHelpers::combinePaths(currentDir, pattern);
@@ -652,14 +653,14 @@ PatternSearch Sniffle::classifyPattern(const std::string& pattern)
 	{
 		const std::string& token = patternTokens[i];
 
-		if (token.find("*") != std::string::npos)
+		if (token.find('*') != std::string::npos)
 		{
 			foundAnyWildcard = true;
 		}
 
 		bool lastToken = i == (patternTokens.size() - 1);
 
-		if (!lastToken && !foundDirWildcard && token.find("*") != std::string::npos && token.find(".") == std::string::npos)
+		if (!lastToken && !foundDirWildcard && token.find('*') != std::string::npos && token.find('.') == std::string::npos)
 		{
 			// we've found a directory wildcard (that isn't a file wildcard)
 
@@ -667,7 +668,7 @@ PatternSearch Sniffle::classifyPattern(const std::string& pattern)
 
 			foundDirWildcard = true;
 		}
-//		else if (token.find(".") != std::string::npos && lastToken)
+//		else if (token.find('.') != std::string::npos && lastToken)
 		else if (lastToken)
 		{
 			// it should be the file filter
@@ -745,7 +746,7 @@ bool Sniffle::configureFilenameMatcher(const PatternSearch& pattern)
 		return true;
 	}
 
-	size_t sepPos = pattern.fileMatch.find(".");
+	size_t sepPos = pattern.fileMatch.find('.');
 	if (sepPos == std::string::npos)
 	{
 		// no extension
@@ -757,14 +758,14 @@ bool Sniffle::configureFilenameMatcher(const PatternSearch& pattern)
 	std::string extensionPart = pattern.fileMatch.substr(sepPos + 1);
 
 	// simple extension only filter with full wildcard filename part
-	if (extensionPart.find("*", sepPos) == std::string::npos && filenameCorePart == "*")
+	if (extensionPart.find('*', sepPos) == std::string::npos && filenameCorePart == "*")
 	{
 		// just a simple filename extension filter
 		m_pFilenameMatcher = new FilenameMatcherExtension(extensionPart);
 		return true;
 	}
 
-	if (filenameCorePart.find("*") == std::string::npos)
+	if (filenameCorePart.find('*') == std::string::npos)
 	{
 		// exact filename...
 		m_pFilenameMatcher = new FilenameMatcherExactFilename(filenameCorePart, extensionPart);

@@ -72,7 +72,7 @@ public:
 		// do this as signed...
 		int offset = ((int)index - (int)m_currentIndex);
 
-		unsigned int maxNum = std::min(m_bufferSize, m_itemCount);
+		const unsigned int maxNum = std::min(m_bufferSize, m_itemCount);
 
 		if (offset < 0)
 		{

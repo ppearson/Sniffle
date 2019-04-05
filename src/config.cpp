@@ -288,11 +288,11 @@ void Config::printFullOptions() const
 // for config file
 bool Config::getKeyValue(const std::string& configLine, std::string& key, std::string& value)
 {
-	size_t sepPos = configLine.find(":");
+	size_t sepPos = configLine.find(':');
 	if (sepPos == std::string::npos)
 		return false;
 
-	size_t valueStart = configLine.find_first_not_of(" ", sepPos + 1);
+	size_t valueStart = configLine.find_first_not_of(' ', sepPos + 1);
 	if (valueStart == std::string::npos)
 		return false;
 
@@ -305,7 +305,7 @@ bool Config::getKeyValue(const std::string& configLine, std::string& key, std::s
 // for command line args string
 bool Config::getKeyValueFromArg(const std::string& argString, std::string& key, std::string& value)
 {
-	size_t sepPos = argString.find("=");
+	size_t sepPos = argString.find('=');
 	if (sepPos == std::string::npos)
 		return false;
 

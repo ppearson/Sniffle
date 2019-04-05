@@ -33,7 +33,6 @@ struct PatternSearch;
 class FileFinder
 {
 public:
-
 	FileFinder(const Config& config,
 	           const FilenameMatcher* pFilenameMatcher,
 	           const PatternSearch& patternSearch);

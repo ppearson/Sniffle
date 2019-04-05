@@ -18,8 +18,8 @@
 
 #include "file_grepper.h"
 
-#include <string.h>
-#include <time.h>
+#include <cstring>
+#include <ctime>
 
 #include "utils/string_helpers.h"
 

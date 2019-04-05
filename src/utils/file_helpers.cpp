@@ -18,16 +18,18 @@
 
 #include "file_helpers.h"
 
-#include <stdio.h>
-#include <sys/stat.h>
-#include <string.h>
-#include <dirent.h>
-#include <unistd.h>
+#include <cstdio>
+#include <cstring>
 
 #include <algorithm>
 #include <set>
 
-static const std::string kDirSep = "/";
+#include <sys/stat.h>
+#include <dirent.h>
+#include <unistd.h>
+
+static const char kDirSepChar = '/';
+static const std::string kDirSepString = "/";
 
 FileHelpers::FileHelpers()
 {
@@ -48,7 +50,7 @@ std::string FileHelpers::getFileExtension(const std::string& path)
 std::string FileHelpers::getFileDirectory(const std::string& path)
 {
 	std::string directory;
-	size_t slashPos = path.find_last_of(kDirSep, path.length());
+	size_t slashPos = path.find_last_of(kDirSepChar, path.length());
 	if (slashPos != std::string::npos)
 		directory = path.substr(0, slashPos + 1);
 
@@ -58,7 +60,7 @@ std::string FileHelpers::getFileDirectory(const std::string& path)
 std::string FileHelpers::getFileName(const std::string& path)
 {
 	std::string fileName;
-	size_t slashPos = path.find_last_of(kDirSep, path.length());
+	size_t slashPos = path.find_last_of(kDirSepChar, path.length());
 	if (slashPos != std::string::npos)
 		fileName = path.substr(slashPos + 1);
 	else
@@ -83,9 +85,9 @@ std::string FileHelpers::combinePaths(const std::string& path0, const std::strin
 
 	std::string final = path0;
 
-	if (strcmp(final.substr(final.size() - 1, 1).c_str(), kDirSep.c_str()) != 0)
+	if (strcmp(final.substr(final.size() - 1, 1).c_str(), kDirSepString.c_str()) != 0)
 	{
-		final += kDirSep;
+		final += kDirSepString;
 	}
 
 	final += path1;
@@ -100,7 +102,7 @@ std::string FileHelpers::combinePaths(const std::vector<std::string>& pathItems)
 
 	for (const std::string& item : pathItems)
 	{
-		finalPath += kDirSep + item;
+		finalPath += kDirSepString + item;
 	}
 
 	return finalPath;
@@ -115,10 +117,10 @@ bool FileHelpers::getDirectoriesInDirectory(const std::string& directoryPath, co
 	if (!dir)
 		return false;
 
-	struct dirent* dirEnt = NULL;
+	struct dirent* dirEnt = nullptr;
 	char tempBuffer[4096];
 
-	while ((dirEnt = readdir(dir)) != NULL)
+	while ((dirEnt = readdir(dir)) != nullptr)
 	{
 		// cope with symlinks by working out what they point at
 		if (dirEnt->d_type == DT_LNK)

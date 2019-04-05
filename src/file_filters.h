@@ -19,7 +19,7 @@
 #ifndef FILE_FILTERS_H
 #define FILE_FILTERS_H
 
-#include <time.h>
+#include <ctime>
 
 class FilterParameters
 {

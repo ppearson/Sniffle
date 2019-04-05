@@ -82,7 +82,7 @@ FilenameMatcherNameWildcard::FilenameMatcherNameWildcard(const std::string& matc
 		else
 		{
 			m_matchType = eMTItemOuter;
-			size_t astPos = matchString.find("*");
+			size_t astPos = matchString.find('*');
 			if (astPos != std::string::npos)
 			{
 				m_filenameMatchItemMain = matchString.substr(0, astPos);
@@ -230,7 +230,7 @@ bool FilenameMatcherNameWildcard::canSkipPotentialFile(const char* filename) con
 
 bool FilenameMatcherExactFilename::doesMatch(const std::string& filename) const
 {
-	size_t sepPos = filename.find(".");
+	size_t sepPos = filename.find('.');
 	if (sepPos == std::string::npos)
 	{
 		return (m_extensionMatch.empty() || m_extensionMatch == "*") && m_filenameMatch == filename;
