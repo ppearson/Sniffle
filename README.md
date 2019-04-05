@@ -80,23 +80,28 @@ Leading and trailing surrounding characters separating the timestamp from the re
 
 Example log lines which are supported (although 'logTimestampFormat' will need to be modified to support the different types):
 Default - with 'logTimestampFormat' = '[%ts%]':
+
     [2019-03-28 08:23:33] Event1
     [2019-03-28 08:25:33] Event2
 
 With 'logTimestampFormat' = '(%ts%)':
+
     (2019-03-28 08:23:33) Event1
     (2019-03-28 08:25:33) Event2
 
 With 'logTimestampFormat' = '%ts%':
+
     2019-03-28 08:23:33 Event1
     2019-03-28 08:25:33 Event2
 
 Example usages:
 
 Find timestamp deltas of greater than or equal to 10 minutes:
+
     sniffle tsdelta 10 "/path/to/logs/*/program/*prog*.log"
 
 Find timestamp deltas of greater than or equal to 4 hours:
+
     sniffle tsdelta 4h "/path/to/logs/*/program/*prog*.log"
 
 
@@ -133,7 +138,7 @@ is within a particular stage of log output, i.e. if you know the output you're l
 log lines before a certain unique log line is output, this functionality can be used to skip uselessly processing the rest
 of each file by specifying that unique string as the short circuit option.
 
-It can be specified with the '-sc "string to look for"' option before the processing mode, i.e.:
+It can be specified with the -sc "string to look for" option before the processing mode, i.e.:
 
-    sniffle -sc "Starting rendering" grep "[Error] Degenerate geometry found" "/path/to/logs/*/program/*prog*.log"
+    sniffle -sc "Building BVH..." grep "[Error] Degenerate geo found" "/path/to/logs/*/program/*prog*.log"
 
