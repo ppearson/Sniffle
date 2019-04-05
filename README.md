@@ -72,6 +72,7 @@ functionality working correctly with the limitation of timestamp delta being les
 work correctly with larger timestamp deltas than that.
 
 The timestamp string currently must be at the beginning of each line, and be in the approximate format: YYYY-MM-DD HH:MM:SS
+
 Separators between each value *can* be different (i.e. spaces instead of dashes), but the length must be consistent and the values
 must be in the expected character position.
 
