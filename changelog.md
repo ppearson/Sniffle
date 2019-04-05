@@ -1,6 +1,13 @@
 Sniffle changelog
 =================
 
+Version 0.6
+-----------
+
+* Added support for tsdelta file processing, which will detect gaps greater than the specified time period in
+  timestamps at the beginning of each line in files.
+* Minor tweaks and optimisations.
+
 Version 0.5
 -----------
 
