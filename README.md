@@ -66,10 +66,14 @@ Match all (in order):
 Timestamp Deltas:
 ---------------
 
-Outputs pairs of lines which have timestamps of which the time delta between them is greater than or equal to the specified amount.
-I.e. to look for delays / pauses between timestamps on subsequent lines in a log. Due to algorithm optimisations, there's a limit on this
-functionality working correctly with the limitation of timestamp delta being less than a month: it's possible the functionality won't
-work correctly with larger timestamp deltas than that.
+Outputs pairs of lines which have timestamps of which the time delta between them is greater than or equal to the specified time amount.
+
+I.e. to look for delays / pauses between timestamps on subsequent lines in a log. Due to algorithm optimisations, there's an edge-case
+limit on this functionality working correctly with the limitation being that the total log duration throughout the logfile
+(i.e. first line to last line timestamp delta) being less than ~48 days (actually 1st Jan to 28th Feb) - outside this working assumption,
+it's possible the leapyear will be calculated incorrectly.
+However, for the use-case this is designed for (log durations of less than a week), the optimisation can speed up processing, hence
+why it exists and the mentioned limitation is acceptable.
 
 The timestamp string currently must be at the beginning of each line, and be in the approximate format: YYYY-MM-DD HH:MM:SS
 

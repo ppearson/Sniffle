@@ -745,8 +745,9 @@ bool FileGrepper::findTimestampDelta(const std::string& filename, uint64_t timeD
 		yearVal += (currentString[timestampStart + 3] - '0');
 
 		// we assume that for the leap-year calculation, the year doesn't change after the first log line with a timestamp in,
-		// which under the limiting assumption that any timestamp delta we're supporting will be less than a week, is an acceptable
-		// approximation (in which being incorrect won't matter), as we then won't be able to go from December the year before at
+		// which under the limiting assumption that any timestamp delta we're supporting will be less than a week, and the
+		// entire log duration is under 48 days (up to 28th Feb from 1st Jan) is an acceptable approximation
+		// (in which being incorrect won't matter), as we then won't be able to go from December the year before at
 		// the beginning of the log to the end of February further down and have a miss-match of Dec->Feb across a leap year, so
 		// with that restriction, this code will work.
 		if (currentYear == 0)
@@ -773,10 +774,10 @@ bool FileGrepper::findTimestampDelta(const std::string& filename, uint64_t timeD
 		uint64_t secondVal = (currentString[timestampStart + 17] - '0') * 10;
 		secondVal += (currentString[timestampStart + 18] - '0');
 
-		// TODO: handle months and years properly, not in this hacky way
-		// Note: this year/month thing is a hack, but in practice should work ignoring the year change which is extremely unlikely.
-		//       On the assumption that a timestamp delta is very unlikely to be > week, this should work, but is obviously not very
-		//       principled.
+		// Note: this year/month thing is a hack, but in practice should work in all situations except for the one where the log
+		//       timestamps start in one year (i.e. December), and later on in the log reach the end of February. In this scenario,
+		//       it's possible the leap-year calculation will be wrong as it will be using the previous year to work that out.
+		//       However, with the assumption that the total log file duration is < month, this should work correctly.
 
 		const unsigned int numDaysSinceStartOfYearToMonth = pCumulativeDaysInMonth[monthVal - 1];
 
