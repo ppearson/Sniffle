@@ -66,12 +66,12 @@ Match all (in order):
 Timestamp Deltas:
 ---------------
 
-Outputs pairs of lines which have timestamps of which the time delta between them is greater than or equal to the specified time amount.
+Outputs pairs of lines which have timestamps of which the time delta between them is greater than or equal to the specified time amount
+ - for example to look for delays / pauses between timestamps on subsequent lines in a log.
 
-I.e. to look for delays / pauses between timestamps on subsequent lines in a log. Due to algorithm optimisations, there's an edge-case
-limit on this functionality working correctly with the limitation being that the total log duration throughout the logfile
-(i.e. first line to last line timestamp delta) being less than ~48 days (actually 1st Jan to 28th Feb) - outside this working assumption,
-it's possible the leapyear will be calculated incorrectly.
+Due to algorithm optimisations, there's an edge-case limit on this functionality working correctly with the limitation being that the
+total log duration throughout the logfile (i.e. first line to last line timestamp delta) being less than ~48 days
+(actually 1st Jan to 28th Feb) - outside this working assumption, it's possible the leapyear will be calculated incorrectly.
 However, for the use-case this is designed for (log durations of less than a week), the optimisation can speed up processing, hence
 why it exists and the mentioned limitation is acceptable.
 
@@ -143,7 +143,7 @@ is within a particular stage of log output, i.e. if you know the output you're l
 log lines before a certain unique log line is output, this functionality can be used to skip uselessly processing the rest
 of each file by specifying that unique string as the short circuit option.
 
-It can be specified with the -sc "string to look for" option before the processing mode, i.e.:
+It can be specified with the -sc "string to look for" option before the processing mode, e.g.:
 
     sniffle -sc "Building BVH..." grep "[Error] Degenerate geo found" "/path/to/logs/*/program/*prog*.log"
 
