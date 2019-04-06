@@ -66,8 +66,8 @@ Match all (in order):
 Timestamp Deltas:
 ---------------
 
-Outputs pairs of lines which have timestamps of which the time delta between them is greater than or equal to the specified time amount
- - for example to look for delays / pauses between timestamps on subsequent lines in a log.
+Outputs pairs of lines which have timestamps of which the time delta between them is greater than or equal to the specified time amount:
+for example to look for delays / pauses between timestamps on subsequent lines in a log.
 
 Due to algorithm optimisations, there's an edge-case limit on this functionality working correctly with the limitation being that the
 total log duration throughout the logfile (i.e. first line to last line timestamp delta) being less than ~48 days
