@@ -18,7 +18,7 @@
 
 #include "string_helpers.h"
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <algorithm>
 
 StringHelpers::StringHelpers()
@@ -28,10 +28,10 @@ StringHelpers::StringHelpers()
 
 void StringHelpers::split(const std::string& str, std::vector<std::string>& tokens, const std::string& sep)
 {
-	int lastPos = str.find_first_not_of(sep, 0);
-	int pos = str.find_first_of(sep, lastPos);
+	size_t lastPos = str.find_first_not_of(sep, 0);
+	size_t pos = str.find_first_of(sep, lastPos);
 
-	while (lastPos != -1 || pos != -1)
+	while (lastPos != std::string::npos || pos != std::string::npos)
 	{
 		tokens.push_back(str.substr(lastPos, pos - lastPos));
 		lastPos = str.find_first_not_of(sep, pos);

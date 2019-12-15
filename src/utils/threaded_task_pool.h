@@ -45,13 +45,13 @@ public:
 	};
 	
 	void addTask(Task* pTask);
+protected:
 	
 	void start(unsigned int threads);
 	
 	// it's (currently) the subclass's job to delete the task object when finished
 	virtual void processTask(Task* pTask) = 0;	
 	
-protected:
 	void workerThreadFunctionProcess(); // just process what's in the list
 	void workerThreadFunctionEvent(); // continue.
 	

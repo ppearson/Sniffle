@@ -694,7 +694,8 @@ bool FileGrepper::findTimestampDelta(const std::string& filename, uint64_t timeD
 
 	uint64_t lastTime = 0;
 
-	unsigned int foundCount = 0;
+	// this is signed on purpose, as the default config value for matches is -1.
+	int foundCount = 0;
 
 	unsigned int currentYear = 0;
 	const unsigned int* pCumulativeDaysInMonth = nullptr;
@@ -792,7 +793,14 @@ bool FileGrepper::findTimestampDelta(const std::string& filename, uint64_t timeD
 				{
 					fprintf(stdout, "\n");
 				}
-				fprintf(stdout, "%s :\n", filename.c_str());
+				if (m_config.getOutputContentLines())
+				{
+					fprintf(stdout, "%s :\n", filename.c_str());
+				}
+				else
+				{
+					fprintf(stdout, "%s\n", filename.c_str());
+				}
 			}
 
 			if (m_config.getOutputContentLines())

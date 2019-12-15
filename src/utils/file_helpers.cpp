@@ -151,7 +151,7 @@ bool FileHelpers::getDirectoriesInDirectory(const std::string& directoryPath, co
 				else if (S_ISDIR(statState.st_mode))
 				{
 					// currently, we don't do any dirMatch checking, on the assumption it's only a full wildcard for the moment...
-					directories.push_back(dirEnt->d_name);
+					directories.emplace_back(dirEnt->d_name);
 				}
 				else
 				{
@@ -172,7 +172,7 @@ bool FileHelpers::getDirectoriesInDirectory(const std::string& directoryPath, co
 				continue;
 
 			// currently, we don't do any dirMatch checking, on the assumption it's only a full wildcard for the moment...
-			directories.push_back(dirEnt->d_name);
+			directories.emplace_back(dirEnt->d_name);
 		}
 		else if (dirEnt->d_type == DT_REG)
 		{

@@ -18,10 +18,11 @@
 
 #include "file_finders.h"
 
+#include <cstring>
+
 #include <dirent.h>
 #include <sys/stat.h>
 #include <unistd.h> // for readlink()
-#include <string.h>
 
 #include "config.h"
 #include "filename_matchers.h"
