@@ -3,6 +3,8 @@ Sniffle
 
 Copyright 2018-2020 Peter Pearson.
 
+Licensed under the Apache 2.0 license.
+
 Sniffle is a program designed to allow fast, easy and flexible searching of text in log files,
 with a heavy emphasis on performing the search over busy NFS networks where there are many symlinks
 involved in the directory/file structure, and where the number of resultant files to match content
@@ -19,7 +21,7 @@ which can be very useful to reduce the amount of text Sniffle has to process if 
 Sniffle is processing for (searching / counting / etc) will only appear in a certain part of log files.
 
 It is currently not completely parallel/multi-threaded for all functionality, as often it can saturate
-1Gb network connections as is for some workloads, and on busy/loaded NFS networks searching/statting files
+1Gb network connections as-is for some workloads, and on busy/loaded NFS networks searching/statting files
 and directories at the same time as pulling the contents of very large log files across the connection
 can sometimes slow things down, so it's not currently a priority to make this faster.
 However, in the future, much better parallelism is planned.
@@ -29,14 +31,14 @@ systems, although it can do that to a degree with certain by-design limitations:
 that these other tools will be more efficient for searching local (non-network) filesystems.
 
 Currently it does not use the most optimum algorithm for searching content (currently uses
-linear line-by-line search instead of something like Boyer-Moore, or SIMD'd char matching)
- - in the future this will be improved.
+linear line-by-line search instead of something like Boyer-Moore, or SIMD'd char matching) - in the
+future this will be improved.
 
 It can perform file searches, grepping of content of files, counting occurrences of strings, 
 matching multiple search strings within files, detecting timestamp deltas within log files,
 and more functionality will be added in the future.
 
-It is by design *not* Unicode-aware, as the files / directories and logs it was designed to
+It is by-design *not* Unicode-aware, as the files / directories and logs it was designed to
 process are exclusively ASCII.
 
 Supported operations:
@@ -80,16 +82,16 @@ Match all (in order):
 
 
 Timestamp Deltas:
----------------
+-----------------
 
 Outputs pairs of lines which have timestamps of which the time delta between them is greater than or equal to the specified time amount:
 for example to look for delays / pauses between timestamps on subsequent lines in a log.
 
 Due to algorithm optimisations, there's an edge-case limit on this functionality working correctly with the limitation being that the
 total log duration throughout the logfile (i.e. first line to last line timestamp delta) being less than ~48 days
-(actually 1st Jan to 28th Feb) - outside this working assumption, it's possible the leapyear will be calculated incorrectly.
-However, for the use-case this is designed for (log durations of less than a week), the optimisation can speed up processing, hence
-why it exists and the mentioned limitation is acceptable.
+(actually 1st Jan to 28th Feb) - outside this working assumption, it's possible the leap-year will be calculated incorrectly.
+However, for the use-case this functionality is designed for (log durations of less than a week), the optimisation can speed up
+processing, hence why it exists and the mentioned limitation is acceptable.
 
 The timestamp string currently must be at the beginning of each line, and be in the approximate format: YYYY-MM-DD HH:MM:SS
 
@@ -129,11 +131,11 @@ Find timestamp deltas of greater than or equal to 4 hours:
 
 
 File filtering:
--------------
+---------------
 
 Filtering can be done as an additional condition on the initial files found, filtering for file modified date or the file size.
 
-Filter to search for files younger than two weeks old:
+Filter to search for files younger than 14 days old:
 
     sniffle -ff-md y14d grep "Error 101" "/path/to/logs/*/program/*prog*.log"
 
