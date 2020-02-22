@@ -1,6 +1,11 @@
 Sniffle changelog
 =================
 
+Version 0.6.1
+-------------
+
+* Moved match argument validation to happen before searching for files.
+
 Version 0.6
 -----------
 
@@ -20,7 +25,7 @@ Version 0.4
 -----------
 
 * Added short circuit option, which when enabled will make Sniffle abort processing the current file
-  when it finds the specified string
+  when it finds the specified string.
 * Optimised file finding algorithm to check filename before doing a stat() for any find filters, so as
   to avoid needlessly doing stat() calls on files which were never going to match anyway.
 * Added support for outputting content lines before the found line (-B or with -C for both before and after)
@@ -31,20 +36,20 @@ Version 0.4
 Version 0.3
 -----------
 
-* Added count mode support, in order to count appearances of strings in files
-* Added file size filtering support
+* Added count mode support, in order to count appearances of strings in files.
+* Added file size filtering support.
 
 Version 0.2
 -----------
 
 * Added basic parallel find functionality (multiple threads) when using directory-level wildcard
-  searching
+  searching.
 * Added basic file modified timestamp filter capability, to allow filtering files older/younger
-  than a time delta from the current time
-* Printouts of numeric matched file counts and content counts now have thousand separators
+  than a time delta from the current time.
+* Printouts of numeric matched file counts and content counts now have thousand separators.
 * Fixed bug which incorrectly skipped symlinks to files when preEmptiveSymlinkSkipping was
-  enabled and the filename match extension was '*'
-* Some minor internal refactoring/renaming to FilenameMatchers classes
+  enabled and the filename match extension was '*'.
+* Some minor internal refactoring/renaming to FilenameMatchers classes.
 
 Version 0.1
 -----------

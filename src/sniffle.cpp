@@ -419,6 +419,15 @@ void Sniffle::runMatch(const std::string& filePattern, const std::string& conten
 	// this can be done as a file find, plus additional contents search on the results.
 	// TODO: contents search in multiple threads...
 
+	// do the initialisation first, so that we can print an error if there's a problem with the match term before we bother
+	// searching for files.
+	FileGrepper grepper(m_config);
+	if (!grepper.initMatch(contentsPattern))
+	{
+		fprintf(stderr, "Invalid match pattern. Make sure you provide multiple items to search for, separated by the respective OR and AND character separators.\n");
+		return;
+	}
+
 	std::vector<std::string> foundFiles;
 
 	fprintf(stderr, "Searching for files...\n");
@@ -433,14 +442,6 @@ void Sniffle::runMatch(const std::string& filePattern, const std::string& conten
 			foundFiles.size() == 1 ? "file" : "files");
 
 	bool printProgress = m_config.getPrintProgressWhenOutToStdOut() && !SystemHelpers::isStdOutATTY();
-
-	FileGrepper grepper(m_config);
-
-	if (!grepper.initMatch(contentsPattern))
-	{
-		fprintf(stderr, "Invalid match pattern. Make sure you provide multiple items to search for, separated by the respective OR and AND character separators.\n");
-		return;
-	}
 
 	bool foundPrevious = false;
 
