@@ -31,7 +31,7 @@
 
 static void printHelp(bool fullOptions)
 {
-	fprintf(stderr, "Sniffle version 0.6x.\n");
+	fprintf(stderr, "Sniffle version 0.6.1. Copyright 2018-2020 Peter Pearson.\n");
 	fprintf(stderr, "Usage:\n");
 	fprintf(stderr, "sniffle [options] find <\"/path/to/search/*.log\">\n");
 	fprintf(stderr, "sniffle [options] find <\"/path/to/*/search/*.log\">\n");
@@ -43,7 +43,7 @@ static void printHelp(bool fullOptions)
 	fprintf(stderr, "sniffle [options] match <tokens&to&find> <\"/path/to/*/search/*.log\">\n");
 	fprintf(stderr, "sniffle [options] tsdelta <mins> <\"/path/to/search/*.log\">\n");
 	fprintf(stderr, "sniffle [options] debug <args>...    print args received.\n");
-	fprintf(stderr, "\nNote: in some shells, a path with wildcards in might have to be escaped/quoted to prevent auto-completed arguments being given to Sniffle.\n");
+	fprintf(stderr, "\nNote: in most shells, a path with wildcards in will likely have to be escaped/quoted to prevent auto-completed arguments being given to Sniffle.\n");
 	
 	if (fullOptions)
 	{
