@@ -45,6 +45,9 @@ public:
 		
 		if (!CHECK_RETURN_TRUE("test wrong extension", fm1.canSkipPotentialFile("mytest.txt")))
 			return false;
+
+		if (!CHECK_RETURN_TRUE("test wrong additional extension", fm1.canSkipPotentialFile("mytest.log.txt")))
+			return false;
 		
 		if (!CHECK_RETURN_FALSE("test possible directory", fm1.canSkipPotentialFile("mytest")))
 			return false;
@@ -55,6 +58,9 @@ public:
 		//
 		
 		if (!CHECK_RETURN_FALSE("test wrong extension", fm1.doesMatch("mytest.txt")))
+			return false;
+
+		if (!CHECK_RETURN_FALSE("test wrong additional extension", fm1.doesMatch("mytest.log.txt")))
 			return false;
 		
 		if (!CHECK_RETURN_FALSE("test possible directory", fm1.doesMatch("mytest")))
@@ -72,6 +78,9 @@ public:
 			return false;
 		
 		if (!CHECK_RETURN_TRUE("test wrong extension", fm2_1.canSkipPotentialFile("mytest.txt")))
+			return false;
+
+		if (!CHECK_RETURN_TRUE("test wrong additional extension", fm2_1.canSkipPotentialFile("mytest.log.txt")))
 			return false;
 		
 		if (!CHECK_RETURN_TRUE("test wrong extension and core filename", fm2_1.canSkipPotentialFile("test.txt")))
@@ -95,6 +104,9 @@ public:
 			return false;
 		
 		if (!CHECK_RETURN_FALSE("test wrong extension", fm2_1.doesMatch("mytest.txt")))
+			return false;
+
+		if (!CHECK_RETURN_FALSE("test wrong additional extension", fm2_1.doesMatch("mytest.log.txt")))
 			return false;
 		
 		if (!CHECK_RETURN_FALSE("test wrong extension and core filename", fm2_1.doesMatch("test.txt")))
