@@ -617,9 +617,11 @@ PatternSearch Sniffle::classifyPattern(const std::string& pattern)
 
 		std::string currentDir(szCurrDir);
 
-		if (pattern[0] == '*' && pattern.find('/') == std::string::npos)
+		if (pattern.find('/') == std::string::npos)
 		{
-			// we're likely just a file match pattern...
+			// we're likely just a file match pattern in the current working directory...
+			
+			// we either have a simple wildcard, or maybe an exact filename...
 			result.baseSearchPath = currentDir;
 			result.fileMatch = pattern;
 			result.type = PatternSearch::ePatternSimple;
@@ -636,7 +638,7 @@ PatternSearch Sniffle::classifyPattern(const std::string& pattern)
 		}
 		else
 		{
-			fprintf(stderr, "Other relative path...\n");
+			fprintf(stderr, "Other relative path, currently unsupported...\n");
 			result.type = PatternSearch::ePatternError;
 			return result;
 		}

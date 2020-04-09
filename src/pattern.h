@@ -27,7 +27,7 @@ struct PatternSearch
 	enum PatternType
 	{
 		ePatternUnknown,
-		ePatternSingleFile,
+		ePatternSingleFile, // don't actually search, just try to open, mainly for processing known files
 		ePatternSimple,
 		ePatternWildcardDir,
 		ePatternError

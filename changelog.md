@@ -1,6 +1,11 @@
 Sniffle changelog
 =================
 
+Version 0.6.2
+-------------
+
+* Fixed issue which meant that finding exact filenames in the current working directory didn't work.
+
 Version 0.6.1
 -------------
 

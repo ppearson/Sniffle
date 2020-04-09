@@ -31,7 +31,7 @@
 
 static void printHelp(bool fullOptions)
 {
-	fprintf(stderr, "Sniffle version 0.6.1. Copyright 2018-2020 Peter Pearson.\n");
+	fprintf(stderr, "Sniffle version 0.6.2. Copyright 2018-2020 Peter Pearson.\n");
 	fprintf(stderr, "Usage:\n");
 	fprintf(stderr, "sniffle [options] find <\"/path/to/search/*.log\">\n");
 	fprintf(stderr, "sniffle [options] find <\"/path/to/*/search/*.log\">\n");
