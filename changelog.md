@@ -1,6 +1,11 @@
 Sniffle changelog
 =================
 
+Version 0.6.3
+-------------
+
+* Added support for wildcard file matching with two wildcards in the core filename in limited combinations (more work needed to more fully support all combinations).
+
 Version 0.6.2
 -------------
 

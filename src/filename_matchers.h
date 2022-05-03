@@ -76,6 +76,7 @@ public:
 		eMTItemInner,			// "*es*"
 		eMTItemRight,			// "*est"
 		eMTItemOuter,			// "t*t"
+		eMTItemInnerAndRight,   // "*e*t"
 		eMTItemFullWildcard		// "*"
 	};
 

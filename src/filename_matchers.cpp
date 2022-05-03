@@ -64,29 +64,53 @@ FilenameMatcherNameWildcard::FilenameMatcherNameWildcard(const std::string& matc
 	}
 	else
 	{
-		if (matchString[0] == '*' && matchString[matchString.size() - 1] == '*')
+		size_t numWildcards = 0;
+		for (char c : matchString)
 		{
-			m_matchType = eMTItemInner;
-			m_filenameMatchItemMain = matchString.substr(1, matchString.size() - 2);
+			if (c == '*')
+				numWildcards += 1;
 		}
-		else if (matchString[matchString.size() - 1] == '*')
+		
+		if (numWildcards == 1)
 		{
-			m_matchType = eMTItemLeft;
-			m_filenameMatchItemMain = matchString.substr(0, matchString.size() - 1);
-		}
-		else if (matchString[0] == '*')
-		{
-			m_matchType = eMTItemRight;
-			m_filenameMatchItemMain = matchString.substr(1, matchString.size() - 1);
+			if (matchString[matchString.size() - 1] == '*')
+			{
+				m_matchType = eMTItemLeft;
+				m_filenameMatchItemMain = matchString.substr(0, matchString.size() - 1);
+			}
+			else if (matchString[0] == '*')
+			{
+				m_matchType = eMTItemRight;
+				m_filenameMatchItemMain = matchString.substr(1, matchString.size() - 1);
+			}
+			else
+			{
+				m_matchType = eMTItemOuter;
+				size_t astPos = matchString.find('*');
+				if (astPos != std::string::npos)
+				{
+					m_filenameMatchItemMain = matchString.substr(0, astPos);
+					m_filenameMatchItemExtra = matchString.substr(astPos + 1);
+				}
+			}
 		}
 		else
 		{
-			m_matchType = eMTItemOuter;
-			size_t astPos = matchString.find('*');
-			if (astPos != std::string::npos)
+			// we only support two for the moment...
+			if (matchString[0] == '*' && matchString[matchString.size() - 1] == '*')
 			{
-				m_filenameMatchItemMain = matchString.substr(0, astPos);
-				m_filenameMatchItemExtra = matchString.substr(astPos + 1);
+				m_matchType = eMTItemInner;
+				m_filenameMatchItemMain = matchString.substr(1, matchString.size() - 2);
+			}
+			else if (matchString[0] == '*' && matchString[matchString.size() - 1] != '*')
+			{
+				size_t secondWildcardPos = matchString.find('*', 1);
+				if (secondWildcardPos != std::string::npos)
+				{
+					m_matchType = eMTItemInnerAndRight;
+					m_filenameMatchItemMain = matchString.substr(1, secondWildcardPos - 1);
+					m_filenameMatchItemExtra = matchString.substr(secondWildcardPos + 1);
+				}
 			}
 		}
 	}
@@ -102,7 +126,7 @@ bool FilenameMatcherNameWildcard::doesMatch(const std::string& filename) const
 
 	const std::string mainFilename = FileHelpers::stripExtensionFromFilename(filename);
 
-	// TODO: remove substr() allocations below by doing direct comparisons...
+	// TODO: remove substr() allocations below by doing direct comparisons with StringHelpers::stringMatches()...
 
 	if (m_matchType == eMTItemInner)
 	{
@@ -139,6 +163,21 @@ bool FilenameMatcherNameWildcard::doesMatch(const std::string& filename) const
 		bool rightMatches = mainFilename.substr(rightStartPos) == m_filenameMatchItemExtra;
 		return rightMatches;
 	}
+	else if (m_matchType == eMTItemInnerAndRight)
+	{
+		// can't match...
+		if (mainFilename.size() < m_filenameMatchItemMain.size() + m_filenameMatchItemExtra.size() + 1)
+		{
+			return false;
+		}
+		
+		size_t diff = mainFilename.size() - m_filenameMatchItemExtra.size();
+		bool matchRight = mainFilename.substr(diff, mainFilename.size()) == m_filenameMatchItemExtra;
+		if (!matchRight)
+			return false;
+		
+		return mainFilename.find(m_filenameMatchItemMain, 1) != std::string::npos;
+	}
 
 	return false;
 }
@@ -173,6 +212,7 @@ bool FilenameMatcherNameWildcard::canSkipPotentialFile(const char* filename) con
 	if (m_matchType == eMTItemInner)
 	{
 		// TODO: this isn't completely correct, as we're also potentially matching in the extension of "filename"...
+		// TODO: match only up to mainFilenameLength...
 		const char* findItem = strstr(filename, m_filenameMatchItemMain.c_str());
 		// we didn't find the string, so we can skip it.
 		if (findItem == nullptr)
@@ -218,6 +258,14 @@ bool FilenameMatcherNameWildcard::canSkipPotentialFile(const char* filename) con
 														 filename, diff);
 		
 		if (!rightMatches)
+		{
+			return true;
+		}
+	}
+	else if (m_matchType == eMTItemInnerAndRight)
+	{
+		// can't match...
+		if (mainFilenameLength < m_filenameMatchItemMain.size() + m_filenameMatchItemExtra.size() + 1)
 		{
 			return true;
 		}

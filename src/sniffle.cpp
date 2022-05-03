@@ -749,7 +749,7 @@ bool Sniffle::configureFilenameMatcher(const PatternSearch& pattern)
 		return true;
 	}
 
-	size_t sepPos = pattern.fileMatch.find('.');
+	size_t sepPos = pattern.fileMatch.find_last_of('.');
 	if (sepPos == std::string::npos)
 	{
 		// no extension
