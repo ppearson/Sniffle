@@ -115,7 +115,7 @@ bool FileGrepper::initMatch(const std::string& matchString)
 		matchChar[0] = m_config.getMatchItemOrSeperatorChar();
 		StringHelpers::split(matchString, m_aMatchItems, matchChar);
 	}
-	else if (matchString.find(m_config.getMatchItemAndSeperatorChar() != std::string::npos))
+	else if (matchString.find(m_config.getMatchItemAndSeperatorChar()) != std::string::npos)
 	{
 		m_matchType = eMatchTypeAnd;
 		std::string matchChar = "&";
