@@ -18,12 +18,13 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 
 #include <string>
 
 #include "sniffle.h"
 
-#define RUN_TESTS 1
+#define RUN_TESTS 0
 
 #if RUN_TESTS
 #include "tests/tests.h"
@@ -88,6 +89,16 @@ int main(int argc, char** argv)
 		printHelp(false);
 		return -1;
 	}
+
+	if (strcmp(argv[1], "debug") == 0)
+	{
+		fprintf(stderr, "Args provided:\n");
+		for (int i = 1; i < argc; i++)
+		{
+			fprintf(stderr, "%s\n", argv[i]);
+		}
+		return 0;
+	}
 	
 	Sniffle sniffle;
 	
@@ -134,7 +145,7 @@ int main(int argc, char** argv)
 		fprintf(stderr, "Error handling command line parsing.\n");
 		return -1;
 	}
-	
+
 	std::string mainCommand = argv[nextArg];
 	
 	if (mainCommand == "find")
@@ -225,15 +236,7 @@ int main(int argc, char** argv)
 
 		sniffle.runTimestampDeltaFind(filePattern, tsDelta * 60);
 	}
-	else if (mainCommand == "debug")
-	{
-		fprintf(stderr, "Args provided:\n");
-		for (int i = 1; i < argc; i++)
-		{
-			fprintf(stderr, "%s\n", argv[i]);
-		}
-	}
-	
+
 	return 0;
 }
 
