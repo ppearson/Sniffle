@@ -19,7 +19,7 @@
 use std::env;
 use std::io::{BufReader, BufRead};
 
-const K_CUMULATIVE_DAYS_IN_YEAR_FOR_MONTH: [u32; 12] =			[ 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 ];
+const K_CUMULATIVE_DAYS_IN_YEAR_FOR_MONTH: [u32; 12] =          [ 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 ];
 const K_CUMULATIVE_DAYS_IN_YEAR_FOR_MONTH_LEAPYEAR: [u32; 12] = [ 0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335 ];
 
 // Minimum sub-set of Sniffle (C++) functionality, just replicating the timestamp delta functionality for the moment...
@@ -131,7 +131,7 @@ fn check_file(path: &str, max_gap_seconds: u64) {
         if cumulative_days_in_year_for_month.is_none() {
             
             // exactly divisible by 400, not exactly devisible by 100
-			let is_leap_year = ((year_val % 400 == 0) || (year_val % 100 != 0)) && (year_val % 4 == 0);
+            let is_leap_year = ((year_val % 400 == 0) || (year_val % 100 != 0)) && (year_val % 4 == 0);
             if is_leap_year {
                 cumulative_days_in_year_for_month = Some(&K_CUMULATIVE_DAYS_IN_YEAR_FOR_MONTH_LEAPYEAR);
             }
